@@ -98,6 +98,5 @@ object Global extends GlobalSettings {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
     }
-
   }
 }
