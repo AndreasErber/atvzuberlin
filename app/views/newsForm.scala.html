@@ -1,0 +1,20 @@
+@(newsForm: Form[News])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("news")) {
+    @Logger.debug("Rendering news form")
+	<h1>@Messages("news")</h1>
+	@form(routes.NewsCtrl.submit) {
+	  @inputHidden(newsForm("id")) 
+	  @inputText(newsForm("title"), '_label -> Messages("news.title"))
+	  @textarea(newsForm("lead"), '_label -> Messages("news.lead"))
+	  @textarea(newsForm("content"), '_label -> Messages("news.content"))
+      @createModifyFormPart(newsForm)
+      @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering news form")
+}

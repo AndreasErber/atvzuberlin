@@ -1,0 +1,25 @@
+@(entity: String)(implicit lang: Lang)
+
+ <!-- Modal Deletion Confirmation -->
+			<div id="delConfirm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			  <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">@Messages(entity + ".delete.heading")</h3>
+              </div>
+              <div class="modal-body">
+                <p>@Messages(entity + ".delete.body")</p>
+              </div>
+              <div class="modal-footer">
+                <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">@Messages("cancel")</a>
+                <a href="#" id="delConfirmed" class="btn btn-primary" data-dismiss="modal" onclick="jQuery.get('/@entity/delete/' + delId)">@Messages("delete")</a>
+              </div>
+            </div>    
+<!-- Modal Deletion Confirmation -->	
+	
+	<script>
+      var delId = 0
+
+	$('#delConfirm').on('hidden', function () {
+      window.location.assign("/@(entity)s")
+    })
+    </script>

@@ -1,0 +1,31 @@
+@(regForm: Form[(Person, String, String)], persons: Seq[(String, String)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import util.StandardUser
+
+@main(Messages("registration")) {
+
+  <h1>@Messages("registration")</h1>
+  <h2>@Messages("registration.form")</h2>
+  
+  @regForm.globalError.map { error => 
+    <span class="error">@error.message</span>
+  }
+
+  @if(flash.get("error").isDefined){
+            <div class="alert alert-error">
+            @flash.get("error")
+            </div>
+          }
+  @form(routes.UserCtrl.register) { 
+    @select(regForm("username"), 
+      persons.map{p => p._1 -> p._2},
+      '_default -> Messages("registration.selPerson.default"),
+      '_label -> Messages("login.username")
+    )
+    @inputPassword(regForm("password1"), '_label -> Messages("login.password"))
+    @inputPassword(regForm("password2"), '_label -> Messages("registration.password.repeat"))
+    <input type="submit" class="btn btn-primary" value="@Messages("registration.register.button")" />
+    <input type="reset" class="btn" value="@Messages("reset")" />
+  }
+ 
+}

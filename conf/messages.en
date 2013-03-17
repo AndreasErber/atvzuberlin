@@ -1,0 +1,180 @@
+about = About
+
+actions = Options
+
+address = Address
+address.add = Add Address
+address.addon = Addon
+address.city = City
+address.postbox = Postbox
+address.selCountry = Country
+address.street = Street
+address.zip = ZIP Code 
+addresses = Addresses
+addresses.of = Addresses of
+
+application.name = ATV zu Berlin
+
+cancel = Cancel
+create = Create
+delete = Delete
+reset = Reset
+
+email = Email
+emails = Emails
+email.add = Add Email
+email.delete = Delete
+email.edit = Edit
+email.of = Email address of
+email.selUsageType = Usage Type
+email.submit = Submit Email
+email.usagetype = Usage Type
+email.usagetype.personal = private
+email.usagetype.business = business
+email.usagetype.honorary = honorary
+emails.of = Email addresses of
+
+error.failedToDeleteAddress = Failed to delete address.
+error.failedToDeleteEmail = Failed to delete email.
+error.failedToDeleteOrg = Failed to delete organization.
+error.failedToDeletePerson = Failed to delete person.
+error.failedToFindEmailAddress = Could not find the email address {0} in the system.
+error.failedToFindUserByName = Failed to find a user with name {0}.
+error.failedToIdentifyCharacter = Failed to identify single character.
+error.failedToLoadCountries = Failed to load countries.
+error.failedToLoadCountry = Failed to load country with ID {0}.
+error.failedToLoadEventtype = Failed to load event type with ID {0}.
+error.failedToLoadPerson = Failed to load person with ID {0}.
+error.failedToLoadUpcomingEventsList = Failed to load list of upcoming events.
+error.failedToLoadUsagetype = Failed to load usage type with ID {0}.
+error.failedToLoadUserRole = Failed to load user role with ID {0}.
+error.failedToParseDate = Failed to parse date. Wrong format: {0}.
+error.failedToStoreAddress = Failed to store address.
+error.failedToStoreEmail = Failed to store email.
+error.failedToStoreEvent = Failed to store event.
+error.failedToStoreOrg = Failed to store organization.
+error.loginFailed = Login failed.
+error.registrationFailed = Registration failed.
+error.required=This field is required.
+error.user=Provide a valid username.
+
+event = Event
+events = Events
+event.delete = Delete Event
+event.description = Description
+event.edit = Edit Event
+event.end = Ends 
+event.list = Event List
+event.location = Location
+event.priority = Priority
+event.priority.high = High
+event.priority.low = Low
+event.priority.normal = Normal
+event.priority.select = Select a Priority
+event.reset = Reset
+event.start = Starts
+event.submit = Add Event
+event.time = Time
+event.title = Title
+event.typus = Type
+event.typus.select = Select a Type
+event.url = Link
+event.view = View Details
+
+home = Home
+
+imprint = Imprint
+
+login = Login
+login.form = Authenticate by logging in
+login.username = User Name
+login.password = Password
+login.email = Email
+login.failed = Incorrect user name or password.
+
+logout = Logout
+
+news = News
+news.by = by
+news.author = Author
+news.content = Content
+news.form = Add News
+news.lead = Abstract
+news.modified = modified
+news.read.more = read more ...
+news.title = Title
+
+organization = Organization
+organizations = Organizations 
+organization.add = Add Organization
+organization.colors = Colors
+organization.delete = Delete Organization
+organization.edit = Edit Organization
+organization.founded = Founded
+organization.gender = Gender
+organization.gender.female = female
+organization.gender.male = male
+organization.gender.mixed = mixed
+organization.list = Organization List
+organization.motto = Motto
+organization.name = Name
+organization.refounded = Refounded
+organization.submit = Submit
+organization.url = Homepage
+organization.view = View Details
+
+person = Person
+persons = Persons
+person.add = Add a Person
+person.birth = Birthday
+person.birth.date.format = YYYY-MM-DD
+person.born.on = born
+person.delete = Delete
+person.details = Person Details
+person.edit = Edit
+person.firstname = First Name
+person.gender = Gender
+person.gender.f = female
+person.gender.m = male
+person.lastname = Last Name
+person.list = Person List
+person.new = Create new Person
+person.nickname = Nickname
+person.submit = Submit
+person.view = View details
+
+program = Program
+
+registration = Registration
+registration.error.password.confirmation.failed = The two versions of the entered password were not equal. 
+registration.error.password.too.short = Password must at least have 8 characters.
+registration.form = Registration Form
+registration.password.repeat = Repeat password.
+registration.email = Email
+registration.register.button = Register now!
+registration.selPerson = Select associated person.
+registration.selPerson.default = <--- Select a person --->
+registration.selRole = Select a user role.
+
+submit = Save
+
+success.succeededToDeleteAddress = Address successfully deleted.
+success.succeededToDeleteEmail = Email successfully deleted.
+success.succeededToDeleteOrg = Organization was successfully deleted.
+success.succeededToDeletePerson = Person was successfully deleted.
+success.succeededToStoreAddress = Address successfully stored.
+success.succeededToStoreEmail = Email was successfully stored.
+success.succeededToStoreEvent = Event was successfully stored.
+success.succeededToStoreOrg = Organization was successfully stored.
+success.succeededToStoreNews = News were successfully stored.
+
+top.of.page = Go to top
+
+usagetype.personal = Private
+usagetype.business = Business
+usagetype.honorary = Honorary
+
+user.logged.in = Currently Logged in User
+user.log.out = Log out User
+
+welcome = Welcome to ATV zu Berlin

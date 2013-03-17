@@ -1,0 +1,22 @@
+@(loginForm: Form[(String,String)], error: Option[String])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import helper.twitterBootstrap._
+
+@main(Messages("login")) {
+
+  <h1>@Messages("login")</h1>
+  <h2>@Messages("login.form")</h2>
+  <div>
+  @if(ctx.user.isDefined) {
+    Logged in as <a href="/person/@ctx.user.get.person">@ctx.user.get.username</a> [<a href="/logout">@Messages("logout")</a>] 
+  } else {
+    @form(routes.UserCtrl.login) { 
+      @inputText(loginForm("username"), '_label -> Messages("login.username"))
+      @inputPassword(loginForm("password"), '_label -> Messages("login.password"))
+      <input type="submit" class="btn btn-primary" value="@Messages("login")" />
+      <input type="reset" class="btn" value="@Messages("reset")" />
+    } 
+    <a href="/registration" class="btn">@Messages("registration")</a>
+  }
+  </div>
+}

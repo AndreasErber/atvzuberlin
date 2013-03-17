@@ -1,0 +1,39 @@
+@(persons: Seq[Person])(implicit flash: Flash, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("persons")) {
+	<h1>@{if(persons.size == 1) Messages("person") else Messages("persons")}</h1>
+	<table class="table table-striped table-hover">
+	  <thead>
+	    <tr>
+	      <th>@Messages("person.lastname")</th>
+	      <th>@Messages("person.firstname")</th>
+	      <th>@Messages("person.nickname")</th>
+	      <th>@Messages("actions")</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  @persons.map { p =>
+	    <tr>
+	      <td>@p.lastname</td>
+	      <td>@p.firstname.getOrElse("")</td>
+  	      <td>@p.nickname.getOrElse("")</td>
+          <td> 
+            <a href="/person/@p.id.get" title="@Messages("person.view")"><i class="icon-eye-open"></i></a>
+          @if(ctx.user.isDefined) {
+            <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
+            <a href="#" data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
+          }
+          </td>
+        </tr>
+	  }
+	  @if(ctx.user.isDefined) {
+	    <tr>
+	      <td colspan="4"><a href="/person/new" title="@Messages("person.add")"><i class="icon-plus"></i></a> ...</td>
+	    </tr>
+	  }
+	  </tbody>
+	</table>
+
+@deleteConfirmation("person")
+}

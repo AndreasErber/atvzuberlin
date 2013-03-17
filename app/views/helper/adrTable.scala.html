@@ -1,0 +1,45 @@
+@(e: Entity, t: String, addresses: List[Address])(implicit lang: Lang, ctx: util.Ctx)
+
+    <table class="table table-striped table-hover">
+      <thead>
+        <th>@Messages("address")</th>
+        <th>@Messages("actions")</th>
+      </thead>
+      <tbody>
+    @for(a <- addresses) {
+      <tr>
+        <td>
+          <address>
+          @if(a.addon.isDefined) {
+            @a.addon.get<br/>
+          }
+          @if(a.street.isDefined) {
+            @a.street.get<br/>
+          }
+          @if(a.postbox.isDefined) {
+            @a.postbox.get<br/>
+          }
+          @if(a.country.vrc.get == "D" || a.country.vrc.get == "A" || a.country.vrc.get == "CH") {
+            <strong>@a.zip @a.city</strong><br/>
+          } else {
+            <strong>@a.city</strong><br/>
+            @a.zip<br/>
+          }
+            @a.country.nameDe
+          </address>
+        </td>
+        <td>@if(ctx.user.isDefined) {
+		  <a href="/@t/@e.id.get/address/edit/@a.id.get" title="@Messages("address.edit")"><i class="icon-pencil"></i></a>
+		  <a href="/@t/@e.id.get/address/delete/@a.id.get" title="@Messages("address.delete")"><i class="icon-trash"></i></a>
+		</td>
+		}
+      </tr>
+	}
+	@if(ctx.user.isDefined) {
+	  <tr>
+	    <td></td>
+	    <td><a href="/@t/@e.id.get/address/new" title="@Messages("address.add")"><i class="icon-plus"></i></a> ...</td>
+	  </tr>
+	}
+	  </tbody>
+	</table>

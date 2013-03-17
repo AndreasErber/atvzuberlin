@@ -1,0 +1,73 @@
+@(o: Organization)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("organization")) {
+  <h2>@Messages("organization")</h2>
+  
+  <table class="table table-condensed">
+    <caption>
+      <h3>@o.name</h3>
+      <span class="pull-right">
+      @if(ctx.user.isDefined) {
+        <a href="/organization/edit/@o.id.get" title="@Messages("organization.edit")"><i class="icon-pencil"></i></a>
+        <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="icon-trash"></i></a>
+	  }
+	    <a href="/organizations" title="@Messages("organization.list")"><i class="icon-th-list"></i></a>
+      </span>
+    </caption>
+    <thead>
+    </thead>
+    <tbody>
+      <tr>
+        <th>
+          @Messages("organization.motto")
+        </th>
+  		<td>
+  		@if(o.motto.isDefined) {
+    	  @o.motto
+    	}
+  		</td>
+      <tr>
+      <tr>
+        <th>
+          @Messages("organization.colors")
+        </th>
+        <td>
+        @if(o.colors.isDefined) {
+    	  @o.colors
+    	}
+        </td>
+      </tr>
+      <tr>
+        <th>
+          @Messages("organization.founded")
+        </th>
+        <td>
+        @if(o.founded.isDefined) {
+          @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(o.founded.get)}
+        }
+        </td>
+      </tr>
+      <tr>
+        <th>
+          @Messages("organization.gender")
+        </th>
+        <td>
+          @o.gender
+        </td>
+      </tr>
+      <tr>
+        <th>
+          @Messages("organization.url")
+        </th>
+        <td>
+        @if(o.url.isDefined) { 
+          <a href="@o.url.get" title="Homepage e.s.v. @o.name">@o.url.get</a>
+        }
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+@deleteConfirmation("organization")
+}

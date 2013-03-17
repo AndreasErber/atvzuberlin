@@ -1,0 +1,56 @@
+@(orgs: Seq[Organization])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("organizations")) {
+
+	<h1>@{if(orgs.size == 1) Messages("organization") else Messages("organizations")}</h1>
+	<table class="table table-striped table-hover">
+	  <thead>
+	    <tr>
+	      <th>@Messages("organization.name")</th>
+	      <th>@Messages("organization.motto")</th>
+	      <th>@Messages("organization.colors")</th>
+	      <th>@Messages("organization.founded")</th>
+	      <th>@Messages("actions")</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  @orgs.map { o =>
+	    <tr>
+	      <td>
+	        @o.name
+	      </td>
+	      <td>
+	      @if(o.motto.isDefined) {
+	        @o.motto.get
+	      }
+          </td>
+  	      <td>
+  	      @if(o.colors.isDefined) {
+	        @o.colors.get
+	      }
+          </td>
+          <td>
+  	      @if(o.founded.isDefined) {
+	        @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(o.founded.get)}
+	      }
+          </td>
+          <td> 
+            <a href="/organization/@o.id.get" title="@Messages("organization.view")"><i class="icon-eye-open"></i></a>
+          @if(ctx.user.isDefined) {
+            <a href="/organization/edit/@o.id.get" title="@Messages("organization.edit")"><i class="icon-pencil"></i></a>
+            <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="icon-trash"></i></a>
+          }
+          </td>
+        </tr>
+	  }
+	  @if(ctx.user.isDefined) {
+	    <tr>
+	      <td colspan="5"><a href="/organization/new" title="@Messages("organization.add")"><i class="icon-plus"></i></a> ...</td>
+	    </tr>
+	  }
+	  </tbody>
+	</table>
+	
+@deleteConfirmation("organization")
+}

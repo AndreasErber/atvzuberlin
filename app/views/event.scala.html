@@ -1,0 +1,74 @@
+@(e: Event)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.twitterBootstrap._
+@import helper.deleteConfirmation
+
+@main(Messages("event")) {
+  <h2>@Messages("event")</h2>
+  
+  <table class="table table-condensed">
+    <caption>
+      <h3>@e.title</h3>
+      <span class="pull-right">
+      @if(ctx.user.isDefined) {
+        <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
+        <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="icon-trash"></i></a>
+	  }
+	    <a href="/events" title="@Messages("event.list")"><i class="icon-th-list"></i></a>
+      </span>
+    </caption>
+    <thead>
+    </thead>
+    <tbody>
+      @if(e.description.isDefined) {
+      <tr>
+        <th>
+          @Messages("event.description")
+        </th>
+  		<td>
+    	  @e.description
+  		</td>
+      <tr>
+      }
+      <tr>
+        <th>
+          @Messages("event.start")
+        </th>
+        <td>
+        @{new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(e.start)}
+        </td>
+      </tr>
+      @if(e.end.isDefined) {
+      <tr>
+        <th>
+          @Messages("event.end")
+        </th>
+        <td>
+          @{new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(e.end.get)}
+        </td>
+      </tr>
+      }
+      <tr>
+        <th>
+          @Messages("event.location")
+        </th>
+        <td>
+        @if(e.location.isDefined) {
+          @e.location.get
+        }
+        </td>
+      </tr>
+      @if(e.url.isDefined) {
+      <tr>
+        <th>
+          @Messages("event.url")
+        </th>
+        <td>
+          @e.url.get
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+
+@deleteConfirmation("event")
+}

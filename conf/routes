@@ -1,0 +1,75 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+#
+# Naming convention for atvzuberlin.de
+# 
+# GET  /<entity>s          Displays the list of instances of an entity
+# GET  /entity/delete/:id  Deletes the entity's instance with ID :id
+# GET  /entity/edit/:id    Displays the pre-filled form of the entity's instance with ID :id
+# GET  /entity/new         Creates a new entity
+# GET  /entity/:id         Displays the entity's instance with ID :id (needs to be last in the order)
+# 
+
+# Home page
+GET   /                           controllers.Application.index
+GET   /login                      controllers.UserCtrl.index
+POST  /                           controllers.UserCtrl.login
+
+GET   /logout                     controllers.UserCtrl.logout
+
+# Event
+GET   /events                     controllers.EventCtrl.listUpcoming
+GET   /event/new                  controllers.EventCtrl.create
+GET   /event/delete/:id           controllers.EventCtrl.delete(id: Long)
+GET   /event/edit/:id             controllers.EventCtrl.edit(id: Long)
+POST  /event/edit                 controllers.EventCtrl.submit
+GET   /event/:id                  controllers.EventCtrl.show(id: Long)
+
+# News
+GET   /newslist                   controllers.NewsCtrl.list
+GET   /newslist/:limit            controllers.NewsCtrl.listLtd(limit: Int)
+GET   /news/new                   controllers.NewsCtrl.create
+GET   /news/delete/:id            controllers.NewsCtrl.delete(id: Long)
+GET   /news/edit/:id              controllers.NewsCtrl.edit(id: Long)
+POST  /news/edit                  controllers.NewsCtrl.submit
+GET   /news/:id                   controllers.NewsCtrl.show(id: Long)
+
+
+# Organization
+GET   /organizations              controllers.OrganizationCtrl.list
+GET   /organization/new           controllers.OrganizationCtrl.create
+GET   /organization/delete/:id    controllers.OrganizationCtrl.delete(id: Long)
+GET   /organization/edit/:id      controllers.OrganizationCtrl.edit(id: Long)
+POST  /organization/edit          controllers.OrganizationCtrl.submit
+GET   /organization/:id           controllers.OrganizationCtrl.show(id: Long)
+
+# Address
+GET   /p/:pid/address/new         controllers.AddressCtrl.createPersonAdr(pid: Long)
+GET   /p/:pid/address/delete/:id  controllers.AddressCtrl.deletePersonAdr(pid: Long, id: Long)
+GET   /p/:pid/address/edit/:id    controllers.AddressCtrl.editPersonAdr(pid: Long, id: Long)
+POST  /p/:pid/address/edit        controllers.AddressCtrl.submitPersonAdr(pid: Long)
+GET   /p/:pid/address             controllers.AddressCtrl.showPersonAdr(pid: Long)
+
+# Email
+GET   /p/:pid/email/show          controllers.EmailCtrl.showPersonEmail(pid: Long)
+GET   /p/:pid/email/delete/:id    controllers.EmailCtrl.deletePersonEmail(pid: Long, id: Long)
+GET   /p/:pid/email/edit          controllers.EmailCtrl.createPersonEmail(pid: Long)
+GET   /p/:pid/email/edit/:id      controllers.EmailCtrl.editPersonEmail(pid: Long, id: Long)
+POST  /p/:pid/email/edit          controllers.EmailCtrl.submitPersonEmail(pid: Long)
+
+GET   /persons                    controllers.PersonCtrl.list
+GET   /person/new                 controllers.PersonCtrl.create
+POST  /person/new                 controllers.PersonCtrl.submit
+GET   /person/delete/:id          controllers.PersonCtrl.delete(id: Long)
+GET   /person/edit/:id            controllers.PersonCtrl.edit(id: Long)
+POST  /person/                    controllers.PersonCtrl.updatePerson
+GET   /person/:id                 controllers.PersonCtrl.show(id: Long)
+
+
+GET   /registration               controllers.UserCtrl.showRegistrationForm
+POST  /registration               controllers.UserCtrl.register
+
+# Map static resources from the /public folder to the /assets URL path
+GET   /assets/*file               controllers.Assets.at(path="/public", file)

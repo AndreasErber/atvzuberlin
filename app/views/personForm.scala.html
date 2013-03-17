@@ -1,0 +1,26 @@
+@(personForm: Form[Person])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main("Person") {
+    @Logger.debug("Rendering person form " + personForm)
+	<h1>Person</h1>
+	<h2>Angaben zur Person</h2>
+	@form(routes.PersonCtrl.updatePerson) { 
+		@inputHidden(personForm("id")) 
+		@inputText(personForm("lastname"), '_label -> "Nachname")
+		@inputText(personForm("firstname"), '_label -> "Vorname(n)")
+		@inputText(personForm("nickname"), '_label -> "Spitzname")
+		@inputDate(personForm("birth"), '_label -> "Geburtsdatum (JJJJ-MM-TT)")
+		@select(personForm("gender"), 
+              Seq(("m" -> Messages("person.gender.m")), ("f" -> Messages("person.gender.f"))),
+              '_label -> Messages("person.selGender")
+        )
+	    @createModifyFormPart(personForm)
+		<input type="submit" class="btn btn-primary" value="@Messages("person.submit")" />
+		<input type="reset" class="btn" value="@Messages("reset")" />
+	}
+	@Logger.debug("Done rendering person form")
+}

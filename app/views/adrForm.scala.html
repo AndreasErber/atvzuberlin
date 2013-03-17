@@ -1,0 +1,26 @@
+@(adrForm: Form[Address], countries: Seq[Country], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("address")) {
+    @Logger.debug("Rendering address form")
+	<h1>@Messages("address")</h1>
+	@form(routes.AddressCtrl.submitPersonAdr(pid)) {
+	  @inputHidden(adrForm("id")) 
+	  @inputText(adrForm("addon"), '_label -> Messages("address.addon"))
+	  @inputText(adrForm("street"), '_label -> Messages("address.street"))
+	  @inputText(adrForm("postbox"), '_label -> Messages("address.postbox"))
+	  @inputText(adrForm("zip"), '_label -> Messages("address.zip"))
+	  @inputText(adrForm("city"), '_label -> Messages("address.city"))
+	  @select(adrForm("country"), 
+              countries.map{c => c.id.get.toString -> c.nameDe.get},
+              '_label -> Messages("address.selCountry")
+      )
+      @createModifyFormPart(adrForm)
+      @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering address form")
+}

@@ -1,0 +1,23 @@
+@(news: Seq[News])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("news")) {
+	<h2>@{if(news.size == 1) Messages("news") else Messages("news")}</h2>
+	<div class="pull-right">
+	  <a href="/news/new" title="@Messages("news.add")"><i class="icon-plus"></i></a> ...
+	</div>
+	@news.map { n =>
+	  <p class="pull-right">
+	  @if(ctx.user.isDefined && ctx.user.get.username == n.creator) {
+        <a href="/event/edit/@n.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
+        <a data-toggle="modal" title="@Messages("news.delete")" data-target="#delConfirm" onclick="delId = @n.id.get"><i class="icon-trash"></i></a>
+      }
+	  </p>
+	  <h3>@n.title</h3>
+	  <p class="text-right"><small>@Messages("news.by") @n.creator, @{val d = new java.util.Date(n.created); new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm").format(d)+ "h"}@{if(n.modified.isDefined) ", " + Messages("news.modified") + " " + new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm").format(new java.util.Date(n.modified.get))+ "h"}</small></p>
+	  <p>@n.lead</p>
+	  <p class="text-right"><a href="/news/@n.id.get">@Messages("news.read.more")</a></p>
+	  <hr />
+	}	
+@deleteConfirmation("event")
+}

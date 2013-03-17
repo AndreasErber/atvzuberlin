@@ -1,0 +1,188 @@
+about = Wir über uns
+
+actions = Optionen
+
+address = Adresse
+address.add = Adresse hinzufügen
+address.addon = Adresszusatz
+address.city = Stadt
+address.postbox = Postfach
+address.selCountry = Land
+address.street = Straße
+address.zip = Postleitzahl
+addresses = Adressen
+addresses.of = Adressen von
+
+application.name = ATV zu Berlin
+
+cancel = Abbrechen
+create = Erstellen
+delete = Löschen
+reset = Zurücksetzen
+
+email = E-Mail
+emails = E-Mails
+email.add = E-Mail-Adresse hinzufügen
+email.address = E-Mail-Adresse
+email.delete = Löschen
+email.edit = Bearbeiten
+email.of = E-Mail-Adresse von
+email.selUsageType = Art der E-Mail-Adresse
+email.submit = E-Mail-Adresse eintragen
+email.usagetype = Art der E-Mail-Adresse
+email.usagetype.personal = privat
+email.usagetype.business = geschäftlich
+email.usagetype.honorary = ehrenamtlich
+emails.of = E-Mail-Adressen von
+
+error.failedToDeleteAddress = Die Adresse konnte leider nicht gelöscht werden.
+error.failedToDeleteEmail = Die E-Mail-Adresse konnte leider nicht gelöscht werden.
+error.failedToDeleteOrg = Die Organisation konnte leider nicht gelöscht werden.
+error.failedToDeletePerson = Die Person konnte leider nicht gelöscht werden.
+error.failedToFindEmailAddress = Die E-Mail-Adresse {0} konnte nicht im System gefunden werden.
+error.failedToFindUserByName = Ein Benutzer mit dem Namen {0} konnte nicht gefunden werden. 
+error.failedToIdentifyCharacter = Es konnte kein einzelner Buchstabe erkannt werden.
+error.failedToLoadCountries = Die Länderliste konnte nicht geladen werden.
+error.failedToLoadCountry = Das Land mit der ID {0} konnte nicht geladen werden.
+error.failedToLoadEventtype = Die Veranstaltungskategorie mit der ID {0} konnte nicht geladen werden.
+error.failedToLoadPerson = Die Person mit der ID {0} konnte nicht geladen werden.
+error.failedToLoadUpcomingEventsList = Die Liste der kommenden Veranstaltungen konnte nicht geladen werden.
+error.failedToLoadUsagetype = Der Verwendungstyp mit der ID {0} konnte nicht geladen werden.
+error.failedToLoadUserRole = Die Benutzerrolle mit der ID {0} konnte nicht geladen werden.
+error.failedToParseDate = Die Eingabe {0} konnte nicht als Datum identifiziert werden.
+error.failedToStoreAddress = Das Speichern der Adresse ist leider fehlgeschlagen.
+error.failedToStoreEmail = Das Speichern der E-Mail-Adresse ist leider fehlgeschlagen.
+error.failedToStoreEvent = Das Speichern der Veranstaltung ist leider fehlgeschlagen.
+error.failedToStoreOrg = Das Speichern der Organisation ist leider fehlgeschlagen.
+error.loginFailed = Anmeldung ist fehlgeschlagen. Benutzername und/oder Password sind falsch.
+error.registrationFailed = Die Registrierung ist leider fehlgeschlagen.
+error.required=Dieses Feld muss ausgefüllt werden.
+error.user=Geben Sie einen gültigen Benutzernamen ein.
+
+event = Veranstaltung
+events = Veranstaltungen
+event.delete = Veranstaltung löschen
+event.description = Beschreibung
+event.edit = Veranstaltung bearbeiten
+event.end = Ende
+event.list = Veranstaltungsliste
+event.location = Ort
+event.priority = Priorität
+event.priority.high = Hoch
+event.priority.low = Niedrig
+event.priority.normal = Normal
+event.priority.select = Wähle eine Priorität
+event.reset = Zurücksetzen 
+event.start = Beginn
+event.submit = Veranstaltung eintragen
+event.time = Zeit
+event.title = Titel
+event.typus = Typ
+event.typus.select = Wähle einen Typen
+event.url = Link
+event.view = Details ansehen
+
+home = Startseite
+
+imprint = Impressum
+
+login = Anmeldung
+login.form = Authentifizierung durch Anmeldung
+login.username = Benutzername
+login.password = Passwort
+login.email = E-mail
+login.failed = Benutzername oder Passwort ist falsch.
+
+logout = Abmelden
+
+news = Neuigkeiten
+news.by = geschrieben von
+news.content = Inhalt
+news.form = Neuigkeit hinzufügen
+news.lead = Zusammenfassung
+news.modified = geändert am
+news.read.more = weiter lesen ...
+news.title = Titel
+
+organization = Organisation
+organizations = Organisationen
+organization.add = Organisation hinzufügen
+organization.colors = Farben
+organization.delete = Organisation löschen
+organization.edit = Organisation bearbeiten
+organization.founded = Gegründet
+organization.gender = Geschlecht
+organization.gender.female = weiblich
+organization.gender.male = männlich
+organization.gender.mixed = gemischt
+organization.list = Liste der Organisation
+organization.motto = Wahlspruch
+organization.name = Name
+organization.refounded = Wiedergegründet
+organization.submit = Organisation eintragen
+organization.url = Homepage
+organization.view = Details ansehen
+
+person = Person
+persons = Personen
+person.add = Person hinzufügen
+person.birth = Geburtstag
+person.birth.date.format = JJJJ-MM-TT
+person.born.on = geboren am
+person.create = Person anlegen
+person.delete = Löschen
+person.delete.heading = Person löschen
+person.delete.body = Soll der Eintrag wirklich gelöscht werden?
+person.details = Personendetails
+person.edit = Bearbeiten
+person.firstname = Vorname
+person.gender = Geschlecht
+person.gender.f = weiblich
+person.gender.m = männlich
+person.lastname = Nachname
+person.list = Personenliste
+person.new = Neue Person anlegen
+person.nickname = Biername
+person.plural = Personen
+person.selGender = Geschlecht
+person.singular = Person
+person.submit = Speichern
+person.view = Details ansehen
+
+program = Semesterprogramm
+
+registration = Registrierung
+registration.error.password.confirmation.failed = Die beiden Eingaben für das Passwort stimmen nicht überein. 
+registration.error.password.too.short = Das Passwort muss mindestens 8 Zeichen lang sein.
+registration.form = Anmeldeformular
+registration.password.repeat = Passwort wiederholen
+registration.email = E-mail
+registration.register.button = Jetzt registrieren!
+registration.selPerson = Wählen Sie die zugehörige Person
+registration.selPerson.default = <--- Person auswählen --->
+registration.selRole = Rolle des Benutzers wählen
+
+submit = Speichern
+
+success.succeededToDeleteAddress = Die Adresse wurde gelöscht.
+success.succeededToDeleteEmail = Die E-Mail-Adresse wurde gelöscht.
+success.succeededToDeleteOrg = Die Organisation wurde gelöscht.
+success.succeededToDeletePerson = Die Person wurde gelöscht.
+success.succeededToStoreAddress = Die Adresse wurde gespeichert.
+success.succeededToStoreEmail = Die E-Mail-Adresse wurde gespeichert.
+success.succeededToStoreEvent = Die Veranstaltung wurde gespeichert.
+success.succeededToStoreNews = Die Neuigkeit wurde gespeichert.
+success.succeededToStoreOrg = Die Organisation wurde gespeichert.
+
+
+top.of.page = Zum Seitenanfang
+
+usagetype = Typ
+usagetype.personal = privat
+usagetype.business = geschäftlich
+usagetype.honorary = ehrenamtlich
+
+user.logged.in = Eingeloggter Benutzer
+user.log.out = Ausloggen des Benutzers
+
+welcome = Willkommen beim ATV zu Berlin

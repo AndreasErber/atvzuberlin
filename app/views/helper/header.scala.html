@@ -1,0 +1,37 @@
+@(menus: Option[List[display.Menu]])(implicit lang: Lang, ctx: util.Ctx)
+          <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+              <div class="container">
+                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+               
+          		<div class="nav-collapse collapse">
+                @if(menus.isDefined) {
+                  <ul class="nav">
+                    <li><a href="/" title="@Messages("home")"><i class="icon-home"></i></a></li>
+                  @menus.get.map { m =>
+                    <li><a href="@m.url">@m.name</a></li>
+                  }
+                  </ul> 
+                }
+                </div>
+                <div class="nav-collapse collapse pull-right">
+                @if(ctx.user.isDefined) {
+                  <ul class="nav">
+                    <li class="pull-right"><a href="/person/@ctx.user.get.person" title="@Messages("user.logged.in")"><i class="icon-user"></i> @ctx.user.get.username</a></li>
+                    <li class="pull-right"><a href="/logout" title="@{Messages("user.log.out") + " " + ctx.user.get.username}"><i class="icon-off"></i></a></li>
+                  </ul>
+                } else {
+                  <form class="form-inline" action="@routes.UserCtrl.login" method="POST">
+                    <input type="text" id="username" name="username" class="input-small" placeholder="@Messages("login.username")">
+                    <input type="password" id="password" name="password" class="input-small" placeholder="@Messages("login.password")">
+                    <input type="submit" class="btn" value="@Messages("login")" />
+                  </form>
+                }
+                </div>
+              </div>
+            </div>
+          </div>

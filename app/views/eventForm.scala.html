@@ -1,0 +1,34 @@
+@(eventForm: Form[Event])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Atv
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("event")) {
+    @Logger.debug("Rendering event form")
+	<h1>@Messages("event")</h1>
+	@form(routes.EventCtrl.submit) {
+	  @inputHidden(eventForm("id")) 
+	  @inputText(eventForm("title"), '_label -> Messages("event.title"))
+	  @inputText(eventForm("description"), '_label -> Messages("event.description"))
+	  @inputDate(eventForm("start"), '_label -> Messages("event.start"))
+	  @inputDate(eventForm("end"), '_label -> Messages("event.end"))
+	  @inputText(eventForm("location"), '_label -> Messages("event.location"))
+	  @inputText(eventForm("url"), '_label -> Messages("event.url"))
+	  @select(eventForm("priority"),
+	          Seq[(String, String)]("1" -> Messages("event.priority.high"), "2" -> Messages("event.priority.normal"), "3" -> Messages("event.priority.low")),
+              '_default -> ("<-- " + Messages("event.priority.select") + " -->"),
+              '_label -> Messages("event.priority")
+      )
+	  @select(eventForm("typus"), 
+              Atv.getEventTypes().map{et => et.id.toString -> et.name},
+              '_default -> ("<-- " + Messages("event.typus.select") + " -->"),
+              '_label -> Messages("event.typus")
+      )
+      @createModifyFormPart(eventForm)
+      @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering event form")
+}
