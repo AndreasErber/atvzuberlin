@@ -21,6 +21,10 @@ import models.PersonHasAddress
 import models.OrgHasAddress
 import models.NewsTable
 
+/**
+ * @author andreas
+ * @version 0.0.5, 2013-03-17
+ */
 object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
