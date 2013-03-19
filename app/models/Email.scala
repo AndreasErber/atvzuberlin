@@ -11,20 +11,23 @@ import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
 import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import util.UsageType
-import util.Personal
-import util.UsageType
 import scalaz.Validation
 import scalaz.Failure
 import scalaz.Success
+import util.UsageType
+import util.Personal
+import util.UsageType
+import util.Privacy
+import util.MembersPrivate
 
 /**
  * @author andreas
- * @version 0.0.4, 2013-03-13
+ * @version 0.0.5, 2013-03-19
  */
 case class Email(override val id: Option[Long],
     val address: String,
     val usage: UsageType = Personal,
+    val privacy: Privacy = MembersPrivate,
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
@@ -221,18 +224,20 @@ object Emails extends Table[Email](Email.tablename) {
   import scala.slick.lifted.TypeMapper
   import util.Personal
   implicit val usageTypeMapper: TypeMapper[UsageType] = base[UsageType, Int](ut => ut.id, id => Personal.getUsageType(id).get)
+  implicit val privacyMapper: TypeMapper[Privacy] = base[Privacy, Int](p => p.id, id => MembersPrivate.getPrivacy(id).get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def address = column[String]("address")
   def usage = column[UsageType]("usage")
+  def privacy = column[Privacy]("privacy")
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ address ~ usage ~ created ~ creator ~ modified.? ~ modifier.? <> (Email.apply _, Email.unapply _)
+  def * = id.? ~ address ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? <> (Email.apply _, Email.unapply _)
 
-  def withoutId = address ~ usage ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (e: Email) => withoutId.insert(e.address, e.usage, e.created, e.creator, e.modified, e.modifier)
+  def withoutId = address ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (e: Email) => withoutId.insert(e.address, e.usage, e.privacy, e.created, e.creator, e.modified, e.modifier)
   def update(e: Email): Int = Emails.where(_.id === e.id).update(e.copy(modified = Some(System.currentTimeMillis())))
 }
 

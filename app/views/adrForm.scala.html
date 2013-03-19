@@ -1,6 +1,8 @@
 @(adrForm: Form[Address], countries: Seq[Country], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
+@import util.Personal
+@import util.Private
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -17,6 +19,14 @@
 	  @select(adrForm("country"), 
               countries.map{c => c.id.get.toString -> c.nameDe.get},
               '_label -> Messages("address.selCountry")
+      )
+      @select(adrForm("usage"), 
+              Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
+              '_label -> Messages("address.selUsageType")
+      )
+      @select(adrForm("privacy"), 
+              Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + p.name)},
+              '_label -> Messages("address.selPrivacy")
       )
       @createModifyFormPart(adrForm)
       @submitResetCancel()

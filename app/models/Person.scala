@@ -27,6 +27,7 @@ case class Person(
     val firstname: Option[String] = None,
     val nickname: Option[String] = None,
     val birth: Option[Date] = None,
+    val death: Option[Date] = None,
     val gender: Char = 'm',
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
@@ -242,15 +243,16 @@ object Persons extends Table[Person](Person.tablename) {
   def firstname = column[String]("firstname", O.Nullable)
   def nickname = column[String]("nickname", O.Nullable)
   def birth = column[Date]("birth", O.Nullable)
+  def death = column[Date]("death", O.Nullable)
   def gender = column[Char]("gender", O.Default('m'), O.DBType("CHAR(1)"))
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ lastname ~ firstname.? ~ nickname.? ~ birth.? ~ gender ~ created ~ creator ~ modified.? ~ modifier.? <> (Person.apply _, Person.unapply _)
+  def * = id.? ~ lastname ~ firstname.? ~ nickname.? ~ birth.? ~ death.? ~ gender ~ created ~ creator ~ modified.? ~ modifier.? <> (Person.apply _, Person.unapply _)
 
-  def withoutId = lastname ~ firstname.? ~ nickname.? ~ birth.? ~ gender ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (p: Person) => withoutId.insert(p.lastname, p.firstname, p.nickname, p.birth, p.gender, p.created, p.creator, p.modified, p.modifier)
+  def withoutId = lastname ~ firstname.? ~ nickname.? ~ birth.? ~ death.?  ~ gender ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (p: Person) => withoutId.insert(p.lastname, p.firstname, p.nickname, p.birth, p.death, p.gender, p.created, p.creator, p.modified, p.modifier)
   def update(p: Person): Int = Persons.where(_.id === p.id).update(p.copy(modified = Some(System.currentTimeMillis())))
   def count(): Int = Persons.count
 }

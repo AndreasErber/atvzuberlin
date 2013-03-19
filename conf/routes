@@ -59,6 +59,13 @@ GET   /p/:pid/email/edit          controllers.EmailCtrl.createPersonEmail(pid: L
 GET   /p/:pid/email/edit/:id      controllers.EmailCtrl.editPersonEmail(pid: Long, id: Long)
 POST  /p/:pid/email/edit          controllers.EmailCtrl.submitPersonEmail(pid: Long)
 
+# Phone
+GET   /p/:pid/phone/show          controllers.PhoneCtrl.showPersonPhone(pid: Long)
+GET   /p/:pid/phone/delete/:id    controllers.PhoneCtrl.deletePersonPhone(pid: Long, id: Long)
+GET   /p/:pid/phone/edit          controllers.PhoneCtrl.createPersonPhone(pid: Long)
+GET   /p/:pid/phone/edit/:id      controllers.PhoneCtrl.editPersonPhone(pid: Long, id: Long)
+POST  /p/:pid/phone/edit          controllers.PhoneCtrl.submitPersonPhone(pid: Long)
+
 GET   /persons                    controllers.PersonCtrl.list
 GET   /person/new                 controllers.PersonCtrl.create
 POST  /person/new                 controllers.PersonCtrl.submit

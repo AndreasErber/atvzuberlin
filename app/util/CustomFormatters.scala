@@ -138,6 +138,34 @@ object CustomFormatters {
 
     def unbind(key: String, c: Country) = Map(key -> c.id.get.toString())
   }
+  
+  val privacyFormatter = new Formatter[Privacy] {
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[Privacy].either(MembersPrivate.getPrivacy(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadPrivacy", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, p: Privacy) = Map(key -> p.id.toString())
+  }
+
+  val phoneFormatter = new Formatter[PhoneType] {
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[PhoneType].either(Landline.getPhoneType(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadPhoneType", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, pt: PhoneType) = Map(key -> pt.id.toString())
+  }
 
   /**
    * Takes the first character of the input string and returns it as a char.
