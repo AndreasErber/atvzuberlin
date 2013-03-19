@@ -12,8 +12,12 @@
 	  @inputHidden(emailForm("id")) 
 	  @inputText(emailForm("address"), '_label -> Messages("email.address"))
 	  @select(emailForm("usage"), 
-              Personal.getUsageTypes().map{u => u.id.toString -> Messages("email.usagetype." + u.name.toLowerCase)},
+              Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
               '_label -> Messages("email.selUsageType")
+      )
+      @select(emailForm("privacy"), 
+              Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + u.name)},
+              '_label -> Messages("email.selPrivacy")
       )
       @createModifyFormPart(emailForm)
       @submitResetCancel()

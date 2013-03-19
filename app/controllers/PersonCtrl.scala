@@ -33,6 +33,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       "firstname" -> optional(text),
       "nickname" -> optional(text),
       "birth" -> optional(sqlDateMapping),
+      "death" -> optional(sqlDateMapping),
       "gender" -> charMapping,
       "created" -> longNumber,
       "creator" -> text,

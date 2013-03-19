@@ -13,10 +13,14 @@ import scala.slick.lifted.Query
 import scalaz.Validation
 import scalaz.Failure
 import scalaz.Success
+import util.UsageType
+import util.Personal
+import util.Privacy
+import util.MembersPrivate
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-03-11
+ * @version 0.0.2, 2013-03-19
  */
 case class Address(override val id: Option[Long] = None,
   val addon: Option[String],
@@ -25,6 +29,8 @@ case class Address(override val id: Option[Long] = None,
   val city: String,
   val zip: String,
   val country: Country,
+  val usage: UsageType = Personal,
+  val privacy: Privacy = MembersPrivate,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -219,6 +225,8 @@ object Addresses extends Table[Address](Address.tablename) {
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
   implicit val countryMapper: TypeMapper[Country] = base[Country, Int](c => c.id.get, id => Country.load(id).get)
+  implicit val usageTypeMapper: TypeMapper[UsageType] = base[UsageType, Int](ut => ut.id, id => Personal.getUsageType(id).get)
+  implicit val privacyMapper: TypeMapper[Privacy] = base[Privacy, Int](p => p.id, id => MembersPrivate.getPrivacy(id).get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def addon = column[String]("addon", O.Nullable)
@@ -227,14 +235,16 @@ object Addresses extends Table[Address](Address.tablename) {
   def city = column[String]("city")
   def zip = column[String]("zip")
   def country = column[Country]("country")
+  def usage = column[UsageType]("usage")
+  def privacy = column[Privacy]("privacy")
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ created ~ creator ~ modified.? ~ modifier.? <> (Address.apply _, Address.unapply _)
+  def * = id.? ~ addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? <> (Address.apply _, Address.unapply _)
 
-  def withoutId = addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (a: Address) => withoutId.insert(a.addon, a.street, a.postbox, a.city, a.zip, a.country, a.created, a.creator, a.modified, a.modifier)
+  def withoutId = addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (a: Address) => withoutId.insert(a.addon, a.street, a.postbox, a.city, a.zip, a.country, a.usage, a.privacy, a.created, a.creator, a.modified, a.modifier)
   def update(a: Address): Int = Addresses.where(_.id === a.id).update(a.copy(modified = Some(System.currentTimeMillis())))
   def count(): Int = Addresses.count
 }

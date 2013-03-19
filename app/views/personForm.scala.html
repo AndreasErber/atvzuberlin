@@ -10,10 +10,11 @@
 	<h2>Angaben zur Person</h2>
 	@form(routes.PersonCtrl.updatePerson) { 
 		@inputHidden(personForm("id")) 
-		@inputText(personForm("lastname"), '_label -> "Nachname")
-		@inputText(personForm("firstname"), '_label -> "Vorname(n)")
-		@inputText(personForm("nickname"), '_label -> "Spitzname")
-		@inputDate(personForm("birth"), '_label -> "Geburtsdatum (JJJJ-MM-TT)")
+		@inputText(personForm("lastname"), '_label -> Messages("person.lastname"))
+		@inputText(personForm("firstname"), '_label -> Messages("person.firstname"))
+		@inputText(personForm("nickname"), '_label -> Messages("person.nickname"))
+		@inputDate(personForm("birth"), '_label -> (Messages("person.birth") + " (" + Messages("person.birth.date.format") + ")"))
+		@inputDate(personForm("birth"), '_label -> (Messages("person.death") + " (" + Messages("person.death.date.format") + ")"))
 		@select(personForm("gender"), 
               Seq(("m" -> Messages("person.gender.m")), ("f" -> Messages("person.gender.f"))),
               '_label -> Messages("person.selGender")

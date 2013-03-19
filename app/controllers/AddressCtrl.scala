@@ -17,16 +17,23 @@ import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import models.Country
 import play.api.i18n.Messages
+import util.Privacy
 
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-03-13
+ * @version 0.0.3, 2013-03-19
  */
 object AddressCtrl extends Controller with ProvidesCtx with Security {
 
   implicit val countryFormatter = CustomFormatters.countryFormatter
   val countryMapping = of[Country]
+  
+  implicit val usageFormatter = CustomFormatters.usageTypeFormatter
+  val usageMapping = of[UsageType]
+
+  implicit val privacyFormatter = CustomFormatters.privacyFormatter
+  val privacyMapping = of[Privacy]
 
   val adrForm = Form[Address](
     mapping(
@@ -37,6 +44,8 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
       "city" -> nonEmptyText,
       "zip" -> nonEmptyText,
       "country" -> countryMapping,
+      "usage" -> usageMapping,
+      "privacy" -> privacyMapping,
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
@@ -46,7 +55,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val countries = Country.getAll
       if (countries.isSuccess) {
-        Ok(views.html.adrForm(adrForm, countries.toOption.get, pid))
+        Ok(views.html.adrForm(adrForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, countries.toOption.get, pid))
       } else {
         Ok(views.html.adrForm(adrForm.withGlobalError(Messages("error.failedToLoadCountries")), List(), pid))
       }

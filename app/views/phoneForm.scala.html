@@ -1,0 +1,32 @@
+@(phoneForm: Form[Phone], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Personal
+@import util.Private
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("phone")) {
+    @Logger.debug("Rendering phone form")
+	<h2>@Messages("phone")</h2>
+	@form(routes.PhoneCtrl.submitPersonEmail(pid)) {
+	  @inputHidden(phoneForm("id")) 
+	  @inputText(phoneForm("areacode"), '_label -> Messages("phone.areacode"))
+	  @inputText(phoneForm("extension"), '_label -> Messages("phone.extension"))
+	  @select(phoneForm("country"), 
+              countries.map{c => c.id.get.toString -> c.phone.get},
+              '_label -> Messages("phone.selCountry")
+      )
+      @select(phoneForm("usage"), 
+              Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
+              '_label -> Messages("phone.selUsageType")
+      )
+      @select(phoneForm("privacy"), 
+              Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + u.name)},
+              '_label -> Messages("phone.selPrivacy")
+      )
+      @createModifyFormPart(emailForm)
+      @submitResetCancel()
+	}
+	@Logger.debug("Done rendering phone form")
+}

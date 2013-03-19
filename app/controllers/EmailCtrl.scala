@@ -16,6 +16,7 @@ import models.PersonHasEmail
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import play.api.i18n.Messages
+import util.Privacy
 
 /**
  * @author andreas
@@ -26,18 +27,22 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
   implicit val charFormatter = CustomFormatters.usageTypeFormatter
   val usageTypeMapping = of[UsageType]
 
+  implicit val privacyFormatter = CustomFormatters.privacyFormatter
+  val privacyMapping = of[Privacy]
+
   val emailForm = Form[Email](
     mapping(
       "id" -> optional(longNumber),
       "address" -> email,
       "usage" -> usageTypeMapping,
+      "privacy" -> privacyMapping,
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
       "modifier" -> optional(text))(Email.apply)(Email.unapply))
 
   def createPersonEmail(pid: Long) = isAuthenticated { username => implicit request =>
-    Ok(views.html.emailForm(emailForm.bind(Map("usage" -> "1")).discardingErrors, pid))
+    Ok(views.html.emailForm(emailForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, pid))
   }
   
   def deletePersonEmail(pid: Long, id: Long) = isAuthenticated { username =>

@@ -1,0 +1,198 @@
+/**
+ *
+ */
+package models
+
+import play.data.validation.Constraints
+import play.api.db._
+import play.api.Logger
+import play.api.Play.current
+import scala.slick.driver.PostgresDriver.simple._
+import Database.threadLocalSession
+import scala.slick.lifted.Parameters
+import scala.slick.lifted.Query
+import scalaz.Validation
+import scalaz.Failure
+import scalaz.Success
+import util.UsageType
+import util.Personal
+import util.Privacy
+import util.MembersPrivate
+import util.PhoneType
+import util.Landline
+
+/**
+ * @author andreas
+ * @version 0.0.1, 2013-03-19
+ */
+case class Phone(override val id: Option[Long],
+    val areacode: Int,
+    val extension: Int,
+    val country: Country,
+    val kind: PhoneType,
+    val usage: UsageType = Personal,
+    val privacy: Privacy = MembersPrivate,
+    override val created: Long = System.currentTimeMillis(),
+    override val creator: String,
+    override val modified: Option[Long] = None,
+    override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier)
+
+object Phone {
+  
+  implicit val db = Database.forDataSource(DB.getDataSource())
+  
+  val tablename = "Phone"
+
+  def load(id: Long): Option[Phone] = db withSession {
+    Query(Phones).filter(_.id === id).firstOption
+  }
+
+  private def delete(id: Long): Validation[Throwable, Boolean] = {
+    try {
+      val delCount = Query(Phones).filter(_.id === id).delete
+      if (delCount > 0) Success(true) else Failure(new RuntimeException("Failed to delete phone number with id " + id))
+    } catch {
+      case e: Throwable => Failure(e)
+    }
+  }
+  
+  def deleteOrgPhone(oid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
+    val del = Query(OrgHasPhone).where(_.oid === oid).where(_.phid === id).delete
+    if (del > 0) {
+      delete(id)
+    } else {
+      Failure(new RuntimeException("Failed to delete the connection between the organization and the phone number. (" + oid + ", " + id + ")"))
+    }
+  }
+
+  def deletePersonPhone(pid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
+    val del = Query(PersonHasPhone).where(_.pid === pid).where(_.phid === id).delete
+    if (del > 0) {
+      delete(id)
+    } else {
+      Failure(new RuntimeException("Failed to delete the connection between the person and the phone number. (" + pid + ", " + id + ")"))
+    }
+  }
+
+  /**
+   * Get the list of phone numbers a Person has.
+   *
+   * Note, that the output list is sorted according to the position parameter in the relation table.
+   */
+  def getPersonPhones(p: Person): Validation[Throwable, List[Phone]] = {
+    require(p.id.isDefined)
+    db withSession {
+      try {
+        val result = for {
+          php <- PersonHasPhone.sortBy(x => (x.pid, x.pos)) if php.pid === p.id.get
+          e <- Phones if php.phid === e.id
+        } yield (e)
+        Success(result.list)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Insert the specified Phone number in the database and set it into a relation to the given Person.
+   *
+   * If the person is not yet persisted it will be in a first step.
+   */
+  def savePersonEmail(p: Person, ph: Phone): Validation[Throwable, Phone] = {
+
+    var p1 = p
+    if (!p.id.isDefined) {
+      p1 = Person.saveOrUpdate(p).toOption.get
+    }
+    db withSession {
+      try {
+        val isUpdate = if (ph.id.isDefined) true else false
+        val ph1 = Phone.saveOrUpdate(ph)
+        if (ph1.isSuccess) {
+          if (!isUpdate) {
+            val l = Query(PersonHasPhone).where(_.pid === p1.id.get).list
+            PersonHasPhone.insert((p1.id.get, ph1.toOption.get.id.get, l.length + 1));
+          }
+          ph1
+        } else Failure(ph1.fail.toOption.get)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+
+    }
+  }
+
+  private def saveOrUpdate(ph: Phone): Validation[Throwable, Phone] = {
+    db withSession {
+      if (ph.id.isDefined) {
+        try {
+          val count = Phones.update(ph)
+          if (count == 0) {
+            Failure(new RuntimeException("Failed to update phone number " + ph))
+          } else {
+            Success(ph)
+          }
+        } catch {
+          case e: Throwable => Failure(e)
+        }
+      } else {
+        try {
+          val id = Phones.insert(ph)
+          Success(ph.copy(id = Some(id)))
+        } catch {
+          case e: Throwable => Failure(e)
+        }
+      }
+    }
+  }
+}
+
+object Phones extends Table[Phone](Phone.tablename) {
+  
+  import scala.slick.lifted.MappedTypeMapper.base
+  import scala.slick.lifted.TypeMapper
+  import util.Personal
+  
+  implicit val countryMapper: TypeMapper[Country] = base[Country, Int](c => c.id.get, id => Country.load(id).get)
+  implicit val phoneTypeMapper: TypeMapper[PhoneType] = base[PhoneType, Int](pt => pt.id, id => Landline.getPhoneType(id).get)
+  implicit val usageTypeMapper: TypeMapper[UsageType] = base[UsageType, Int](ut => ut.id, id => Personal.getUsageType(id).get)
+  implicit val privacyMapper: TypeMapper[Privacy] = base[Privacy, Int](p => p.id, id => MembersPrivate.getPrivacy(id).get)
+
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  def areacode = column[Int]("areacode")
+  def extension = column[Int]("extension")
+  def country = column[Country]("country")
+  def kind = column[PhoneType]("kind")
+  def usage = column[UsageType]("usage")
+  def privacy = column[Privacy]("privacy")
+  def created = column[Long]("created")
+  def creator = column[String]("creator")
+  def modified = column[Long]("modified", O.Nullable)
+  def modifier = column[String]("modifier", O.Nullable)
+  def * = id.? ~ areacode ~ extension ~ country ~ kind ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? <> (Phone.apply _, Phone.unapply _)
+
+  def withoutId = areacode ~ extension ~ country ~ kind ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (p: Phone) => withoutId.insert(p.areacode, p.extension, p.country, p.kind, p.usage, p.privacy, p.created, p.creator, p.modified, p.modifier)
+  def update(p: Phone): Int = Phones.where(_.id === p.id).update(p.copy(modified = Some(System.currentTimeMillis())))
+}
+
+object PersonHasPhone extends Table[(Long, Long, Int)]("PersonHasPhone") {
+  def pid = column[Long]("pid")
+  def phid = column[Long]("phid")
+  def pos = column[Int]("position")
+  def * = pid ~ phid ~ pos
+  def person = foreignKey("person_fk", pid, Persons)(_.id)
+  def email = foreignKey("phone_fk", phid, Emails)(_.id)
+  def pk = primaryKey("pk_personhasphone", (pid, phid))
+}
+
+object OrgHasPhone extends Table[(Long, Long, Int)]("OrgHasPhone") {
+  def oid = column[Long]("oid")
+  def phid = column[Long]("phid")
+  def pos = column[Int]("position")
+  def * = oid ~ phid ~ pos
+  def organization = foreignKey("org_fk", oid, Organizations)(_.id)
+  def email = foreignKey("phone_fk", phid, Emails)(_.id)
+  def pk = primaryKey("pk_orghasphone", (oid, phid))
+}
