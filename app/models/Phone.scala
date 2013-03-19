@@ -99,7 +99,7 @@ object Phone {
    *
    * If the person is not yet persisted it will be in a first step.
    */
-  def savePersonEmail(p: Person, ph: Phone): Validation[Throwable, Phone] = {
+  def savePersonPhone(p: Person, ph: Phone): Validation[Throwable, Phone] = {
 
     var p1 = p
     if (!p.id.isDefined) {

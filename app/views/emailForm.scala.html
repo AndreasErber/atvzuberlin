@@ -2,6 +2,7 @@
 @import helper._
 @import play.api.Logger
 @import util.Personal
+@import util.Private
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -16,7 +17,7 @@
               '_label -> Messages("email.selUsageType")
       )
       @select(emailForm("privacy"), 
-              Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + u.name)},
+              Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + p.name)},
               '_label -> Messages("email.selPrivacy")
       )
       @createModifyFormPart(emailForm)

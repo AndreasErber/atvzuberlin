@@ -1,11 +1,9 @@
-@(e: Entity, t: String, emails: List[Email])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(e: Entity, t: String, phones: List[Phone])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
-@main(Messages("email")) {
-    @Logger.debug("Rendering email " + email)
-	<h2>@{val x = e match { case p: Person => p.name; case o: Organization => o.name}; Messages("emails.of") + " " + x}</h2>
-	@emailTable(e, t, emails)
-	@Logger.debug("Done rendering email")
+@main(Messages("phone")) {
+	<h2>@{val x = e match { case p: Person => p.name; case o: Organization => o.name}; Messages("phones.of") + " " + x}</h2>
+	@phoneTable(e, t, phones)
 }
