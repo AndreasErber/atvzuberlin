@@ -1,4 +1,4 @@
-@(e: Entity, t: String, emails: List[Email])(implicit lang: Lang, ctx: util.Ctx)
+@(p: Person, emails: List[(Email, PersonHasEmail)])(implicit lang: Lang, ctx: util.Ctx)
 
     <table class="table table-striped table-hover">
 	  <thead>
@@ -11,19 +11,20 @@
 	  <tbody>
 	  @for(em <- emails) {
 		<tr>
-		  <td><a href="mailto:@em.address">@em.address</a></td>
-		  <td>@Messages("usagetype." + em.usage)</td>
+		  <td><a href="mailto:@em._1.address">@em._1.address</a></td>
+		  <td>@Messages("usagetype." + em._2.usage)</td>
 		  <td>
 		  @if(ctx.user.isDefined) {
-		    <a href="/@t/@e.id.get/email/edit/@em.id.get" title="@Messages("email.edit")"><i class="icon-pencil"></i></a>
-		    <a href="/@t/@e.id.get/email/delete/@em.id.get" title="@Messages("email.delete")"><i class="icon-trash"></i></a>
+		    <a href="/p/@p.id.get/email/edit/@em._1.id.get" title="@Messages("email.edit")"><i class="icon-pencil"></i></a>
+		    <a href="/p/@p.id.get/email/delete/@em._1.id.get" title="@Messages("email.delete")"><i class="icon-trash"></i></a>
 		  </td>
 		  }
 		</tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="3"><a href="/@t/@e.id.get/email/edit" title="@Messages("email.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="2"></td>
+	      <td><a href="/p/@p.id.get/email/edit" title="@Messages("email.add")"><i class="icon-plus"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

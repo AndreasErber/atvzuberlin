@@ -26,7 +26,7 @@ import play.api.mvc.Flash
 
 /**
  * @author andreas
- * @version 0.0.3, 2013-03-16
+ * @version 0.0.4, 2013-03-31
  */
 object UserCtrl extends Controller with ProvidesCtx with Security {
 
@@ -120,7 +120,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
         } else {
           un = tuple._1.nickname.get
         }
-        val u = User(un, tuple._2, Email.getPersonEmails(tuple._1).toOption.get(0), tuple._1.id.get, StandardUser, System.currentTimeMillis(), None)
+        val u = User(un, tuple._2, Email.getPersonEmails(tuple._1).toOption.get(0)._1, tuple._1.id.get, StandardUser, System.currentTimeMillis(), None)
         val result = User.insert(u)
         if (result.isSuccess) {
           Logger.logger.debug("Registration of user " + u.username + " was successful!")

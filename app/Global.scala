@@ -12,18 +12,21 @@ import models.Persons
 import org.postgresql.util.PSQLException
 import models.Emails
 import models.Users
-import models.PersonHasEmail
 import models.Events
 import models.Organizations
 import models.Countries
 import models.Addresses
-import models.PersonHasAddress
-import models.OrgHasAddress
 import models.NewsTable
+import models.Phones
+import models.PersonHasAddresses
+import models.OrgHasAddresses
+import models.PersonHasPhones
+import models.OrgHasPhones
+import models.PersonHasEmails
 
 /**
  * @author andreas
- * @version 0.0.5, 2013-03-17
+ * @version 0.0.7, 2013-03-30
  */
 object Global extends GlobalSettings {
 
@@ -45,7 +48,7 @@ object Global extends GlobalSettings {
       }
       
       try {
-    	  PersonHasEmail.ddl.create
+    	  PersonHasEmails.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
@@ -81,13 +84,13 @@ object Global extends GlobalSettings {
       }
       
       try {
-    	  PersonHasAddress.ddl.create
+    	  PersonHasAddresses.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
       
       try {
-    	  OrgHasAddress.ddl.create
+    	  OrgHasAddresses.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
@@ -97,6 +100,25 @@ object Global extends GlobalSettings {
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
+      
+      try {
+    	  Phones.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  PersonHasPhones.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  OrgHasPhones.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
     }
   }
 }

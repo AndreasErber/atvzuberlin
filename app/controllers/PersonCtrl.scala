@@ -13,10 +13,11 @@ import models.Email
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import models.Address
+import models.Phone
 
 /**
  * @author andreas
- * @version 0.2.0, 2013-03-13
+ * @version 0.2.1, 2013-03-25
  */
 object PersonCtrl extends Controller with ProvidesCtx with Security {
 
@@ -70,27 +71,8 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       if (list.isSuccess) {
         Ok(views.html.personList(list.toOption.get.sortBy(x => (x.lastname, x.firstname))))
       } else {
+        Logger.logger.error(list.toString(), list.fail.toOption.get)
         BadRequest("When trying to load the list of persons a failure occurred.")
-      }
-  }
-
-  /**
-   * Display the details of a person.
-   */
-  def show(id: Long) = isAuthenticated { username =>
-    implicit request =>
-      val p = Person.load(id)
-      p match {
-        case None =>
-          Logger.logger.debug("No person with ID " + id + " found."); NotFound
-        case Some(pers) =>
-          Logger.logger.debug("Found person with ID " + id + ".")
-          val alist = Address.getPersonAddresses(pers)
-          val adrs = if (alist.isSuccess) alist.toOption.get else Nil
-          val elist = Email.getPersonEmails(pers)
-          val emails = if (elist.isSuccess) elist.toOption.get else Nil
-          Ok(views.html.person(pers, adrs, emails))
-        case _ => NotFound
       }
   }
 
@@ -107,6 +89,28 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       }
   }
   
+  /**
+   * Display the details of a person.
+   */
+  def show(id: Long) = isAuthenticated { username =>
+    implicit request =>
+      val p = Person.load(id)
+      p match {
+        case None =>
+          Logger.logger.debug("No person with ID " + id + " found."); NotFound
+        case Some(pers) =>
+          Logger.logger.debug("Found person with ID " + id + ".")
+          val alist = Address.getPersonAddresses(pers)
+          val adrs = if (alist.isSuccess) alist.toOption.get else Nil
+          val plist = Phone.getPersonPhones(pers)
+          val phones = if (plist.isSuccess) plist.toOption.get else Nil
+          val elist = Email.getPersonEmails(pers)
+          val emails = if (elist.isSuccess) elist.toOption.get else Nil
+          Ok(views.html.person(pers, adrs, phones, emails))
+        case _ => NotFound
+      }
+  }
+
   def submit = isAuthenticated { username =>
     implicit request =>
       personForm.bindFromRequest.value map {

@@ -1,4 +1,4 @@
-@(emailForm: Form[Email], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(emailForm: Form[(Email, util.UsageType, util.Privacy)], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
 @import util.Personal
@@ -10,8 +10,8 @@
     @Logger.debug("Rendering email form")
 	<h2>@Messages("email")</h2>
 	@form(routes.EmailCtrl.submitPersonEmail(pid)) {
-	  @inputHidden(emailForm("id")) 
-	  @inputText(emailForm("address"), '_label -> Messages("email.address"))
+	  @inputHidden(emailForm("email.id")) 
+	  @inputText(emailForm("email.address"), '_label -> Messages("email.address"))
 	  @select(emailForm("usage"), 
               Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
               '_label -> Messages("email.selUsageType")
@@ -20,7 +20,7 @@
               Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + p.name)},
               '_label -> Messages("email.selPrivacy")
       )
-      @createModifyFormPart(emailForm)
+      @createModifyFormPart(emailForm, "email.")
       @submitResetCancel()
 	}
 	@Logger.debug("Done rendering email form")

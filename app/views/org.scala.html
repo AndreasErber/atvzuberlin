@@ -1,5 +1,5 @@
-@(o: Organization)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
-@import helper.deleteConfirmation
+@(o: Organization, adrs: List[Address], ps: List[Phone], es: List[(Email, OrgHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
 
 @main(Messages("organization")) {
   <h2>@Messages("organization")</h2>
@@ -69,5 +69,14 @@
     </tbody>
   </table>
 
+  <h4>@Messages("addresses")</h4>
+  @adrOrgTable(o, "o", adrs)
+  
+  <h4>@Messages("phone")</h4>
+  @phoneOrgTable(o, "o", ps)
+
+  <h4>@Messages("email")</h4>
+  @emailOrgTable(o, es)
+  
 @deleteConfirmation("organization")
 }

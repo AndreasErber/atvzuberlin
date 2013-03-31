@@ -1,0 +1,19 @@
+@(emailForm: Form[Email], oid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Personal
+@import util.Private
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("email")) {
+    @Logger.debug("Rendering email org form")
+	<h2>@Messages("email")</h2>
+	@form(routes.EmailCtrl.submitOrgEmail(oid)) {
+	  @inputHidden(emailForm("id")) 
+	  @inputText(emailForm("address"), '_label -> Messages("email.address"))
+      @createModifyFormPart(emailForm)
+      @submitResetCancel()
+	}
+	@Logger.debug("Done rendering email org form")
+}

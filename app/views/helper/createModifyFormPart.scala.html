@@ -1,12 +1,12 @@
-@(form: Form[_])(implicit ctx: util.Ctx)
+@(form: Form[_], prefix: String = "")(implicit ctx: util.Ctx)
       @if(!form("created").value.isDefined) {
-        @inputHidden(form("created"), '_value -> System.currentTimeMillis())
-        @inputHidden(form("creator"), '_value -> ctx.user.get.username)
-        @inputHidden(form("modified"))
-        @inputHidden(form("modifier"))
+        @inputHidden(form(prefix +"created"), '_value -> System.currentTimeMillis())
+        @inputHidden(form(prefix +"creator"), '_value -> ctx.user.get.username)
+        @inputHidden(form(prefix +"modified"))
+        @inputHidden(form(prefix +"modifier"))
       } else {
-	    @inputHidden(form("created"))
-        @inputHidden(form("creator"))
-        @inputHidden(form("modified"), '_value -> System.currentTimeMillis())
-        @inputHidden(form("modifier"), '_value -> ctx.user.get.username)
+	    @inputHidden(form(prefix +"created"))
+        @inputHidden(form(prefix +"creator"))
+        @inputHidden(form(prefix +"modified"), '_value -> System.currentTimeMillis())
+        @inputHidden(form(prefix +"modifier"), '_value -> ctx.user.get.username)
       }

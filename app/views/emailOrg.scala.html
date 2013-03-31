@@ -1,11 +1,11 @@
-@(p: Person, emails: List[(Email, PersonHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(o: Organization, emails: List[(Email, OrgHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("email")) {
     @Logger.debug("Rendering email " + email)
-	<h2>@Messages("emails.of") @p.name</h2>
-	@emailTable(p, emails)
+	<h2>@Messages("emails.of") @o.name</h2>
+	@emailOrgTable(o, emails)
 	@Logger.debug("Done rendering email")
 }

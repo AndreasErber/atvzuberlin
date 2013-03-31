@@ -1,22 +1,24 @@
-@(adrForm: Form[Address], countries: Seq[Country], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(adrForm: Form[(Address, util.UsageType, util.Privacy)], countries: Seq[Country], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
+@import util.UsageType
 @import util.Personal
+@import util.Privacy
 @import util.Private
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
 @main(Messages("address")) {
     @Logger.debug("Rendering address form")
-	<h1>@Messages("address")</h1>
+	<h2>@Messages("address")</h2>
 	@form(routes.AddressCtrl.submitPersonAdr(pid)) {
-	  @inputHidden(adrForm("id")) 
-	  @inputText(adrForm("addon"), '_label -> Messages("address.addon"))
-	  @inputText(adrForm("street"), '_label -> Messages("address.street"))
-	  @inputText(adrForm("postbox"), '_label -> Messages("address.postbox"))
-	  @inputText(adrForm("zip"), '_label -> Messages("address.zip"))
-	  @inputText(adrForm("city"), '_label -> Messages("address.city"))
-	  @select(adrForm("country"), 
+	  @inputHidden(adrForm("address.id")) 
+	  @inputText(adrForm("address.addon"), '_label -> Messages("address.addon"))
+	  @inputText(adrForm("address.street"), '_label -> Messages("address.street"))
+	  @inputText(adrForm("address.postbox"), '_label -> Messages("address.postbox"))
+	  @inputText(adrForm("address.zip"), '_label -> Messages("address.zip"))
+	  @inputText(adrForm("address.city"), '_label -> Messages("address.city"))
+	  @select(adrForm("address.country"), 
               countries.map{c => c.id.get.toString -> c.nameDe.get},
               '_label -> Messages("address.selCountry")
       )
@@ -28,7 +30,7 @@
               Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + p.name)},
               '_label -> Messages("address.selPrivacy")
       )
-      @createModifyFormPart(adrForm)
+      @createModifyFormPart(adrForm, "address.")
       @submitResetCancel()
 	}
 	

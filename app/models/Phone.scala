@@ -23,24 +23,22 @@ import util.Landline
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-03-19
+ * @version 0.0.3, 2013-03-29
  */
 case class Phone(override val id: Option[Long],
-    val areacode: Int,
-    val extension: Int,
-    val country: Country,
-    val kind: PhoneType,
-    val usage: UsageType = Personal,
-    val privacy: Privacy = MembersPrivate,
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier)
+  val areacode: Int,
+  val extension: Int,
+  val country: Country,
+  val kind: PhoneType,
+  override val created: Long = System.currentTimeMillis(),
+  override val creator: String,
+  override val modified: Option[Long] = None,
+  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier)
 
 object Phone {
-  
+
   implicit val db = Database.forDataSource(DB.getDataSource())
-  
+
   val tablename = "Phone"
 
   def load(id: Long): Option[Phone] = db withSession {
@@ -55,9 +53,9 @@ object Phone {
       case e: Throwable => Failure(e)
     }
   }
-  
+
   def deleteOrgPhone(oid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(OrgHasPhone).where(_.oid === oid).where(_.phid === id).delete
+    val del = Query(OrgHasPhones).where(_.oid === oid).where(_.phid === id).delete
     if (del > 0) {
       delete(id)
     } else {
@@ -66,7 +64,7 @@ object Phone {
   }
 
   def deletePersonPhone(pid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(PersonHasPhone).where(_.pid === pid).where(_.phid === id).delete
+    val del = Query(PersonHasPhones).where(_.pid === pid).where(_.phid === id).delete
     if (del > 0) {
       delete(id)
     } else {
@@ -75,22 +73,120 @@ object Phone {
   }
 
   /**
-   * Get the list of phone numbers a Person has.
+   * Get the list of phone numbers an {@link Organization} has.
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
-  def getPersonPhones(p: Person): Validation[Throwable, List[Phone]] = {
-    require(p.id.isDefined)
+  def getOrgPhones(o: Organization): Validation[Throwable, List[Phone]] = {
+    require(o.id.isDefined)
     db withSession {
       try {
         val result = for {
-          php <- PersonHasPhone.sortBy(x => (x.pid, x.pos)) if php.pid === p.id.get
-          e <- Phones if php.phid === e.id
-        } yield (e)
+          ohp <- OrgHasPhones.sortBy(x => (x.oid, x.pos)) if ohp.oid === o.id.get
+          p <- Phones if ohp.phid === p.id
+        } yield (p)
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
       }
+    }
+  }
+  
+  /**
+   * Get the {@link Phone} identified by <em>phid</em> for the {@link Person} <em>p</em>.
+   */
+  def getPersonPhone(p: Person, phid: Long): Validation[Throwable, Option[(Phone, UsageType, Privacy)]] = {
+    require(p.id.isDefined)
+    db withSession {
+      try {
+        val php = Query(PersonHasPhones).where(_.pid === p.id.get).where(_.phid === phid).firstOption
+        val phone = load(phid)
+        if (php.isDefined) {
+          if (phone.isDefined) {
+            Success(Some((phone.get, php.get.usage, php.get.privacy)))
+          } else {
+            Failure(new RuntimeException("Phone number with ID " + phid + " not found."))
+          }
+        } else {
+          Success(None)
+        }
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+  
+  /**
+   * Get the {@link Phone} identified by <em>phid</em> for the {@link Organization} <em>o</em>.
+   */
+  def getOrgPhone(o: Organization, phid: Long): Validation[Throwable, Option[Phone]] = {
+    require(o.id.isDefined)
+    db withSession {
+      try {
+        val ohp = Query(OrgHasPhones).where(_.oid === o.id.get).where(_.phid === phid).firstOption
+        val phone = load(phid)
+        if (ohp.isDefined) {
+          if (phone.isDefined) {
+            Success(phone)
+          } else {
+            Failure(new RuntimeException("Phone number with ID " + phid + " not found."))
+          }
+        } else {
+          Success(None)
+        }
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Get the list of phone numbers a Person has.
+   *
+   * Note, that the output list is sorted according to the position parameter in the relation table.
+   */
+  def getPersonPhones(p: Person): Validation[Throwable, List[(Phone, UsageType, Privacy)]] = {
+    require(p.id.isDefined)
+    db withSession {
+      try {
+        val list = Query(PersonHasPhones).where(_.pid === p.id.get).list
+        val result = for {
+          php <- list
+          ph <- Phone.load(php.phid)
+        } yield ((ph, php.usage, php.privacy))
+        Success(result)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Insert the specified Phone number in the database and set it into a relation to the given {@link Organization}.
+   *
+   * If the person is not yet persisted it will be in a first step.
+   */
+  def saveOrgPhone(o: Organization, ph: Phone): Validation[Throwable, Phone] = {
+
+    var o1 = o
+    if (!o.id.isDefined) {
+      o1 = Organization.saveOrUpdate(o).toOption.get
+    }
+    db withSession {
+      try {
+        val isUpdate = if (ph.id.isDefined) true else false
+        val ph1 = Phone.saveOrUpdate(ph)
+        if (ph1.isSuccess) {
+          val l = Query(OrgHasPhones).where(_.oid === o1.id.get).list
+          if (!isUpdate) {
+            OrgHasPhones.insert(OrgHasPhone(o1.id.get, ph1.toOption.get.id.get, l.length + 1));
+          }
+          ph1
+        } else Failure(ph1.fail.toOption.get)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+
     }
   }
 
@@ -110,9 +206,9 @@ object Phone {
         val isUpdate = if (ph.id.isDefined) true else false
         val ph1 = Phone.saveOrUpdate(ph)
         if (ph1.isSuccess) {
+          val l = Query(PersonHasPhones).where(_.pid === p1.id.get).list
           if (!isUpdate) {
-            val l = Query(PersonHasPhone).where(_.pid === p1.id.get).list
-            PersonHasPhone.insert((p1.id.get, ph1.toOption.get.id.get, l.length + 1));
+            PersonHasPhones.insert(PersonHasPhone(p1.id.get, ph1.toOption.get.id.get, l.length + 1));
           }
           ph1
         } else Failure(ph1.fail.toOption.get)
@@ -149,11 +245,11 @@ object Phone {
 }
 
 object Phones extends Table[Phone](Phone.tablename) {
-  
+
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
   import util.Personal
-  
+
   implicit val countryMapper: TypeMapper[Country] = base[Country, Int](c => c.id.get, id => Country.load(id).get)
   implicit val phoneTypeMapper: TypeMapper[PhoneType] = base[PhoneType, Int](pt => pt.id, id => Landline.getPhoneType(id).get)
   implicit val usageTypeMapper: TypeMapper[UsageType] = base[UsageType, Int](ut => ut.id, id => Personal.getUsageType(id).get)
@@ -170,29 +266,10 @@ object Phones extends Table[Phone](Phone.tablename) {
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ areacode ~ extension ~ country ~ kind ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? <> (Phone.apply _, Phone.unapply _)
+  def * = id.? ~ areacode ~ extension ~ country ~ kind ~ created ~ creator ~ modified.? ~ modifier.? <> (Phone.apply _, Phone.unapply _)
 
-  def withoutId = areacode ~ extension ~ country ~ kind ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (p: Phone) => withoutId.insert(p.areacode, p.extension, p.country, p.kind, p.usage, p.privacy, p.created, p.creator, p.modified, p.modifier)
+  def withoutId = areacode ~ extension ~ country ~ kind ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (p: Phone) => withoutId.insert(p.areacode, p.extension, p.country, p.kind, p.created, p.creator, p.modified, p.modifier)
   def update(p: Phone): Int = Phones.where(_.id === p.id).update(p.copy(modified = Some(System.currentTimeMillis())))
 }
 
-object PersonHasPhone extends Table[(Long, Long, Int)]("PersonHasPhone") {
-  def pid = column[Long]("pid")
-  def phid = column[Long]("phid")
-  def pos = column[Int]("position")
-  def * = pid ~ phid ~ pos
-  def person = foreignKey("person_fk", pid, Persons)(_.id)
-  def email = foreignKey("phone_fk", phid, Emails)(_.id)
-  def pk = primaryKey("pk_personhasphone", (pid, phid))
-}
-
-object OrgHasPhone extends Table[(Long, Long, Int)]("OrgHasPhone") {
-  def oid = column[Long]("oid")
-  def phid = column[Long]("phid")
-  def pos = column[Int]("position")
-  def * = oid ~ phid ~ pos
-  def organization = foreignKey("org_fk", oid, Organizations)(_.id)
-  def email = foreignKey("phone_fk", phid, Emails)(_.id)
-  def pk = primaryKey("pk_orghasphone", (oid, phid))
-}

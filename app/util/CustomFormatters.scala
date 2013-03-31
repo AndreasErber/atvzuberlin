@@ -17,7 +17,7 @@ import play.api.i18n.Messages
 
 /**
  * @author andreas
- * @version 0.1.0, 2013-03-16
+ * @version 0.1.1, 2013-03-30
  */
 object CustomFormatters {
 
@@ -116,7 +116,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { string =>
-        Exception.allCatch[Email].either(Email.findByAddress(string).toOption.get).left.map {
+        Exception.allCatch[Email].either(Email.findByAddress(string).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToFindEmailAddress", string), Nil))
         }
       }

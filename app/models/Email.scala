@@ -19,15 +19,15 @@ import util.Personal
 import util.UsageType
 import util.Privacy
 import util.MembersPrivate
+import util.UsageType
+import util.Privacy
 
 /**
  * @author andreas
- * @version 0.0.5, 2013-03-19
+ * @version 0.0.6, 2013-03-31
  */
 case class Email(override val id: Option[Long],
     val address: String,
-    val usage: UsageType = Personal,
-    val privacy: Privacy = MembersPrivate,
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
@@ -35,7 +35,6 @@ case class Email(override val id: Option[Long],
 
   // check the params
   require(Option(address).isDefined)
-  require(Option(usage).isDefined)
 
   private val validator = new Constraints.EmailValidator
   require(validator.isValid(address))
@@ -51,7 +50,7 @@ case class Email(override val id: Option[Long],
     if (id.isDefined) {
       result = "(" + id.get + ") "
     }
-    result + address + " (" + this.usage.toString() + ")"
+    result + address
   }
 
   /**
@@ -74,8 +73,7 @@ case class Email(override val id: Option[Long],
       else {
         (that.## == this.##) &&
           (that canEqual this) &&
-          (this.address == that.address) &&
-          (this.usage == that.usage)
+          (this.address == that.address)
       }
     case _ => false
   }
@@ -89,7 +87,6 @@ case class Email(override val id: Option[Long],
 
     var hash = 17
     hash = 31 * hash + address.hashCode
-    hash = 31 * hash + usage.hashCode
     hash
   }
 }
@@ -111,9 +108,9 @@ object Email {
       case e: Throwable => Failure(e)
     }
   }
-  
+
   def deleteOrgEmail(oid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(OrgHasEmail).where(_.oid === oid).where(_.eid === id).delete
+    val del = Query(OrgHasEmails).where(_.oid === oid).where(_.eid === id).delete
     if (del > 0) {
       delete(id)
     } else {
@@ -122,7 +119,7 @@ object Email {
   }
 
   def deletePersonEmail(pid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(PersonHasEmail).where(_.pid === pid).where(_.eid === id).delete
+    val del = Query(PersonHasEmails).where(_.pid === pid).where(_.eid === id).delete
     if (del > 0) {
       delete(id)
     } else {
@@ -130,13 +127,81 @@ object Email {
     }
   }
 
-  def findByAddress(e: String): Validation[Throwable, Email] = {
+  def findByAddress(e: String): Validation[Throwable, Option[Email]] = {
     db withSession {
       try {
         val result = Query(Emails).where(_.address === e).firstOption
         result match {
           case None => Failure(new RuntimeException("Failed to find email " + e))
-          case _    => Success(result.get)
+          case _    => Success(result)
+        }
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Get the {@link Email} identified by <em>eid</em> for the {@link Organization} <em>o</em>.
+   */
+  def getOrgEmail(o: Organization, eid: Long): Validation[Throwable, Option[(Email, OrgHasEmail)]] = {
+    require(o.id.isDefined)
+    db withSession {
+      try {
+        val ohe = Query(OrgHasEmails).where(_.oid === o.id.get).where(_.eid === eid).firstOption
+        val email = load(eid)
+        if (ohe.isDefined) {
+          if (email.isDefined) {
+            Success(Some(email.get, ohe.get))
+          } else {
+            Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+          }
+        } else {
+          Success(None)
+        }
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Get the list of {@link Email} addresses an {@link Organization} has.
+   *
+   * Note, that the output list is sorted according to the position parameter in the relation table.
+   */
+  def getOrgEmails(o: Organization): Validation[Throwable, List[(Email, OrgHasEmail)]] = {
+    require(o.id.isDefined)
+    db withSession {
+      try {
+        val result = for {
+          ohe <- OrgHasEmails.sortBy(x => (x.oid, x.pos)) if ohe.oid === o.id.get
+          e <- Emails if ohe.eid === e.id
+        } yield ((e, ohe))
+        Success(result.list)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
+    }
+  }
+
+  /**
+   * Get the {@link Email} identified by <em>eid</em> for the {@link Person} <em>p</em>.
+   */
+  def getPersonEmail(p: Person, eid: Long): Validation[Throwable, Option[(Email, PersonHasEmail)]] = {
+    require(p.id.isDefined)
+    db withSession {
+      try {
+        val phe = Query(PersonHasEmails).where(_.pid === p.id.get).where(_.eid === eid).firstOption
+        val email = load(eid)
+        if (phe.isDefined) {
+          if (email.isDefined) {
+            Success(Some((email.get, phe.get)))
+          } else {
+            Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+          }
+        } else {
+          Success(None)
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -149,14 +214,14 @@ object Email {
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
-  def getPersonEmails(p: Person): Validation[Throwable, List[Email]] = {
+  def getPersonEmails(p: Person): Validation[Throwable, List[(Email, PersonHasEmail)]] = {
     require(p.id.isDefined)
     db withSession {
       try {
         val result = for {
-          phe <- PersonHasEmail.sortBy(x => (x.pid, x.pos)) if phe.pid === p.id.get
+          phe <- PersonHasEmails.sortBy(x => (x.pid, x.pos)) if phe.pid === p.id.get
           e <- Emails if phe.eid === e.id
-        } yield (e)
+        } yield ((e, phe))
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -165,11 +230,11 @@ object Email {
   }
 
   /**
-   * Insert the specified Email item in the database and set it into a relation to the given Person.
+   * Insert the specified {@link Email} item in the database and set it into a relation to the given {@link Person}.
    *
    * If the person is not yet persisted it will be in a first step.
    */
-  def savePersonEmail(p: Person, e: Email): Validation[Throwable, Email] = {
+  def savePersonEmail(p: Person, e: Email, u: UsageType, pr: Privacy, pos: Int = 0): Validation[Throwable, (Email, PersonHasEmail)] = {
 
     var p1 = p
     if (!p.id.isDefined) {
@@ -180,16 +245,86 @@ object Email {
         val isUpdate = if (e.id.isDefined) true else false
         val e1 = Email.saveOrUpdate(e)
         if (e1.isSuccess) {
+          var position = -1
           if (!isUpdate) {
-            val l = Query(PersonHasEmail).where(_.pid === p1.id.get).list
-            PersonHasEmail.insert((p1.id.get, e1.toOption.get.id.get, l.length + 1));
+            val l = Query(PersonHasEmails).where(_.pid === p1.id.get).list
+            position = l.length +1
+            PersonHasEmails.insert(PersonHasEmail(p1.id.get, e1.toOption.get.id.get, position));
+          } else {
+            val oldPos = Query(PersonHasEmails).where(_.pid === p1.id.get).where(_.eid === e1.toOption.get.id.get).firstOption.get.pos
+            position = if (pos == 0) oldPos else pos
+            PersonHasEmails.update(PersonHasEmail(p1.id.get, e1.toOption.get.id.get, position, u, pr))
+            if (oldPos > position) {
+              val l = Query(PersonHasEmails).where(_.pid === p1.id.get).where(_.pos >= position).list.sortBy(x => x.pos)
+              for (phe1 <- l) {
+                if (phe1.eid != e1.toOption.get.id.get && phe1.pos > oldPos && phe1.pos <= position) {
+                  PersonHasEmails.update(phe1.copy(pos = phe1.pos + 1))
+                }
+              }
+            } else if (oldPos < position) {
+              val l = Query(PersonHasEmails).where(_.pid === p1.id.get).where(_.pos <= position).list.sortBy(x => x.pos)
+              for (phe1 <- l) {
+                if (phe1.eid != e1.toOption.get.id.get && phe1.pos < oldPos && phe1.pos >= position) {
+                  PersonHasEmails.update(phe1.copy(pos = phe1.pos - 1))
+                }
+              }
+            }
           }
-          e1
+          Success((e1.toOption.get, PersonHasEmail(p.id.get, e1.toOption.get.id.get, position, u, pr)))
         } else Failure(e1.fail.toOption.get)
       } catch {
         case e: Throwable => Failure(e)
       }
 
+    }
+  }
+
+  /**
+   * Insert the specified {@link Email} item in the database and set it into a relation to the given {@link Organization}.
+   *
+   * If the person is not yet persisted it will be in a first step.
+   */
+  def saveOrgEmail(o: Organization, e: Email, pos: Int = 0): Validation[Throwable, (Email, OrgHasEmail)] = {
+
+    var o1 = o
+    if (!o.id.isDefined) {
+      o1 = Organization.saveOrUpdate(o).toOption.get
+    }
+    db withSession {
+      try {
+        val isUpdate = if (e.id.isDefined) true else false
+        val e1 = Email.saveOrUpdate(e)
+        if (e1.isSuccess) {
+          var position = -1
+          if (!isUpdate) {
+            val l = Query(OrgHasEmails).where(_.oid === o1.id.get).list
+            position = l.length + 1
+            OrgHasEmails.insert(OrgHasEmail(o1.id.get, e1.toOption.get.id.get, position));
+          } else {
+            val oldPos = Query(OrgHasEmails).where(_.oid === o1.id.get).where(_.eid === e1.toOption.get.id.get).firstOption.get.pos
+            position = if (pos == 0) oldPos else pos
+            OrgHasEmails.update(OrgHasEmail(o.id.get, e1.toOption.get.id.get, position))
+            if (oldPos > position) {
+              val l = Query(OrgHasEmails).where(_.oid === o1.id.get).where(_.pos >= position).list.sortBy(x => x.pos)
+              for (ohe1 <- l) {
+                if (ohe1.eid != e1.toOption.get.id.get && ohe1.pos > oldPos && ohe1.pos <= e1.toOption.get.id.get) {
+                  OrgHasEmails.update(ohe1.copy(pos = ohe1.pos + 1))
+                }
+              }
+            } else if (oldPos < position) {
+              val l = Query(OrgHasEmails).where(_.oid === o1.id.get).where(_.pos <= position).list.sortBy(x => x.pos)
+              for (ohe1 <- l) {
+                if (ohe1.eid != e1.toOption.get.id.get && ohe1.pos < oldPos && ohe1.pos >= e1.toOption.get.id.get) {
+                  OrgHasEmails.update(ohe1.copy(pos = ohe1.pos - 1))
+                }
+              }
+            }
+          }
+          Success((e1.toOption.get, OrgHasEmail(o.id.get,e1.toOption.get.id.get, position)))
+        } else Failure(e1.fail.toOption.get)
+      } catch {
+        case e: Throwable => Failure(e)
+      }
     }
   }
 
@@ -228,35 +363,13 @@ object Emails extends Table[Email](Email.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def address = column[String]("address")
-  def usage = column[UsageType]("usage")
-  def privacy = column[Privacy]("privacy")
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ address ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? <> (Email.apply _, Email.unapply _)
+  def * = id.? ~ address ~ created ~ creator ~ modified.? ~ modifier.? <> (Email.apply _, Email.unapply _)
 
-  def withoutId = address ~ usage ~ privacy ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (e: Email) => withoutId.insert(e.address, e.usage, e.privacy, e.created, e.creator, e.modified, e.modifier)
+  def withoutId = address ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (e: Email) => withoutId.insert(e.address, e.created, e.creator, e.modified, e.modifier)
   def update(e: Email): Int = Emails.where(_.id === e.id).update(e.copy(modified = Some(System.currentTimeMillis())))
-}
-
-object PersonHasEmail extends Table[(Long, Long, Int)]("PersonHasEmail") {
-  def pid = column[Long]("pid")
-  def eid = column[Long]("eid")
-  def pos = column[Int]("position")
-  def * = pid ~ eid ~ pos
-  def person = foreignKey("person_fk", pid, Persons)(_.id)
-  def email = foreignKey("email_fk", eid, Emails)(_.id)
-  def pk = primaryKey("pk_personhasemail", (pid, eid))
-}
-
-object OrgHasEmail extends Table[(Long, Long, Int)]("OrgHasEmail") {
-  def oid = column[Long]("oid")
-  def eid = column[Long]("eid")
-  def pos = column[Int]("position")
-  def * = oid ~ eid ~ pos
-  def organization = foreignKey("org_fk", oid, Organizations)(_.id)
-  def email = foreignKey("email_fk", eid, Emails)(_.id)
-  def pk = primaryKey("pk_orghasemail", (oid, eid))
 }

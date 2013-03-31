@@ -17,7 +17,9 @@ import util.CustomFormatters
 import views.html.defaultpages.todo
 import views.html.defaultpages.notFound
 import play.api.i18n.Messages
-
+import models.Address
+import models.Phone
+import models.Email
 
 /**
  * @author andreas
@@ -51,7 +53,7 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
   }
 
   def delete(id: Long) = isAuthenticated { username =>
-    implicit request => 
+    implicit request =>
       val result = Organization.delete(id)
       if (result.isSuccess) {
         Redirect(routes.OrganizationCtrl.list).flashing(("success" -> Messages("success.succeededToDeleteOrg")))
@@ -91,7 +93,13 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
         Logger.logger.debug("No organization with ID " + id + " found."); NotFound
       case Some(org) =>
         Logger.logger.debug("Found organization with ID " + id + ".")
-        Ok(views.html.org(org))
+        val alist = Address.getOrgAddresses(org)
+        val adrs = if (alist.isSuccess) alist.toOption.get else Nil
+        val plist = Phone.getOrgPhones(org)
+        val phones = if (plist.isSuccess) plist.toOption.get else Nil
+        val elist = Email.getOrgEmails(org)
+        val emails = if (elist.isSuccess) elist.toOption.get else Nil
+        Ok(views.html.org(org, adrs, phones, emails))
       case _ => NotFound
     }
   }

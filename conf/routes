@@ -45,6 +45,13 @@ GET   /organization/edit/:id      controllers.OrganizationCtrl.edit(id: Long)
 POST  /organization/edit          controllers.OrganizationCtrl.submit
 GET   /organization/:id           controllers.OrganizationCtrl.show(id: Long)
 
+# Organization Address
+GET   /o/:oid/address/new         controllers.AddressCtrl.createOrgAdr(oid: Long)
+GET   /o/:oid/address/delete/:id  controllers.AddressCtrl.deleteOrgAdr(oid: Long, id: Long)
+GET   /o/:oid/address/edit/:id    controllers.AddressCtrl.editOrgAdr(oid: Long, id: Long)
+POST  /o/:oid/address/edit        controllers.AddressCtrl.submitOrgAdr(oid: Long)
+GET   /o/:oid/address             controllers.AddressCtrl.showOrgAdr(oid: Long)
+
 # Address
 GET   /p/:pid/address/new         controllers.AddressCtrl.createPersonAdr(pid: Long)
 GET   /p/:pid/address/delete/:id  controllers.AddressCtrl.deletePersonAdr(pid: Long, id: Long)
@@ -53,6 +60,12 @@ POST  /p/:pid/address/edit        controllers.AddressCtrl.submitPersonAdr(pid: L
 GET   /p/:pid/address             controllers.AddressCtrl.showPersonAdr(pid: Long)
 
 # Email
+GET   /o/:oid/email/show          controllers.EmailCtrl.showOrgEmail(oid: Long)
+GET   /o/:oid/email/delete/:id    controllers.EmailCtrl.deleteOrgEmail(oid: Long, id: Long)
+GET   /o/:oid/email/edit          controllers.EmailCtrl.createOrgEmail(oid: Long)
+GET   /o/:oid/email/edit/:id      controllers.EmailCtrl.editOrgEmail(oid: Long, id: Long)
+POST  /o/:oid/email/edit          controllers.EmailCtrl.submitOrgEmail(oid: Long)
+
 GET   /p/:pid/email/show          controllers.EmailCtrl.showPersonEmail(pid: Long)
 GET   /p/:pid/email/delete/:id    controllers.EmailCtrl.deletePersonEmail(pid: Long, id: Long)
 GET   /p/:pid/email/edit          controllers.EmailCtrl.createPersonEmail(pid: Long)
@@ -60,6 +73,12 @@ GET   /p/:pid/email/edit/:id      controllers.EmailCtrl.editPersonEmail(pid: Lon
 POST  /p/:pid/email/edit          controllers.EmailCtrl.submitPersonEmail(pid: Long)
 
 # Phone
+GET   /o/:oid/phone/show          controllers.PhoneCtrl.showOrgPhone(oid: Long)
+GET   /o/:oid/phone/delete/:id    controllers.PhoneCtrl.deleteOrgPhone(oid: Long, id: Long)
+GET   /o/:oid/phone/edit          controllers.PhoneCtrl.createOrgPhone(oid: Long)
+GET   /o/:oid/phone/edit/:id      controllers.PhoneCtrl.editOrgPhone(oid: Long, id: Long)
+POST  /o/:oid/phone/edit          controllers.PhoneCtrl.submitOrgPhone(oid: Long)
+
 GET   /p/:pid/phone/show          controllers.PhoneCtrl.showPersonPhone(pid: Long)
 GET   /p/:pid/phone/delete/:id    controllers.PhoneCtrl.deletePersonPhone(pid: Long, id: Long)
 GET   /p/:pid/phone/edit          controllers.PhoneCtrl.createPersonPhone(pid: Long)

@@ -1,4 +1,6 @@
-@(e: Entity, t: String, phones: List[Phone])(implicit lang: Lang, ctx: util.Ctx)
+@(e: Entity, t: String, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit lang: Lang, ctx: util.Ctx)
+@import util.UsageType
+@import util.Privacy
 
     <table class="table table-striped table-hover">
 	  <thead>
@@ -12,20 +14,21 @@
 	  <tbody>
 	  @for(ph <- phones) {
 		<tr>
-		  <td>00@ph.country.phone @ph.areacode @ph.extension</a></td>
-		  <td>@Messages("phone.kind." + ph.kind)</td>
-		  <td>@Messages("usagetype." + ph.usage)</td>
+		  <td>++@ph._1.country.phone @ph._1.areacode @ph._1.extension</a></td>
+		  <td>@Messages("phone.kind." + ph._1.kind)</td>
+		  <td>@Messages("usagetype." + ph._2)</td>
 		  <td>
 		  @if(ctx.user.isDefined) {
-		    <a href="/@t/@e.id.get/phone/edit/@ph.id.get" title="@Messages("phone.edit")"><i class="icon-pencil"></i></a>
-		    <a href="/@t/@e.id.get/phone/delete/@ph.id.get" title="@Messages("phone.delete")"><i class="icon-trash"></i></a>
+		    <a href="/@t/@e.id.get/phone/edit/@ph._1.id.get" title="@Messages("phone.edit")"><i class="icon-pencil"></i></a>
+		    <a href="/@t/@e.id.get/phone/delete/@ph._1.id.get" title="@Messages("phone.delete")"><i class="icon-trash"></i></a>
 		  </td>
 		  }
 		</tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="3"><a href="/@t/@e.id.get/phone/edit" title="@Messages("phone.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="3"></td>
+	      <td><a href="/@t/@e.id.get/phone/edit" title="@Messages("phone.add")"><i class="icon-plus"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

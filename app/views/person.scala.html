@@ -1,4 +1,4 @@
-@(p: Person, adrs: List[Address], es: List[Email])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(p: Person, adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 
 @main(Messages("person.details")) {
@@ -19,10 +19,10 @@
 	@adrTable(p, "p", adrs)
 	
 	<h4>@Messages("phone")</h4>
-	
+	@phoneTable(p, "p", ps)
 	
 	<h4>@Messages("email")</h4>
-	@emailTable(p, "p", es)
+	@emailTable(p, es)
 	
 @deleteConfirmation("person")
 }
