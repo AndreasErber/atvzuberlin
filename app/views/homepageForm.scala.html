@@ -1,0 +1,24 @@
+@(hpForm: Form[(Homepage, util.UsageType)], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Personal
+@import util.Private
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("homepage")) {
+    @Logger.debug("Rendering homepage form")
+	<h2>@Messages("homepage")</h2>
+	@form(routes.HomepageCtrl.submitPersonHomepage(pid)) {
+	  @inputHidden(hpForm("homepage.id")) 
+	  @inputText(hpForm("homepage.url"), '_label -> Messages("homepage.url"))
+	  @inputText(hpForm("homepage.descr"), '_label -> Messages("homepage.descr"))
+	  @select(hpForm("usage"), 
+              Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
+              '_label -> Messages("email.selUsageType")
+      )
+      @createModifyFormPart(hpForm, "homepage.")
+      @submitResetCancel()
+	}
+	@Logger.debug("Done rendering homepage form")
+}

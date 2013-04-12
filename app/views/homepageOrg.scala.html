@@ -1,0 +1,12 @@
+@(o: Organization, hps: List[(Homepage, OrgHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import helper.twitterBootstrap._
+@import play.api.Logger
+
+@main(Messages("homepage")) {
+    @Logger.debug("Rendering homepages")
+	<h2>@Messages("homepages.of") @o.name</h2>
+	@homepageOrgTable(o, hps)
+	<a href="/organization/@o.id">@Messages("organization.details")</a>
+	@Logger.debug("Done rendering homepages")
+}

@@ -1,0 +1,33 @@
+@(p: Person, hps: List[(Homepage, PersonHasHomepage)])(implicit lang: Lang, ctx: util.Ctx)
+
+    <table class="table table-striped table-hover">
+	  <thead>
+	    <tr>
+	      <th>@Messages("homepage.url")</th>
+	      <th>@Messages("homepage.descr")</th>
+	      <th>@Messages("usagetype")</th>
+	      <th>@Messages("actions")</th>
+	    <tr>
+	  </thead>
+	  <tbody>
+	  @for(hp <- hps) {
+		<tr>
+		  <td><a href="@hp._1.url">@hp._1.url</a></td>
+		  <td>@hp._1.descr.getOrElse("")</td>
+		  <td>@Messages("usagetype." + hp._2.usage)</td>
+		  <td>
+		  @if(ctx.user.isDefined) {
+		    <a href="/p/@p.id.get/hp/edit/@hp._1.id.get" title="@Messages("homepage.edit")"><i class="icon-pencil"></i></a>
+		    <a href="/p/@p.id.get/hp/delete/@hp._1.id.get" title="@Messages("homepage.delete")"><i class="icon-trash"></i></a>
+		  </td>
+		  }
+		</tr>
+	  }
+	  @if(ctx.user.isDefined) {
+	    <tr>
+	      <td colspan="3"></td>
+	      <td><a href="/p/@p.id.get/hp/edit" title="@Messages("homepage.add")"><i class="icon-plus"></i></a> ...</td>
+	    </tr>
+	  }
+	  </tbody>
+	</table>

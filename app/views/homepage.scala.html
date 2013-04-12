@@ -1,0 +1,12 @@
+@(p: Person, hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import helper.twitterBootstrap._
+@import play.api.Logger
+
+@main(Messages("homepage")) {
+    @Logger.debug("Rendering homepages")
+	<h2>@Messages("homepages.of") @p.fullname</h2>
+	@homepageTable(p, hps)
+	<a href="/person/@p.id">Personendetails</a>
+	@Logger.debug("Done rendering homepages")
+}

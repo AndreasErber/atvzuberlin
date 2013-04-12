@@ -1,0 +1,20 @@
+@(hpForm: Form[Homepage], oid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Personal
+@import util.Private
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("homepage")) {
+    @Logger.debug("Rendering homepage form")
+	<h2>@Messages("homepage")</h2>
+	@form(routes.HomepageCtrl.submitOrgHomepage(oid)) {
+	  @inputHidden(hpForm("homepage.id")) 
+	  @inputText(hpForm("homepage.url"), '_label -> Messages("homepage.url"))
+	  @inputText(hpForm("homepage.descr"), '_label -> Messages("homepage.descr"))
+	  @createModifyFormPart(hpForm, "homepage.")
+      @submitResetCancel()
+	}
+	@Logger.debug("Done rendering homepage form")
+}

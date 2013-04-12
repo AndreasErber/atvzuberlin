@@ -1,0 +1,12 @@
+@(o: Organization, t: String, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import helper.twitterBootstrap._
+@import play.api.Logger
+
+@main(Messages("address")) {
+    @Logger.debug("Rendering org addresses")
+	<h2>@Messages("addresses.of") @o.name</h2>
+	@adrOrgTable(o, t, addresses)
+	<a href="/organization/@o.id.get">@Messages("organization.details")</a>
+	@Logger.debug("Done rendering org addresses")
+}
