@@ -5,7 +5,8 @@
 
 @main(Messages("email")) {
     @Logger.debug("Rendering email " + email)
-	<h2>@Messages("emails.of") @p.name</h2>
+	<h2>@Messages("emails.of") @p.fullname</h2>
 	@emailTable(p, emails)
+	<a href="/person/@p.id">Personendetails</a>
 	@Logger.debug("Done rendering email")
 }

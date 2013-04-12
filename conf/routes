@@ -72,6 +72,20 @@ GET   /p/:pid/email/edit          controllers.EmailCtrl.createPersonEmail(pid: L
 GET   /p/:pid/email/edit/:id      controllers.EmailCtrl.editPersonEmail(pid: Long, id: Long)
 POST  /p/:pid/email/edit          controllers.EmailCtrl.submitPersonEmail(pid: Long)
 
+# Homepage
+GET   /o/:oid/hp/show          controllers.HomepageCtrl.showOrgHomepage(oid: Long)
+GET   /o/:oid/hp/delete/:id    controllers.HomepageCtrl.deleteOrgHomepage(oid: Long, id: Long)
+GET   /o/:oid/hp/edit          controllers.HomepageCtrl.createOrgHomepage(oid: Long)
+GET   /o/:oid/hp/edit/:id      controllers.HomepageCtrl.editOrgHomepage(oid: Long, id: Long)
+POST  /o/:oid/hp/edit          controllers.HomepageCtrl.submitOrgHomepage(oid: Long)
+
+GET   /p/:pid/hp/show          controllers.HomepageCtrl.showPersonHomepage(pid: Long)
+GET   /p/:pid/hp/delete/:id    controllers.HomepageCtrl.deletePersonHomepage(pid: Long, id: Long)
+GET   /p/:pid/hp/edit          controllers.HomepageCtrl.createPersonHomepage(pid: Long)
+GET   /p/:pid/hp/edit/:id      controllers.HomepageCtrl.editPersonHomepage(pid: Long, id: Long)
+POST  /p/:pid/hp/edit          controllers.HomepageCtrl.submitPersonHomepage(pid: Long)
+
+
 # Phone
 GET   /o/:oid/phone/show          controllers.PhoneCtrl.showOrgPhone(oid: Long)
 GET   /o/:oid/phone/delete/:id    controllers.PhoneCtrl.deleteOrgPhone(oid: Long, id: Long)

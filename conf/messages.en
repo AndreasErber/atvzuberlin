@@ -89,6 +89,13 @@ event.view = View Details
 
 home = Home
 
+homepage = Homepage
+homepage.add = Add Homepage
+homepage.delete = Delete
+homepage.descr = Description
+homepage.edit = Edit
+homepage.url = URL
+
 imprint = Imprint
 
 login = Login
@@ -116,11 +123,12 @@ organization.add = Add Organization
 organization.colors = Colors
 organization.delete = Delete Organization
 organization.edit = Edit Organization
+organization.details = Organization Details
 organization.founded = Founded
 organization.gender = Gender
-organization.gender.female = female
-organization.gender.male = male
-organization.gender.mixed = mixed
+organization.gender.f = female
+organization.gender.m = male
+organization.gender.g = mixed
 organization.list = Organization List
 organization.motto = Motto
 organization.name = Name
@@ -201,6 +209,8 @@ success.succeededToStoreOrg = Organization was successfully stored.
 success.succeededToStorePhone = Phone number was successfully stored.
 
 top.of.page = Go to top
+
+unknown = unknown
 
 usagetype.personal = Private
 usagetype.business = Business

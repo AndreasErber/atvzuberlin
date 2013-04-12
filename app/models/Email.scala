@@ -353,13 +353,11 @@ object Email {
   }
 }
 
+/**
+ * @author andreas
+ * @version 0.0.3, 2013-04-12
+ */
 object Emails extends Table[Email](Email.tablename) {
-
-  import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
-  import util.Personal
-  implicit val usageTypeMapper: TypeMapper[UsageType] = base[UsageType, Int](ut => ut.id, id => Personal.getUsageType(id).get)
-  implicit val privacyMapper: TypeMapper[Privacy] = base[Privacy, Int](p => p.id, id => MembersPrivate.getPrivacy(id).get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def address = column[String]("address")

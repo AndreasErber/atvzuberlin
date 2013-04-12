@@ -8,7 +8,7 @@
 @main(Messages("phone")) {
     @Logger.debug("Rendering phone org form")
 	<h2>@Messages("phone")</h2>
-	@form(routes.PhoneCtrl.submitPersonPhone(pid)) {
+	@form(routes.PhoneCtrl.submitOrgPhone(pid)) {
 	  @inputHidden(phoneForm("id")) 
 	  @inputText(phoneForm("areacode"), '_label -> Messages("phone.areacode"))
 	  @inputText(phoneForm("extension"), '_label -> Messages("phone.extension"))

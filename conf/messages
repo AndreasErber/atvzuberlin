@@ -90,6 +90,13 @@ event.view = Details ansehen
 
 home = Startseite
 
+homepage = Homepage
+homepage.add = Homepage hinzufügen
+homepage.delete = Löschen
+homepage.descr = Beschreibung
+homepage.edit = Bearbeiten
+homepage.url = URL
+
 imprint = Impressum
 
 login = Anmeldung
@@ -115,12 +122,13 @@ organizations = Organisationen
 organization.add = Organisation hinzufügen
 organization.colors = Farben
 organization.delete = Organisation löschen
+organization.details = Organisationsdetails
 organization.edit = Organisation bearbeiten
 organization.founded = Gegründet
 organization.gender = Geschlecht
-organization.gender.female = weiblich
-organization.gender.male = männlich
-organization.gender.mixed = gemischt
+organization.gender.f = weiblich
+organization.gender.m = männlich
+organization.gender.g = gemischt
 organization.list = Liste der Organisation
 organization.motto = Wahlspruch
 organization.name = Name
@@ -207,6 +215,8 @@ success.succeededToStoreOrg = Die Organisation wurde gespeichert.
 success.succeededToStorePhone = Die Telefonnummer wurde gespeichert.
 
 top.of.page = Zum Seitenanfang
+
+unknown = unbekannt
 
 usagetype = Typ
 usagetype.business = geschäftlich

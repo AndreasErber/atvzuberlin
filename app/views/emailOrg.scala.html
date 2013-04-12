@@ -7,5 +7,6 @@
     @Logger.debug("Rendering email " + email)
 	<h2>@Messages("emails.of") @o.name</h2>
 	@emailOrgTable(o, emails)
+	<a href="/organization/@o.id.get">@Messages("organization.details")</a>
 	@Logger.debug("Done rendering email")
 }

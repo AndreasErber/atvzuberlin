@@ -2,8 +2,10 @@
 @import helper._
 
 @main(Messages("person.details")) {
-	<h2>@(p.firstname.getOrElse("") + " " + p.lastname)</h2>
+	<h2>@(p.name)</h2>
+	@if(p.nickname.isDefined) {
 	<h3><em>@p.nickname.getOrElse("")</em></h3>
+	}
 	@if(ctx.user.isDefined) {
 	  <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
 	  <a data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
@@ -11,8 +13,11 @@
 	<a href="/persons" title="@Messages("person.list")"><i class="icon-th-list"></i></a>
 	
 	<h4>@Messages("person.details")</h4>
-	<p>@if(p.birth.isDefined) { <i class="icon-star"></i> @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.birth.get)}<br/> }
-	@Messages("person.gender"): @Messages("person.gender." + p.gender)
+	<p>
+	  <i class="icon-star"></i> @if(p.birth.isDefined) { @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.birth.get)}} else { @Messages("unknown") }
+	  <br/>
+	  @if(p.death.isDefined) { &dagger; @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.death.get)}<br/>}
+	  @Messages("person.gender"): @Messages("person.gender." + p.gender)
 	</p>
 	
 	<h4>@Messages("addresses")</h4>

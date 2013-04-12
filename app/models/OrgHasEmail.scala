@@ -13,9 +13,9 @@ import scalaz.Success
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-03-30
+ * @version 0.0.3, 2013-04-12
  */
-case class OrgHasEmail(pid: Long, eid: Long, pos: Int)
+case class OrgHasEmail(oid: Long, eid: Long, pos: Int)
 
 object OrgHasEmail {
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
@@ -37,6 +37,6 @@ object OrgHasEmails extends Table[OrgHasEmail](OrgHasEmail.tablename) {
   def * = oid ~ eid ~ pos <> (OrgHasEmail.apply _, OrgHasEmail.unapply _)
   def organization = foreignKey("org_fk", oid, Organizations)(_.id)
   def email = foreignKey("email_fk", eid, Emails)(_.id)
-  def pk = primaryKey("pk_orghasphone", (oid, eid))
-  def update(ohe: OrgHasEmail): Int = OrgHasEmails.where(_.oid === ohe.pid).where(_.eid === ohe.eid).update(ohe)
+  def pk = primaryKey("pk_orghasemail", (oid, eid))
+  def update(ohe: OrgHasEmail): Int = OrgHasEmails.where(_.oid === ohe.oid).where(_.eid === ohe.eid).update(ohe)
 }

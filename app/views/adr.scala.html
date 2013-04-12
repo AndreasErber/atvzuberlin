@@ -1,11 +1,12 @@
-@(e: Entity, t: String, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(p: Person, t: String, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("address")) {
-    @Logger.debug("Rendering addresses")
-	<h2>@{val x = e match { case p: Person => p.name; case o: Organization => o.name}; Messages("addresses.of") + " " + x}</h2>
-	@adrTable(e, t, addresses)
-	@Logger.debug("Done rendering addresses")
+    @Logger.debug("Rendering person addresses")
+	<h2>@Messages("addresses.of") @p.fullname</h2>
+	@adrTable(p, t, addresses)
+	<a href="/person/@p.id.get">@Messages("person.details")</a>
+	@Logger.debug("Done rendering person addresses")
 }

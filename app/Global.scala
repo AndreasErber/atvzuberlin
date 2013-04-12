@@ -23,6 +23,10 @@ import models.OrgHasAddresses
 import models.PersonHasPhones
 import models.OrgHasPhones
 import models.PersonHasEmails
+import models.OrgHasEmails
+import models.Homepages
+import models.OrgHasHomepages
+import models.PersonHasHomepages
 
 /**
  * @author andreas
@@ -119,6 +123,29 @@ object Global extends GlobalSettings {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
       
+      try {
+    	  OrgHasEmails.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  Homepages.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  OrgHasHomepages.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  PersonHasHomepages.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
     }
   }
 }

@@ -4,6 +4,7 @@
 @import play.api.Logger
 
 @main(Messages("phone")) {
-	<h2>@{val x = e match { case p: Person => p.name; case o: Organization => o.name}; Messages("phones.of") + " " + x}</h2>
+	<h2>@{val x = e match { case p: Person => p.fullname; case o: Organization => o.name}; Messages("phones.of") + " " + x}</h2>
 	@phoneTable(e, t, phones)
+	<a href="/person/@e.id">Personendetails</a>
 }

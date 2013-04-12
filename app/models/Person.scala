@@ -19,7 +19,7 @@ import scalaz.Success
 
 /**
  * @author andreas
- * @version 0.0.6, 2013-03-13
+ * @version 0.0.7, 2013-04-12
  */
 case class Person(
     override val id: Option[Long] = None,
@@ -49,13 +49,21 @@ case class Person(
     if (this.firstname.isDefined) {
       name.append(this.firstname.get + " ")
     } 
+    name.append(this.lastname)  
+    name.toString()
+  }
+    
+  def fullname: String = {
+    val name: StringBuffer = new StringBuffer
+    if (this.firstname.isDefined) {
+      name.append(this.firstname.get + " ")
+    } 
     name.append(this.lastname) 
     if (this.nickname.isDefined) {
       name.append(" - " + this.nickname.get)
     } 
     name.toString()
   }
-    
   /**
    * Retrieve the current age of the person.
    */

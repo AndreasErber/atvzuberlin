@@ -1,9 +1,10 @@
-@(e: Entity, t: String, phones: List[Phone])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(o: Organization, t: String, phones: List[Phone])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("phone")) {
-	<h2>@{val x = e match { case p: Person => p.name; case o: Organization => o.name}; Messages("phones.of") + " " + x}</h2>
-	@phoneOrgTable(e, t, phones)
+	<h2>@Messages("phones.of") @o.name</h2>
+	@phoneOrgTable(o, t, phones)
+	<a href="/organization/@o.id.get">@Messages("organization.details")</a>
 }
