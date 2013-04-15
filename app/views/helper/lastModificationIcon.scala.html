@@ -1,0 +1,4 @@
+@(e: Entity)(implicit lang: Lang, ctx: util.Ctx)
+  @if(ctx.user.isDefined && ctx.user.get.role.id >= util.Administrator.id) {
+	        <i class="icon-time" title="@Messages("last.modification"): @e.lastModification(new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss"))"></i>
+  }

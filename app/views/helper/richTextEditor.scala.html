@@ -1,0 +1,25 @@
+@**
+* Generate a rich text editor in wysihtml5 style.
+*
+* Example:
+* {{{
+*   @richtTextEditor(field = myForm("name"), args = 'data-ref -> 0)
+* }}}
+*
+* @param field The form field.
+* @param args Set of extra attributes.
+* @param handler The field constructor.
+* @param lang i18n
+* @param ctx Session context
+*@
+@(field: play.api.data.Field, args: (Symbol,Any)*)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang, ctx: util.Ctx)
+@input(field, args.filter(_._1 != 'type):_*) { (id, name, value, htmlArgs) =>
+	@wysihtml5toolbar()      
+    <textarea id="@id" name="@name" @toHtmlArgs(htmlArgs)>@value</textarea>
+    <script type="text/javascript">
+	  var editor = new wysihtml5.Editor("content", {
+          toolbar:      "wysihtml5-toolbar",
+          parserRules:  wysihtml5ParserRules
+      });
+	</script>
+}

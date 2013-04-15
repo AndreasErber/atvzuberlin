@@ -1,0 +1,51 @@
+@()(implicit lang: Lang, ctx: util.Ctx)
+<ul id="wysihtml5-toolbar" class="wysihtml5-toolbar" style="display: none;">
+  <li>
+    <div class="btn-group">
+      <a class="btn" data-wysihtml5-command="bold" title="@Messages("wysihtml5.bold")"><i class="icon-bold"></i></a>
+      <a class="btn" data-wysihtml5-command="italic" title="@Messages("wysihtml5.italic")"><i class="icon-italic"></i></a>
+      <a class="btn" data-wysihtml5-command="underline" title="@Messages("wysihtml5.underline")"><u>@Messages("wysihtml5.underline.icon")</u></a>
+    </div>
+  </li>
+  
+  <!-- Some wysihtml5 commands require extra parameters -->
+  <li>  
+    <div class="btn-group">
+      <a unselectable="on" href="javascript:;" class="btn" data-wysihtml5-command="insertUnorderedList" title="@Messages("wysihtml5.ul")"><i class="icon-list"></i></a>
+      <a unselectable="on" href="javascript:;" class="btn" data-wysihtml5-command="insertOrderedList" title="@Messages("wysihtml5.ol")"><i class="icon-th-list"></i></a>
+      <a unselectable="on" href="javascript:;" class="btn" data-wysihtml5-command="Indent" title="@Messages("wysihtml5.indent")"><i class="icon-indent-left"></i></a>
+      <a unselectable="on" href="javascript:;" class="btn" data-wysihtml5-command="Outdent" title="@Messages("wysihtml5.outdent")"><i class="icon-indent-right"></i></a>
+    </div>
+  </li>
+  
+  <!-- Some wysihtml5 commands like 'createLink' require extra paramaters specified by the user (eg. href) -->
+  <li>
+    <div data-wysihtml5-dialog="createLink" style="display: none;">
+      <label>
+        Link:
+        <input data-wysihtml5-dialog-field="href" value="http://">
+      </label>
+      <a class="btn" data-wysihtml5-dialog-action="save">@Messages("ok")</a>&nbsp;<a class="btn" data-wysihtml5-dialog-action="cancel">@Messages("cancel")</a>
+    </div>
+    <a class="btn" data-wysihtml5-command="createLink" title="@Messages("wysihtml5.link")"><i class="icon-globe"></i></a>
+  </li>
+
+  <li>   
+    <div data-wysihtml5-dialog="insertImage" style="display: none;">
+      <label>
+        Image:
+        <input data-wysihtml5-dialog-field="src" value="http://">
+      </label>
+      <label>
+        Align:
+        <select data-wysihtml5-dialog-field="className">
+          <option value="">default</option>
+          <option value="wysiwyg-float-left">left</option>
+          <option value="wysiwyg-float-right">right</option>
+        </select>
+      </label>
+      <a class="btn" data-wysihtml5-dialog-action="save">@Messages("ok")</a>&nbsp;<a class="btn" data-wysihtml5-dialog-action="cancel">@Messages("cancel")</a>
+    </div>
+    <a class="btn" data-wysihtml5-command="insertImage" title="@Messages("wysihtml5.img")"><i class="icon-picture"></i></a>
+  </li>
+</ul>
