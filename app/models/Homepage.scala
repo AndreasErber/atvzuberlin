@@ -17,7 +17,7 @@ import util.UsageType
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-12
+ * @version 0.0.2, 2013-04-13
  */
 case class Homepage(override val id: Option[Long],
     val url: String,
@@ -293,7 +293,7 @@ object Homepages extends Table[Homepage](Homepage.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def url = column[String]("url")
-  def descr = column[String]("descr")
+  def descr = column[String]("descr", O.Nullable)
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)

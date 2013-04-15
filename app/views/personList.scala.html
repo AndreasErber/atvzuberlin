@@ -1,5 +1,12 @@
+@**
+* List the addresses of a person p.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-14
+*@
 @(persons: Seq[Person])(implicit flash: Flash, ctx: util.Ctx)
 @import helper.deleteConfirmation
+@import helper.lastModificationIcon
 
 @main(Messages("persons")) {
 	<h1>@{if(persons.size == 1) Messages("person") else Messages("persons")}</h1>
@@ -24,12 +31,14 @@
             <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
             <a href="#" data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
           }
+          @lastModificationIcon(p)
           </td>
         </tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="4"><a href="/person/new" title="@Messages("person.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="3"></td>
+	      <td><a href="/person/new" title="@Messages("person.add")"><i class="icon-plus"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

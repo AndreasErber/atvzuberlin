@@ -6,12 +6,12 @@
 
 @main(Messages("news")) {
     @Logger.debug("Rendering news form")
-	<h1>@Messages("news")</h1>
+	<h1>@Messages("news.add")</h1>
 	@form(routes.NewsCtrl.submit) {
 	  @inputHidden(newsForm("id")) 
-	  @inputText(newsForm("title"), '_label -> Messages("news.title"))
-	  @textarea(newsForm("lead"), '_label -> Messages("news.lead"))
-	  @textarea(newsForm("content"), '_label -> Messages("news.content"))
+	  @inputText(newsForm("title"), '_label -> Messages("news.title"), 'style -> "width: 600px")
+	  @textarea(newsForm("lead"), '_label -> Messages("news.lead"), 'style -> "width: 600px; height: 50px")
+	  @richTextEditor(newsForm("content"), '_label -> Messages("news.content"), 'placeholder -> Messages("wysihtml5.placholder"), 'style -> "width: 600px; height: 200px")
       @createModifyFormPart(newsForm)
       @submitResetCancel()
 	}

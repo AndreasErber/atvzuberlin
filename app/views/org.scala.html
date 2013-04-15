@@ -1,4 +1,4 @@
-@(o: Organization, adrs: List[Address], ps: List[Phone], es: List[(Email, OrgHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(o: Organization, adrs: List[Address], ps: List[Phone], es: List[(Email, OrgHasEmail)], hps: List[(Homepage, OrgHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 
 @main(Messages("organization")) {
@@ -13,6 +13,7 @@
         <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="icon-trash"></i></a>
 	  }
 	    <a href="/organizations" title="@Messages("organization.list")"><i class="icon-th-list"></i></a>
+	  @lastModificationIcon(o)
       </span>
     </caption>
     <thead>
@@ -58,11 +59,11 @@
       </tr>
       <tr>
         <th>
-          @Messages("organization.url")
+          @Messages("organization.city")
         </th>
         <td>
-        @if(o.url.isDefined) { 
-          <a href="@o.url.get" title="Homepage e.s.v. @o.name">@o.url.get</a>
+        @if(o.city.isDefined) { 
+          @o.city.get
         }
         </td>
       </tr>
@@ -70,13 +71,16 @@
   </table>
 
   <h4>@Messages("addresses")</h4>
-  @adrOrgTable(o, "o", adrs)
+  @adrOrgTable(o, adrs)
   
   <h4>@Messages("phone")</h4>
-  @phoneOrgTable(o, "o", ps)
+  @phoneOrgTable(o, ps)
 
   <h4>@Messages("email")</h4>
   @emailOrgTable(o, es)
+  
+  <h4>@Messages("homepage")</h4>
+  @homepageOrgTable(o, hps)
   
 @deleteConfirmation("organization")
 }

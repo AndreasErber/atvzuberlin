@@ -137,7 +137,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
   def showOrgPhone(oid: Long) = isAuthenticated { username =>
     implicit request =>
       val o = Organization.load(oid).get
-      val req = Ok(views.html.phoneOrg(o, "o", Phone.getOrgPhones(o).toOption.get))
+      val req = Ok(views.html.phoneOrg(o, Phone.getOrgPhones(o).toOption.get))
       if (flash.get("error").isDefined) {
         req.flashing(("error" -> flash.get("error").get))
       } else if (flash.get("success").isDefined) {
@@ -150,7 +150,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
   def showPersonPhone(pid: Long) = isAuthenticated { username =>
     implicit request =>
       val p = Person.load(pid).get
-      val req = Ok(views.html.phone(p, "p", Phone.getPersonPhones(p).toOption.get))
+      val req = Ok(views.html.phone(p, Phone.getPersonPhones(p).toOption.get))
       if (flash.get("error").isDefined) {
         req.flashing(("error" -> flash.get("error").get))
       } else if (flash.get("success").isDefined) {

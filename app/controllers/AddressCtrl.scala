@@ -22,7 +22,7 @@ import models.Organization
 
 /**
  * @author andreas
- * @version 0.0.4, 2013-04-12
+ * @version 0.0.5, 2013-04-13
  */
 object AddressCtrl extends Controller with ProvidesCtx with Security {
 
@@ -135,7 +135,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
   def showOrgAdr(oid: Long) = isAuthenticated { username =>
     implicit request =>
       val o = Organization.load(oid).get
-      val req = Ok(views.html.adrOrg(o, "o", Address.getOrgAddresses(o).toOption.get))
+      val req = Ok(views.html.adrOrg(o, Address.getOrgAddresses(o).toOption.get))
       if (flash.get("error").isDefined) {
         req.flashing(("error" -> flash.get("error").get))
       } else if (flash.get("success").isDefined) {
@@ -148,7 +148,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
   def showPersonAdr(pid: Long) = isAuthenticated { username =>
     implicit request =>
       val p = Person.load(pid).get
-      val req = Ok(views.html.adr(p, "p", Address.getPersonAddresses(p).toOption.get))
+      val req = Ok(views.html.adr(p, Address.getPersonAddresses(p).toOption.get))
       if (flash.get("error").isDefined) {
         req.flashing(("error" -> flash.get("error").get))
       } else if (flash.get("success").isDefined) {

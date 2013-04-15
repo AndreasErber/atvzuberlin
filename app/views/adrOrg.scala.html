@@ -1,12 +1,18 @@
-@(o: Organization, t: String, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@**
+* List the addresses of an organization o.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
+@(o: Organization, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("address")) {
-    @Logger.debug("Rendering org addresses")
+    @Logger.debug("Rendering addresses of organization " + o.name)
 	<h2>@Messages("addresses.of") @o.name</h2>
-	@adrOrgTable(o, t, addresses)
-	<a href="/organization/@o.id.get">@Messages("organization.details")</a>
-	@Logger.debug("Done rendering org addresses")
+	@adrOrgTable(o, addresses)
+	@linkToOrgDetails(o)
+	@Logger.debug("Done rendering addresses of organization " + o.name)
 }

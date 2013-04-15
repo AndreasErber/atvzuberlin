@@ -17,7 +17,7 @@ import scalaz.Success
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-03-10
+ * @version 0.0.2, 2013-04-13
  */
 case class Organization(override val id: Option[Long] = None,
     val name: String,
@@ -26,7 +26,7 @@ case class Organization(override val id: Option[Long] = None,
     val refounded: Option[Date],
     val motto: Option[String],
     val colors: Option[String],
-    val url: Option[String],
+    val city: Option[String],
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
@@ -121,15 +121,15 @@ object Organizations extends Table[Organization](Organization.tablename) {
   def refounded = column[Date]("refounded", O.Nullable)
   def motto = column[String]("motto", O.Nullable)
   def colors = column[String]("colors", O.Nullable)
-  def url = column[String]("url", O.Nullable)
+  def city = column[String]("city", O.Nullable)
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ url.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Organization.apply _, Organization.unapply _)
+  def * = id.? ~ name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ city.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Organization.apply _, Organization.unapply _)
   
-  def withoutId = name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ url.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (o: Organization) => withoutId.insert(o.name, o.gender, o.founded, o.refounded, o.motto, o.colors, o.url, o.created, o.creator, o.modified, o.modifier)
+  def withoutId = name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ city.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (o: Organization) => withoutId.insert(o.name, o.gender, o.founded, o.refounded, o.motto, o.colors, o.city, o.created, o.creator, o.modified, o.modifier)
   def update(o: Organization): Int = Organizations.where(_.id === o.id).update(o.copy(modified = Some(System.currentTimeMillis())))
   def count(): Int = Organizations.count
 }

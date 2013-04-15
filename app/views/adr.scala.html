@@ -1,12 +1,18 @@
-@(p: Person, t: String, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@**
+* List the addresses of a person p.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
+@(p: Person, addresses: List[Address])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("address")) {
-    @Logger.debug("Rendering person addresses")
+    @Logger.debug("Rendering addresses of person " + p.fullname)
 	<h2>@Messages("addresses.of") @p.fullname</h2>
-	@adrTable(p, t, addresses)
-	<a href="/person/@p.id.get">@Messages("person.details")</a>
-	@Logger.debug("Done rendering person addresses")
+	@adrTable(p, addresses)
+	@linkToPersonDetails(p)
+	@Logger.debug("Done rendering addresses of person " + p.fullname)
 }

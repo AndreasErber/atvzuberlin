@@ -1,5 +1,6 @@
 @(orgs: Seq[Organization])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
+@import helper.lastModificationIcon
 
 @main(Messages("organizations")) {
 
@@ -41,12 +42,14 @@
             <a href="/organization/edit/@o.id.get" title="@Messages("organization.edit")"><i class="icon-pencil"></i></a>
             <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="icon-trash"></i></a>
           }
+          @lastModificationIcon(o)
           </td>
         </tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="5"><a href="/organization/new" title="@Messages("organization.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="4"></td>
+	      <td><a href="/organization/new" title="@Messages("organization.add")"><i class="icon-plus"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

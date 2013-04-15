@@ -127,11 +127,14 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
       hpOrgForm.bindFromRequest.fold(
         errors => {
           Logger.error("An error occurred when trying to process the email form.")
+          for (err <- errors.errors) {
+            Logger.error(err.key + " - " + err.message)
+          }
           BadRequest(views.html.homepageOrgForm(errors, oid))
         },
         hp => {
           val o = Organization.load(oid).get
-          Logger.debug("Storing homwepage " + hp.url + " for organization " + o.name)
+          Logger.debug("Storing homepage " + hp.url + " for organization " + o.name)
           val result = Homepage.saveOrgHomepage(o, hp)
           if (result.isSuccess) {
             Redirect(routes.HomepageCtrl.showOrgHomepage(oid)).flashing(("success" -> Messages("success.succeededToStoreHomepage")))

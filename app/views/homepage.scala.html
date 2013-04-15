@@ -1,12 +1,18 @@
+@**
+* List the homepages of a person p.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
 @(p: Person, hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("homepage")) {
-    @Logger.debug("Rendering homepages")
+    @Logger.debug("Rendering homepages of person " + p.fullname)
 	<h2>@Messages("homepages.of") @p.fullname</h2>
 	@homepageTable(p, hps)
-	<a href="/person/@p.id">Personendetails</a>
-	@Logger.debug("Done rendering homepages")
+	@linkToPersonDetails(p)
+	@Logger.debug("Done rendering homepages of person " + p.fullname)
 }

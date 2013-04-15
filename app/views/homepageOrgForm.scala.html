@@ -10,10 +10,10 @@
     @Logger.debug("Rendering homepage form")
 	<h2>@Messages("homepage")</h2>
 	@form(routes.HomepageCtrl.submitOrgHomepage(oid)) {
-	  @inputHidden(hpForm("homepage.id")) 
-	  @inputText(hpForm("homepage.url"), '_label -> Messages("homepage.url"))
-	  @inputText(hpForm("homepage.descr"), '_label -> Messages("homepage.descr"))
-	  @createModifyFormPart(hpForm, "homepage.")
+	  @inputHidden(hpForm("id")) 
+	  @inputText(hpForm("url"), '_label -> Messages("homepage.url"))
+	  @inputText(hpForm("descr"), '_label -> Messages("homepage.descr"))
+	  @createModifyFormPart(hpForm)
       @submitResetCancel()
 	}
 	@Logger.debug("Done rendering homepage form")

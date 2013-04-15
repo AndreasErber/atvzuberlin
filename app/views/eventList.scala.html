@@ -20,7 +20,7 @@
 	        @{new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(e.start)} 
 	        @if(e.end.isDefined) { 
 	          -
-	          @if(e.start.getDay == e.end.get.getDay && e.start.getMonth == e.end.get.getMonth && e.start.getYear ==e.end.get.getYear) {
+	          @if(new java.text.SimpleDateFormat("dd.MM.yyyy").format(e.start).equals(new java.text.SimpleDateFormat("dd.MM.yyyy").format(e.start))) {
 	          @{new java.text.SimpleDateFormat("HH:mm").format(e.end.get)}
 	          } else { 
 	          @{new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm").format(e.end.get)}

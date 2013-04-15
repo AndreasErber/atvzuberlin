@@ -1,10 +1,18 @@
-@(o: Organization, t: String, phones: List[Phone])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@**
+* List the phone numbers of an organization o.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
+@(o: Organization, phones: List[Phone])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("phone")) {
+	@Logger.debug("Rendering phone numbers of organization " + o.name)
 	<h2>@Messages("phones.of") @o.name</h2>
-	@phoneOrgTable(o, t, phones)
-	<a href="/organization/@o.id.get">@Messages("organization.details")</a>
+	@phoneOrgTable(o, phones)
+	@linkToOrgDetails(o)
+	@Logger.debug("Done rendering phone numbers of organization " + o.name)
 }

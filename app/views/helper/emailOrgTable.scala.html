@@ -15,8 +15,9 @@
 		  @if(ctx.user.isDefined) {
 		    <a href="/o/@o.id.get/email/edit/@em._1.id.get" title="@Messages("email.edit")"><i class="icon-pencil"></i></a>
 		    <a href="/o/@o.id.get/email/delete/@em._1.id.get" title="@Messages("email.delete")"><i class="icon-trash"></i></a>
-		  </td>
 		  }
+		  @lastModificationIcon(em._1)
+	      </td>
 		</tr>
 	  }
 	  @if(ctx.user.isDefined) {

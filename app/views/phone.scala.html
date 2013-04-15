@@ -1,10 +1,18 @@
-@(e: Entity, t: String, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@**
+* List the phone numbers of a person p.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
+@(p: Person, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("phone")) {
-	<h2>@{val x = e match { case p: Person => p.fullname; case o: Organization => o.name}; Messages("phones.of") + " " + x}</h2>
-	@phoneTable(e, t, phones)
-	<a href="/person/@e.id">Personendetails</a>
+	@Logger.debug("Rendering phone numbers of person " + p.fullname)
+	<h2>@Messages("phones.of") @p.fullname</h2>
+	@phoneTable(p, phones)
+	@linkToPersonDetails(p)
+	@Logger.debug("Done rendering phone numbers of person " + p.fullname)
 }

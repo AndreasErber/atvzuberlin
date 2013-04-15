@@ -1,4 +1,4 @@
-@(e: Entity, t: String, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit lang: Lang, ctx: util.Ctx)
+@(p: Person, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit lang: Lang, ctx: util.Ctx)
 @import util.UsageType
 @import util.Privacy
 
@@ -19,16 +19,17 @@
 		  <td>@Messages("usagetype." + ph._2)</td>
 		  <td>
 		  @if(ctx.user.isDefined) {
-		    <a href="/@t/@e.id.get/phone/edit/@ph._1.id.get" title="@Messages("phone.edit")"><i class="icon-pencil"></i></a>
-		    <a href="/@t/@e.id.get/phone/delete/@ph._1.id.get" title="@Messages("phone.delete")"><i class="icon-trash"></i></a>
-		  </td>
+		    <a href="/p/@p.id.get/phone/edit/@ph._1.id.get" title="@Messages("phone.edit")"><i class="icon-pencil"></i></a>
+		    <a href="/p/@p.id.get/phone/delete/@ph._1.id.get" title="@Messages("phone.delete")"><i class="icon-trash"></i></a>
 		  }
+		  @lastModificationIcon(ph._1)
+		  </td>
 		</tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
 	      <td colspan="3"></td>
-	      <td><a href="/@t/@e.id.get/phone/edit" title="@Messages("phone.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td><a href="/p/@p.id.get/phone/edit" title="@Messages("phone.add")"><i class="icon-plus"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

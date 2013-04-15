@@ -20,10 +20,11 @@ import play.api.i18n.Messages
 import models.Address
 import models.Phone
 import models.Email
+import models.Homepage
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-03-10
+ * @version 0.0.2, 2013-04-13
  */
 object OrganizationCtrl extends Controller with ProvidesCtx with Security {
 
@@ -41,7 +42,7 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
       "refounded" -> optional(sqlDateMapping),
       "motto" -> optional(text),
       "colors" -> optional(text),
-      "url" -> optional(text),
+      "city" -> optional(text),
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
@@ -99,7 +100,9 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
         val phones = if (plist.isSuccess) plist.toOption.get else Nil
         val elist = Email.getOrgEmails(org)
         val emails = if (elist.isSuccess) elist.toOption.get else Nil
-        Ok(views.html.org(org, adrs, phones, emails))
+        val hpList = Homepage.getOrgHomepages(org)
+        val hps = if (hpList.isSuccess) hpList.toOption.get else Nil
+        Ok(views.html.org(org, adrs, phones, emails, hps))
       case _ => NotFound
     }
   }

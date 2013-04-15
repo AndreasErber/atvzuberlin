@@ -15,12 +15,12 @@
 		  <td><a href="@hp._1.url">@hp._1.url</a></td>
 		  <td>@hp._1.descr.getOrElse("")</td>
 		  <td>@Messages("usagetype." + hp._2.usage)</td>
-		  <td>
-		  @if(ctx.user.isDefined) {
+		  <td>@if(ctx.user.isDefined) {
 		    <a href="/p/@p.id.get/hp/edit/@hp._1.id.get" title="@Messages("homepage.edit")"><i class="icon-pencil"></i></a>
 		    <a href="/p/@p.id.get/hp/delete/@hp._1.id.get" title="@Messages("homepage.delete")"><i class="icon-trash"></i></a>
-		  </td>
 		  }
+		  @lastModificationIcon(hp._1)
+		  </td>
 		</tr>
 	  }
 	  @if(ctx.user.isDefined) {

@@ -1,3 +1,9 @@
+@**
+* List the addresses of a person p.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-14
+*@
 @(orgForm: Form[Organization])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -11,14 +17,14 @@
 	  @inputHidden(orgForm("id")) 
 	  @inputText(orgForm("name"), '_label -> Messages("organization.name"))
 	  @select(orgForm("gender"), 
-              Seq(("m" -> Messages("organization.gender.male")), ("f" -> Messages("organization.gender.female")), "g" -> Messages("organization.gender.mixed")),
+              Seq(("m" -> Messages("organization.gender.m")), ("f" -> Messages("organization.gender.f")), "g" -> Messages("organization.gender.g")),
               '_label -> Messages("organization.selGender")
         )
 	  @inputDate(orgForm("founded"), '_label -> Messages("organization.founded"))
 	  @inputDate(orgForm("refounded"), '_label -> Messages("organization.refounded"))
 	  @inputText(orgForm("motto"), '_label -> Messages("organization.motto"))
 	  @inputText(orgForm("colors"), '_label -> Messages("organization.colors"))
-	  @inputText(orgForm("url"), '_label -> Messages("organization.url"))
+	  @inputText(orgForm("city"), '_label -> Messages("organization.city"))
       @createModifyFormPart(orgForm)
       @submitResetCancel()
 	}

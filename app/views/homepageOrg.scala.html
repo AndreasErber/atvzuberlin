@@ -1,12 +1,18 @@
+@**
+* List the homepages of an organization o.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-13
+*@
 @(o: Organization, hps: List[(Homepage, OrgHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import helper.twitterBootstrap._
 @import play.api.Logger
 
 @main(Messages("homepage")) {
-    @Logger.debug("Rendering homepages")
+    @Logger.debug("Rendering homepages of organization " + o.name)
 	<h2>@Messages("homepages.of") @o.name</h2>
 	@homepageOrgTable(o, hps)
-	<a href="/organization/@o.id">@Messages("organization.details")</a>
-	@Logger.debug("Done rendering homepages")
+	@linkToOrgDetails(o)
+	@Logger.debug("Done rendering homepages of organization " + o.name)
 }

@@ -11,6 +11,7 @@
 	  <a data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
 	}
 	<a href="/persons" title="@Messages("person.list")"><i class="icon-th-list"></i></a>
+	@lastModificationIcon(p)
 	
 	<h4>@Messages("person.details")</h4>
 	<p>
@@ -21,10 +22,10 @@
 	</p>
 	
 	<h4>@Messages("addresses")</h4>
-	@adrTable(p, "p", adrs)
+	@adrTable(p, adrs)
 	
 	<h4>@Messages("phone")</h4>
-	@phoneTable(p, "p", ps)
+	@phoneTable(p, ps)
 	
 	<h4>@Messages("email")</h4>
 	@emailTable(p, es)
