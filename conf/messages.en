@@ -95,8 +95,13 @@ homepage.delete = Delete
 homepage.descr = Description
 homepage.edit = Edit
 homepage.url = URL
+homepages.of = Homepages of
 
 imprint = Imprint
+
+last.modification = Last Modification
+
+link.external = External Link
 
 login = Login
 login.form = Authenticate by logging in
@@ -108,18 +113,22 @@ login.failed = Incorrect user name or password.
 logout = Logout
 
 news = News
+news.add = Add News
 news.by = by
 news.author = Author
 news.content = Content
 news.form = Add News
 news.lead = Abstract
 news.modified = modified
-news.read.more = read more ...
+news.read.more = More ...
 news.title = Title
+
+ok = OK
 
 organization = Organization
 organizations = Organizations 
 organization.add = Add Organization
+organization.city = City
 organization.colors = Colors
 organization.delete = Delete Organization
 organization.edit = Edit Organization
@@ -134,7 +143,6 @@ organization.motto = Motto
 organization.name = Name
 organization.refounded = Refounded
 organization.submit = Submit
-organization.url = Homepage
 organization.view = View Details
 
 person = Person
@@ -194,16 +202,20 @@ registration.selPerson = Select associated person.
 registration.selPerson.default = <--- Select a person --->
 registration.selRole = Select a user role.
 
+required = Required
+
 submit = Save
 
 success.succeededToDeleteAddress = Address successfully deleted.
 success.succeededToDeleteEmail = Email successfully deleted.
+success.succeededToDeleteHomepage = Homepage successfully deleted.
 success.succeededToDeleteOrg = Organization was successfully deleted.
 success.succeededToDeletePerson = Person was successfully deleted.
 success.succeededToDeletePhone = Phone was successfully deleted.
 success.succeededToStoreAddress = Address successfully stored.
 success.succeededToStoreEmail = Email was successfully stored.
 success.succeededToStoreEvent = Event was successfully stored.
+success.succeededToStoreHomepage = Homepage was successfully stored.
 success.succeededToStoreNews = News were successfully stored.
 success.succeededToStoreOrg = Organization was successfully stored.
 success.succeededToStorePhone = Phone number was successfully stored.
@@ -220,3 +232,15 @@ user.logged.in = Currently Logged in User
 user.log.out = Log out User
 
 welcome = Welcome to ATV zu Berlin
+
+wysihtml5.bold = Bold
+wysihtml5.img = Insert Image
+wysihtml5.indent = Indent
+wysihtml5.italic = Italic
+wysihtml5.link = Insert Link
+wysihtml5.ol = Ordered List
+wysihtml5.outdent = Outdent
+wysihtml5.placholder = Enter text ...
+wysihtml5.ul = Unordered List
+wysihtml5.underline = Underline
+wysihtml5.underline.icon = U

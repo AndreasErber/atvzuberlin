@@ -96,8 +96,13 @@ homepage.delete = Löschen
 homepage.descr = Beschreibung
 homepage.edit = Bearbeiten
 homepage.url = URL
+homepages.of = Homepages von
 
 imprint = Impressum
+
+last.modification = Letzte Änderung
+
+link.external = Externer Link
 
 login = Anmeldung
 login.form = Authentifizierung durch Anmeldung
@@ -109,17 +114,21 @@ login.failed = Benutzername oder Passwort ist falsch.
 logout = Abmelden
 
 news = Neuigkeiten
+news.add = Neuigkeit eingeben
 news.by = geschrieben von
 news.content = Inhalt
 news.form = Neuigkeit hinzufügen
 news.lead = Zusammenfassung
-news.modified = geändert am
-news.read.more = weiter lesen ...
+news.modified = zuletzt geändert am
+news.read.more = Mehr ...
 news.title = Titel
+
+ok = OK
 
 organization = Organisation
 organizations = Organisationen
 organization.add = Organisation hinzufügen
+organization.city = Stadt
 organization.colors = Farben
 organization.delete = Organisation löschen
 organization.details = Organisationsdetails
@@ -134,7 +143,6 @@ organization.motto = Wahlspruch
 organization.name = Name
 organization.refounded = Wiedergegründet
 organization.submit = Organisation eintragen
-organization.url = Homepage
 organization.view = Details ansehen
 
 person = Person
@@ -200,16 +208,20 @@ registration.selPerson = Wählen Sie die zugehörige Person
 registration.selPerson.default = <--- Person auswählen --->
 registration.selRole = Rolle des Benutzers wählen
 
+required = Pflichtfeld
+
 submit = Speichern
 
 success.succeededToDeleteAddress = Die Adresse wurde gelöscht.
 success.succeededToDeleteEmail = Die E-Mail-Adresse wurde gelöscht.
+success.succeededToDeleteHomepage = Die Homepage wurde gelöscht.
 success.succeededToDeleteOrg = Die Organisation wurde gelöscht.
 success.succeededToDeletePerson = Die Person wurde gelöscht.
 success.succeededToDeletePhone = Die Telefonnummer wurde gelöscht.
 success.succeededToStoreAddress = Die Adresse wurde gespeichert.
 success.succeededToStoreEmail = Die E-Mail-Adresse wurde gespeichert.
 success.succeededToStoreEvent = Die Veranstaltung wurde gespeichert.
+success.succeededToStoreHomepage = Die Homepage wurde gespeichert.
 success.succeededToStoreNews = Die Neuigkeit wurde gespeichert.
 success.succeededToStoreOrg = Die Organisation wurde gespeichert.
 success.succeededToStorePhone = Die Telefonnummer wurde gespeichert.
@@ -227,3 +239,15 @@ user.logged.in = Eingeloggter Benutzer
 user.log.out = Ausloggen des Benutzers
 
 welcome = Willkommen beim ATV zu Berlin
+
+wysihtml5.bold = fett
+wysihtml5.img = Bild einfügen
+wysihtml5.indent = Einrücken
+wysihtml5.italic = kursiv
+wysihtml5.link = Link einfügen
+wysihtml5.ol = Aufzählung
+wysihtml5.outdent = Ausrücken
+wysihtml5.placholder = Text eingeben ...
+wysihtml5.ul = Liste
+wysihtml5.underline = unterstrichen
+wysihtml5.underline.icon = U 
