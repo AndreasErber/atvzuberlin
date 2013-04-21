@@ -1,5 +1,16 @@
 about = About
 
+academicTitle = Academic Title
+academicTitles = Academic Titles
+academicTitle.abbr = Abbreviation
+academicTitle.add = Add Academic Title
+academicTitle.delete = Delete Academic Title
+academicTitle.edit = Edit Academic Title
+academicTitle.femaleForm = Female Form
+academicTitle.list = List of Academic Titles
+academicTitle.maleForm = Male Form
+academicTitle.view = View Academic Title
+
 actions = Options
 
 address = Address
@@ -54,6 +65,7 @@ error.failedToLoadUpcomingEventsList = Failed to load list of upcoming events.
 error.failedToLoadUsagetype = Failed to load usage type with ID {0}.
 error.failedToLoadUserRole = Failed to load user role with ID {0}.
 error.failedToParseDate = Failed to parse date. Wrong format: {0}.
+error.failedToStoreAcademicTitle = Failed to store academic title.
 error.failedToStoreAddress = Failed to store address.
 error.failedToStoreEmail = Failed to store email.
 error.failedToStoreEvent = Failed to store event.
@@ -212,6 +224,7 @@ success.succeededToDeleteHomepage = Homepage successfully deleted.
 success.succeededToDeleteOrg = Organization was successfully deleted.
 success.succeededToDeletePerson = Person was successfully deleted.
 success.succeededToDeletePhone = Phone was successfully deleted.
+success.succeededToStoreAcademicTitle = Academic Title was successfully stored.
 success.succeededToStoreAddress = Address successfully stored.
 success.succeededToStoreEmail = Email was successfully stored.
 success.succeededToStoreEvent = Event was successfully stored.
