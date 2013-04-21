@@ -16,7 +16,7 @@ import scalaz.Validation
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-20
+ * @version 0.0.2, 2013-04-21
  */
 case class AcademicTitle(
   override val id: Option[Long] = None,
@@ -109,6 +109,17 @@ object AcademicTitle {
       Success(Query(AcademicTitles).list)
     } catch {
       case e: Throwable => Failure(e)
+    }
+  }
+
+  def getPersonTitles(p: Person): Validation[Throwable, List[AcademicTitle]] = db withSession {
+    require(Option(p).isDefined)
+    val phts = PersonHasTitle.getAllForPerson(p)
+    if (phts.isSuccess) {
+    	val titles = for (pht <- phts.toOption.get) yield (AcademicTitle.load(pht.tid).get)
+    	Success(titles)
+    } else {
+      Failure(phts.fail.toOption.get)
     }
   }
   

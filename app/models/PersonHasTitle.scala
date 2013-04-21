@@ -20,7 +20,7 @@ import util.MembersPrivate
 
 /**
  * @author andreas
- * @verson 0.0.1, 2013-04-20
+ * @verson 0.0.2, 2013-04-21
  */
 case class PersonHasTitle(pid: Long, tid: Long, pos: Int)
 
@@ -38,29 +38,34 @@ object PersonHasTitle {
    *  @param at The {@link AcademicTitle} the {@link Person} <em>p</em> owns.
    *  @returns A {@link Validation} of the newly created {@link PersonHasTitle} or a {@link Throwable} in case of error.
    */
-  def add(p: Person, at: AcademicTitle): Validation[Throwable, PersonHasTitle] = {
+  def add(p: Person, at: AcademicTitle): Validation[Throwable, PersonHasTitle] = db withSession {
 
     require(Option(p).isDefined && Option(at).isDefined)
-    val phts = getAllForPerson(p)
-    if (phts.isSuccess) {
-      if (!phts.toOption.get.isEmpty) {
-        for (pht <- phts.toOption.get) {
-          pht match {
-            case PersonHasTitle(p.id, at.id, _) =>
-              return Failure(new RuntimeException("Person already has this title set"))
+    try {
+      val phts = getAllForPerson(p)
+      if (phts.isSuccess) {
+        if (!phts.toOption.get.isEmpty) {
+          for (pht <- phts.toOption.get) {
+            pht match {
+              case PersonHasTitle(p.id, at.id, _) =>
+                return Failure(new RuntimeException("Person already has this title set"))
+              case _ =>
+            }
           }
         }
+        // here, the list was either empty or no match was found
+        try {
+          val pht = PersonHasTitle(p.id.get, at.id.get, phts.toOption.get.length + 1)
+          PersonHasTitles.insert(pht)
+          Success(pht)
+        } catch {
+          case e: Throwable => Failure(e)
+        }
+      } else {
+        Failure(phts.fail.toOption.get)
       }
-      // here, the list was either empty or no match was found
-      try {
-        val pht = PersonHasTitle(p.id.get, at.id.get, phts.toOption.get.length + 1)
-        PersonHasTitles.insert(pht)
-        Success(pht)
-      } catch {
-        case e: Throwable => Failure(e)
-      }
-    } else {
-      Failure(phts.fail.toOption.get)
+    } catch {
+      case e: Throwable => Failure(e)
     }
   }
 
