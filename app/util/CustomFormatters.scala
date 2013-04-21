@@ -14,13 +14,32 @@ import java.sql.Timestamp
 import models.Country
 import java.text.ParseException
 import play.api.i18n.Messages
+import models.AcademicTitle
 
 /**
  * @author andreas
- * @version 0.1.1, 2013-03-30
+ * @version 0.1.2, 2013-04-21
  */
 object CustomFormatters {
 
+  /**
+   * Maps an {@link AcademicTitle} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val academicTitleFormatter = new Formatter[AcademicTitle] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[AcademicTitle].either(AcademicTitle.load(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadUsagetype", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, at: AcademicTitle) = Map(key -> at.id.toString())
+  }
+  
   /**
    * Maps a user instance to its username and vice versa.
    */
