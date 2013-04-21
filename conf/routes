@@ -52,7 +52,7 @@ GET   /o/:oid/address/edit/:id    controllers.AddressCtrl.editOrgAdr(oid: Long, 
 POST  /o/:oid/address/edit        controllers.AddressCtrl.submitOrgAdr(oid: Long)
 GET   /o/:oid/address             controllers.AddressCtrl.showOrgAdr(oid: Long)
 
-# Address
+# Person Address
 GET   /p/:pid/address/new         controllers.AddressCtrl.createPersonAdr(pid: Long)
 GET   /p/:pid/address/delete/:id  controllers.AddressCtrl.deletePersonAdr(pid: Long, id: Long)
 GET   /p/:pid/address/edit/:id    controllers.AddressCtrl.editPersonAdr(pid: Long, id: Long)
@@ -103,7 +103,7 @@ GET   /p/:pid/at/edit             controllers.AcademicTitleCtrl.addPersonTitle(p
 GET   /p/:pid/at/edit/:id         controllers.AcademicTitleCtrl.editPersonTitle(pid: Long, id: Long)
 POST  /p/:pid/at/edit             controllers.AcademicTitleCtrl.submitPersonTitle(pid: Long)
 
-
+# Persons
 GET   /persons                    controllers.PersonCtrl.list
 GET   /person/new                 controllers.PersonCtrl.create
 POST  /person/new                 controllers.PersonCtrl.submit
@@ -111,6 +111,12 @@ GET   /person/delete/:id          controllers.PersonCtrl.delete(id: Long)
 GET   /person/edit/:id            controllers.PersonCtrl.edit(id: Long)
 POST  /person/                    controllers.PersonCtrl.updatePerson
 GET   /person/:id                 controllers.PersonCtrl.show(id: Long)
+
+# Persons Additional Information
+GET   /pai/:pid/new               controllers.PersonAdditionalInfoCtrl.create(pid: Long)
+GET   /pai/:pid/edit              controllers.PersonAdditionalInfoCtrl.edit(pid: Long)
+POST  /pai/submit                 controllers.PersonAdditionalInfoCtrl.submit
+
 
 # Academic Titles
 GET   /ats                        controllers.AcademicTitleCtrl.list
