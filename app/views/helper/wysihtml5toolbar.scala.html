@@ -2,9 +2,35 @@
 <ul id="wysihtml5-toolbar" class="wysihtml5-toolbar" style="display: none;">
   <li>
     <div class="btn-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-font"></i> <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li>
+          <a data-wysihtml5-command="formatBlock" data-wysihtml5-command-value="div">@Messages("wysihtml5.div")</a>
+        </li>
+        <li>
+          <a data-wysihtml5-command="formatBlock" data-wysihtml5-command-value="h2">@Messages("wysihtml5.h2")</a>
+        </li>
+        <li>
+          <a data-wysihtml5-command="formatBlock" data-wysihtml5-command-value="h3">@Messages("wysihtml5.h3")</a>
+        </li>
+        <li>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="btn-group">
       <a class="btn" data-wysihtml5-command="bold" title="@Messages("wysihtml5.bold")"><i class="icon-bold"></i></a>
       <a class="btn" data-wysihtml5-command="italic" title="@Messages("wysihtml5.italic")"><i class="icon-italic"></i></a>
       <a class="btn" data-wysihtml5-command="underline" title="@Messages("wysihtml5.underline")"><u>@Messages("wysihtml5.underline.icon")</u></a>
+    </div>
+  </li>
+  
+  <li>
+    <div class="btn-group">
+      <a class="btn" data-wysihtml5-command="foreColor" data-wysihtml5-command-value="yellow" title="@Messages("wysihtml5.yellow")"><img src="/assets/images/color-yellow.png" height="16" width="16"/></a>
+      <a class="btn" data-wysihtml5-command="foreColor" data-wysihtml5-command-value="red" title="@Messages("wysihtml5.red")"><img src="/assets/images/color-red.png" height="16" width="16"/></a>
+      <a class="btn" data-wysihtml5-command="foreColor" data-wysihtml5-command-value="green" title="@Messages("wysihtml5.green")"><img src="/assets/images/color-green.png" height="16" width="16"/></a>
+      <a class="btn" data-wysihtml5-command="foreColor" data-wysihtml5-command-value="blue" title="@Messages("wysihtml5.blue")"><img src="/assets/images/color-blue.png" height="16" width="16"/></a>
     </div>
   </li>
   

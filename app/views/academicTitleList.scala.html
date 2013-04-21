@@ -1,0 +1,44 @@
+@(ats: Seq[AcademicTitle])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("academicTitles")) {
+
+	<h1>@{if(ats.size == 1) Messages("academicTitle") else Messages("academicTitles")}</h1>
+	<table class="table table-striped table-hover">
+	  <thead>
+	    <tr>
+	      <th>@Messages("academicTitle.abbr")</th>
+	      <th>@Messages("academicTitle.maleForm")</th>
+	      <th>@Messages("academicTitle.femaleForm")</th>
+	      <th>@Messages("actions")</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  @ats.map { at =>
+	    <tr>
+	      <td>
+	        @at.abbr
+	      </td>
+	      <td>
+	        @at.maleForm
+          </td>
+  	      <td>@at.femaleForm</td>
+          <td> 
+            <a href="/ate/@at.id.get" title="@Messages("academicTitle.view")"><i class="icon-eye-open"></i></a>
+          @if(ctx.user.isDefined) {
+            <a href="/at/edit/@at.id.get" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
+            <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @at.id.get"><i class="icon-trash"></i></a>
+          }
+          </td>
+        </tr>
+	  }
+	  @if(ctx.user.isDefined) {
+	    <tr>
+	      <td colspan="4"><a href="/at/new" title="@Messages("academicTitle.add")"><i class="icon-plus"></i></a> ...</td>
+	    </tr>
+	  }
+	  </tbody>
+	</table>
+	
+@deleteConfirmation("academicTitle")
+}

@@ -14,7 +14,7 @@
 		@inputText(personForm("firstname"), '_label -> Messages("person.firstname"))
 		@inputText(personForm("nickname"), '_label -> Messages("person.nickname"))
 		@inputDate(personForm("birth"), '_label -> (Messages("person.birth") + " (" + Messages("person.birth.date.format") + ")"))
-		@inputDate(personForm("birth"), '_label -> (Messages("person.death") + " (" + Messages("person.death.date.format") + ")"))
+		@inputDate(personForm("death"), '_label -> (Messages("person.death") + " (" + Messages("person.death.date.format") + ")"))
 		@select(personForm("gender"), 
               Seq(("m" -> Messages("person.gender.m")), ("f" -> Messages("person.gender.f"))),
               '_label -> Messages("person.selGender")

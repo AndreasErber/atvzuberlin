@@ -1,0 +1,21 @@
+@(atForm: Form[AcademicTitle])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Atv
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("academicTitle")) {
+    @Logger.debug("Rendering academicTitle form")
+	<h1>@Messages("academicTitle")</h1>
+	@form(routes.EventCtrl.submit) {
+	  @inputHidden(atForm("id")) 
+	  @inputText(atForm("abbr"), '_label -> Messages("academicTitle.abbr"))
+	  @inputText(atForm("maleForm"), '_label -> Messages("academicTitle.maleForm"))
+	  @inputText(atForm("femaleForm"), '_label -> Messages("academicTitle.femaleForm"))
+      @createModifyFormPart(atForm)
+      @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering event form")
+}

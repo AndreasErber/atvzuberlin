@@ -1,19 +1,36 @@
-@(p: Person, adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(p: Person, ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 
 @main(Messages("person.details")) {
+    <table class="table">
+      
+      @if(ctx.user.isDefined) {
+      	<tr>
+      	@if(!ts.isEmpty) {
+          <td>
+            @ts(1)
+          </td>
+          <td>
+	        <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
+            <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
+          </td>
+        }
+        </tr>
+	  }
+	  
+	</table>
 	<h2>@(p.name)</h2>
 	@if(p.nickname.isDefined) {
 	<h3><em>@p.nickname.getOrElse("")</em></h3>
 	}
-	@if(ctx.user.isDefined) {
-	  <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
-	  <a data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
-	}
-	<a href="/persons" title="@Messages("person.list")"><i class="icon-th-list"></i></a>
-	@lastModificationIcon(p)
-	
-	<h4>@Messages("person.details")</h4>
+	<div class="pull-right">
+      @if(ctx.user.isDefined) {
+	    <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
+        <a data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
+	  }
+	  <a href="/persons" title="@Messages("person.list")"><i class="icon-th-list"></i></a>
+	  @lastModificationIcon(p)
+	</div>
 	<p>
 	  <i class="icon-star"></i> @if(p.birth.isDefined) { @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.birth.get)}} else { @Messages("unknown") }
 	  <br/>

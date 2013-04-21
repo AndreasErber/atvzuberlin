@@ -73,18 +73,17 @@ GET   /p/:pid/email/edit/:id      controllers.EmailCtrl.editPersonEmail(pid: Lon
 POST  /p/:pid/email/edit          controllers.EmailCtrl.submitPersonEmail(pid: Long)
 
 # Homepage
-GET   /o/:oid/hp/show          controllers.HomepageCtrl.showOrgHomepage(oid: Long)
-GET   /o/:oid/hp/delete/:id    controllers.HomepageCtrl.deleteOrgHomepage(oid: Long, id: Long)
-GET   /o/:oid/hp/edit          controllers.HomepageCtrl.createOrgHomepage(oid: Long)
-GET   /o/:oid/hp/edit/:id      controllers.HomepageCtrl.editOrgHomepage(oid: Long, id: Long)
-POST  /o/:oid/hp/edit          controllers.HomepageCtrl.submitOrgHomepage(oid: Long)
+GET   /o/:oid/hp/show             controllers.HomepageCtrl.showOrgHomepage(oid: Long)
+GET   /o/:oid/hp/delete/:id       controllers.HomepageCtrl.deleteOrgHomepage(oid: Long, id: Long)
+GET   /o/:oid/hp/edit             controllers.HomepageCtrl.createOrgHomepage(oid: Long)
+GET   /o/:oid/hp/edit/:id         controllers.HomepageCtrl.editOrgHomepage(oid: Long, id: Long)
+POST  /o/:oid/hp/edit             controllers.HomepageCtrl.submitOrgHomepage(oid: Long)
 
-GET   /p/:pid/hp/show          controllers.HomepageCtrl.showPersonHomepage(pid: Long)
-GET   /p/:pid/hp/delete/:id    controllers.HomepageCtrl.deletePersonHomepage(pid: Long, id: Long)
-GET   /p/:pid/hp/edit          controllers.HomepageCtrl.createPersonHomepage(pid: Long)
-GET   /p/:pid/hp/edit/:id      controllers.HomepageCtrl.editPersonHomepage(pid: Long, id: Long)
-POST  /p/:pid/hp/edit          controllers.HomepageCtrl.submitPersonHomepage(pid: Long)
-
+GET   /p/:pid/hp/show             controllers.HomepageCtrl.showPersonHomepage(pid: Long)
+GET   /p/:pid/hp/delete/:id       controllers.HomepageCtrl.deletePersonHomepage(pid: Long, id: Long)
+GET   /p/:pid/hp/edit             controllers.HomepageCtrl.createPersonHomepage(pid: Long)
+GET   /p/:pid/hp/edit/:id         controllers.HomepageCtrl.editPersonHomepage(pid: Long, id: Long)
+POST  /p/:pid/hp/edit             controllers.HomepageCtrl.submitPersonHomepage(pid: Long)
 
 # Phone
 GET   /o/:oid/phone/show          controllers.PhoneCtrl.showOrgPhone(oid: Long)
@@ -99,6 +98,12 @@ GET   /p/:pid/phone/edit          controllers.PhoneCtrl.createPersonPhone(pid: L
 GET   /p/:pid/phone/edit/:id      controllers.PhoneCtrl.editPersonPhone(pid: Long, id: Long)
 POST  /p/:pid/phone/edit          controllers.PhoneCtrl.submitPersonPhone(pid: Long)
 
+GET   /p/:pid/at/delete/:id       controllers.AcademicTitleCtrl.deletePersonTitle(pid: Long, id: Long)
+GET   /p/:pid/at/edit             controllers.AcademicTitleCtrl.addPersonTitle(pid: Long)
+GET   /p/:pid/at/edit/:id         controllers.AcademicTitleCtrl.editPersonTitle(pid: Long, id: Long)
+POST  /p/:pid/at/edit             controllers.AcademicTitleCtrl.submitPersonTitle(pid: Long)
+
+
 GET   /persons                    controllers.PersonCtrl.list
 GET   /person/new                 controllers.PersonCtrl.create
 POST  /person/new                 controllers.PersonCtrl.submit
@@ -107,6 +112,13 @@ GET   /person/edit/:id            controllers.PersonCtrl.edit(id: Long)
 POST  /person/                    controllers.PersonCtrl.updatePerson
 GET   /person/:id                 controllers.PersonCtrl.show(id: Long)
 
+# Academic Titles
+GET   /ats                     controllers.AcademicTitleCtrl.list
+GET   /at/new                  controllers.AcademicTitleCtrl.create
+GET   /at/delete/:id           controllers.AcademicTitleCtrl.delete(id: Long)
+GET   /at/edit/:id             controllers.AcademicTitleCtrl.edit(id: Long)
+POST  /at/edit                 controllers.AcademicTitleCtrl.submit
+GET   /at/:id                  controllers.AcademicTitleCtrl.show(id: Long)
 
 GET   /registration               controllers.UserCtrl.showRegistrationForm
 POST  /registration               controllers.UserCtrl.register

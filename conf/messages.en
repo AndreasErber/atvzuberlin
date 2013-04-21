@@ -233,7 +233,12 @@ user.log.out = Log out User
 
 welcome = Welcome to ATV zu Berlin
 
+wysihtml5.blue = Blue Text
 wysihtml5.bold = Bold
+wysihtml5.div = Standard
+wysihtml5.green = Green Text
+wysihtml5.h2 = Level 2 Heading
+wysihtml5.h3 = Level 3 Heading
 wysihtml5.img = Insert Image
 wysihtml5.indent = Indent
 wysihtml5.italic = Italic
@@ -241,6 +246,8 @@ wysihtml5.link = Insert Link
 wysihtml5.ol = Ordered List
 wysihtml5.outdent = Outdent
 wysihtml5.placholder = Enter text ...
+wysihtml5.red = Red Text
 wysihtml5.ul = Unordered List
 wysihtml5.underline = Underline
 wysihtml5.underline.icon = U
+wysihtml5.yellow = Yellow Text
