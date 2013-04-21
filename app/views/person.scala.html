@@ -1,24 +1,28 @@
-@(p: Person, ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(p: Person, ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)], hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 
 @main(Messages("person.details")) {
-    <table class="table">
+    
       
       @if(ctx.user.isDefined) {
-      	<tr>
+      	
       	@if(!ts.isEmpty) {
-          <td>
-            @ts(1)
-          </td>
-          <td>
-	        <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
-            <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
-          </td>
+      	<div class="pull-right">
+	      <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
+          <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
+          <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.add")"><i class="icon-plus-sign"></i></a>
+        </div>
+   		<p>
+          @Html(ts.map(x => "<abbr title=\"" + (if (p.gender == 'm') x.maleForm.get else x.femaleForm.get) + "\">" + x.abbr + "</abbr>").mkString(", "))
+        </p>
+        } else {
+        <div class="pull-right">
+          <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.add")"><i class="icon-plus-sign"></i></a> ...
+        </div>
         }
-        </tr>
 	  }
 	  
-	</table>
+	
 	<h2>@(p.name)</h2>
 	@if(p.nickname.isDefined) {
 	<h3><em>@p.nickname.getOrElse("")</em></h3>
@@ -38,14 +42,10 @@
 	  @Messages("person.gender"): @Messages("person.gender." + p.gender)
 	</p>
 	
-	<h4>@Messages("addresses")</h4>
 	@adrTable(p, adrs)
-	
-	<h4>@Messages("phone")</h4>
 	@phoneTable(p, ps)
-	
-	<h4>@Messages("email")</h4>
 	@emailTable(p, es)
+	@homepageTable(p, hps)
 	
 @deleteConfirmation("person")
 }

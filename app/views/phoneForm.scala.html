@@ -1,3 +1,9 @@
+@**
+* Form to enter or modify the phone number of a {@link Person} identified by <em>pid</em>.
+*
+* @author andreas
+* @version 0.0.5, 2013-04-21
+*@
 @(phoneForm: Form[(Phone, util.UsageType, util.Privacy)], countries: Seq[Country], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger

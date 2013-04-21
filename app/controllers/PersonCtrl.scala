@@ -14,10 +14,13 @@ import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import models.Address
 import models.Phone
+import models.AcademicTitle
+import models.PersonHasTitle
+import models.Homepage
 
 /**
  * @author andreas
- * @version 0.2.1, 2013-03-25
+ * @version 0.2.2, 2013-04-21
  */
 object PersonCtrl extends Controller with ProvidesCtx with Security {
 
@@ -100,13 +103,17 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           Logger.logger.debug("No person with ID " + id + " found."); NotFound
         case Some(pers) =>
           Logger.logger.debug("Found person with ID " + id + ".")
+          val tList = AcademicTitle.getPersonTitles(pers)
+          val titles = if (tList.isSuccess) tList.toOption.get else Nil
           val alist = Address.getPersonAddresses(pers)
           val adrs = if (alist.isSuccess) alist.toOption.get else Nil
           val plist = Phone.getPersonPhones(pers)
           val phones = if (plist.isSuccess) plist.toOption.get else Nil
           val elist = Email.getPersonEmails(pers)
           val emails = if (elist.isSuccess) elist.toOption.get else Nil
-          Ok(views.html.person(pers, adrs, phones, emails))
+          val hpList = Homepage.getPersonHomepages(pers)
+          val hps = if (hpList.isSuccess) hpList.toOption.get else Nil
+          Ok(views.html.person(pers, titles, adrs, phones, emails, hps))
         case _ => NotFound
       }
   }

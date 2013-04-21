@@ -12,7 +12,7 @@
 	  <tbody>
 	  @for(hp <- hps) {
 		<tr>
-		  <td><a href="@hp._1.url">@hp._1.url</a></td>
+		  <td><a href="@hp._1.url" title="@Messages("link.external"): @hp._1.descr.getOrElse("")">@hp._1.url</a></td>
 		  <td>@hp._1.descr.getOrElse("")</td>
 		  <td>@Messages("usagetype." + hp._2.usage)</td>
 		  <td>@if(ctx.user.isDefined) {
