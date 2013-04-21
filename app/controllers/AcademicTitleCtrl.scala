@@ -21,6 +21,12 @@ import util.CustomFormatters
  */
 object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
 
+  implicit val personFormatter = CustomFormatters.personFormatter
+  val personMapping = of[Person]
+
+  implicit val titleFormatter = CustomFormatters.academicTitleFormatter
+  val titleMapping = of[AcademicTitle]
+
   val titleForm = Form[AcademicTitle] {
     mapping(
       "id" -> optional(longNumber),
@@ -32,17 +38,28 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       "modified" -> optional(longNumber),
       "modifier" -> optional(text))(AcademicTitle.apply)(AcademicTitle.unapply)
   }
-  
-  val personTitleForm = Form[(Person, AcademicTitle)] {
-    mapping(
-        )
+
+  val titlePersonForm = Form[AcademicTitle] {
+    "atid" -> titleMapping
+  }
+
+  def addPersonTitle(pid: Long) = isAuthenticated { username =>
+    implicit request =>
+      val p = Person.load(pid)
+      val titles = AcademicTitle.getAll
+      if (titles.isSuccess) {
+        Ok(views.html.academicTitlePersonForm(titlePersonForm, titles.toOption.get, pid))
+      } else {
+        Logger.debug("Failed to load list of titles.", titles.fail.toOption.get)
+        Ok(views.html.academicTitlePersonForm(titlePersonForm, Nil, pid))
+      }
   }
 
   def create = isAuthenticated { username =>
     implicit request =>
       Ok(views.html.academicTitleForm(titleForm))
   }
-  
+
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
       val result = AcademicTitle.delete(id)
@@ -53,6 +70,12 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
         Logger.error(result.toString(), result.fail.toOption.get)
         Redirect(routes.AcademicTitleCtrl.list).flashing(("error" -> Messages("error.failedToDeleteAcademicTitle")))
       }
+  }
+
+  def deletePersonTitle(pid: Long, id: Long) = isAuthenticated { username =>
+    implicit request =>
+      // @FIXME 
+      Redirect(routes.PersonCtrl.show(pid))
   }
 
   def edit(id: Long) = isAuthenticated { username =>
@@ -67,7 +90,22 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
         case _ => NotFound
       }
   }
-  
+
+  def editPersonTitle(pid: Long, id: Long) = isAuthenticated { username =>
+    implicit request =>
+      val at = AcademicTitle.load(id)
+      val titles = AcademicTitle.getAll
+      if (!at.isDefined) {
+        Logger.error("Failed to load academic title with ID " + id + ". Academic title with that ID does not exist")
+        Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> "Failed to load academic title.")
+      } else if (titles.isFailure) {
+        Logger.error("Failed to load academic titles.", titles.fail.toOption.get)
+        Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> "Failed to load list of academic titles.")
+      } else {
+        Ok(views.html.academicTitlePersonForm(titlePersonForm.fill(at.get), titles.toOption.get, pid))
+      }
+  }
+
   def list = Action { implicit request =>
     val result = AcademicTitle.getAll
     if (result.isSuccess) {
@@ -84,7 +122,7 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       Ok(views.html.academicTitleList(List())).flashing("error" -> Messages("error.failedToLoadAcademicTitlesList"))
     }
   }
-  
+
   def show(id: Long) = Action { implicit request =>
     val result = AcademicTitle.load(id)
     result match {
@@ -94,12 +132,12 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
         Logger.logger.debug("Found academic title with ID " + id + ".")
         val req = Ok(views.html.academicTitle(at))
         if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
-      } else {
-        req
-      }
+          req.flashing(("error" -> flash.get("error").get))
+        } else if (flash.get("success").isDefined) {
+          req.flashing(("success" -> flash.get("success").get))
+        } else {
+          req
+        }
       case _ => NotFound
     }
   }
@@ -118,7 +156,40 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
             Redirect(routes.AcademicTitleCtrl.show(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStoreAcademicTitle"))
           } else {
             Logger.error(result.toString(), result.fail.toOption.get)
-            BadRequest(views.html.academicTitleForm(titleForm)).flashing("error"-> Messages("error.failedToStoreAcademicTitle"))
+            BadRequest(views.html.academicTitleForm(titleForm)).flashing("error" -> Messages("error.failedToStoreAcademicTitle"))
+          }
+        })
+  }
+
+  def submitPersonTitle(pid: Long) = isAuthenticated { username =>
+    implicit request =>
+      titlePersonForm.bindFromRequest.fold(
+        errors => {
+          Logger.error("An error occurred when trying to process the academic title person form.")
+          for (err <- errors.errors) {
+            Logger.error(err.key + " - " + err.message)
+          }
+          val result = AcademicTitle.getAll
+          if (result.isSuccess) {
+            BadRequest(views.html.academicTitlePersonForm(errors, result.toOption.get, pid))
+          } else {
+            BadRequest(views.html.academicTitlePersonForm(errors, Nil, pid))
+          }
+        },
+        at => {
+          val p = Person.load(pid)
+          if (!p.isDefined) {
+        	  Logger.error("Failed to load person with ID " + pid)
+        	  Redirect(routes.PersonCtrl.list).flashing("error" -> Messages("error.failedToLoadPerson", pid))
+          } else {
+            Logger.debug("Storing academic title with ID " + at.id + " for person " + p.get.name)
+            val result = PersonHasTitle.add(p.get, at)
+            if (result.isSuccess) {
+              Redirect(routes.PersonCtrl.show(p.get.id.get)).flashing("success" -> Messages("success.succeededToStoreAcademicTitle"))
+            } else {
+              Logger.error(result.toString(), result.fail.toOption.get)
+              Redirect(routes.PersonCtrl.show(p.get.id.get)).flashing("error" -> Messages("error.failedToStoreAcademicTitle"))
+            }
           }
         })
   }
