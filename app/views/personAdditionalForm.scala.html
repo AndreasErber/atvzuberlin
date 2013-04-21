@@ -1,0 +1,22 @@
+@(paiForm: Form[PersonAdditionalInfo])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main("personAI") {
+    @Logger.debug("Rendering person additional form ")
+	<h2>@Messages("personAI")</h2>
+	@form(routes.PersonAdditionalInfoCtrl.submit) { 
+		@inputHidden(paiForm("id")) 
+		@inputText(paiForm("formOfAddress"), '_label -> Messages("personAI.formOfAddress"))
+		@inputText(paiForm("letterSalutation"), '_label -> Messages("personAI.letterSalutation"))
+		@inputDate(paiForm("enlistment"), '_label -> (Messages("personAI.enlistment") + " (" + Messages("personAI.enlistment.date.format") + ")"))
+		@inputDate(paiForm("withdrawal"), '_label -> (Messages("personAI.withdrawal") + " (" + Messages("personAI.withdrawal.date.format") + ")"))
+		@inputText(paiForm("profession"), '_label -> Messages("personAI.profession"))
+		@inputText(paiForm("employer"), '_label -> Messages("personAI.employer"))
+	    @createModifyFormPart(paiForm)
+		@submitResetCancel()
+	}
+	@Logger.debug("Done rendering person additional form")
+}

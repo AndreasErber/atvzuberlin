@@ -2,10 +2,7 @@
 @import helper._
 
 @main(Messages("person.details")) {
-    
-      
       @if(ctx.user.isDefined) {
-      	
       	@if(!ts.isEmpty) {
       	<div class="pull-right">
 	      <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
@@ -21,7 +18,6 @@
         </div>
         }
 	  }
-	  
 	
 	<h2>@(p.name)</h2>
 	@if(p.nickname.isDefined) {
@@ -41,6 +37,12 @@
 	  @if(p.death.isDefined) { &dagger; @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.death.get)}<br/>}
 	  @Messages("person.gender"): @Messages("person.gender." + p.gender)
 	</p>
+	
+	@if(ctx.user.isDefined) {
+	<div class="pull-right">
+          <a href="/pai/@p.id.get/new" title="@Messages("personAI.add")"><i class="icon-plus-sign"></i></a> ...
+    </div>
+    }
 	
 	@adrTable(p, adrs)
 	@phoneTable(p, ps)

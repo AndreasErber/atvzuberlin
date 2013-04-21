@@ -4,10 +4,9 @@
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
-@main("Person") {
+@main("person") {
     @Logger.debug("Rendering person form " + personForm)
-	<h1>Person</h1>
-	<h2>Angaben zur Person</h2>
+	<h2>@Messages("person")</h2>
 	@form(routes.PersonCtrl.updatePerson) { 
 		@inputHidden(personForm("id")) 
 		@inputText(personForm("lastname"), '_label -> Messages("person.lastname"))
@@ -20,8 +19,7 @@
               '_label -> Messages("person.selGender")
         )
 	    @createModifyFormPart(personForm)
-		<input type="submit" class="btn btn-primary" value="@Messages("person.submit")" />
-		<input type="reset" class="btn" value="@Messages("reset")" />
+		@submitResetCancel()
 	}
 	@Logger.debug("Done rendering person form")
 }

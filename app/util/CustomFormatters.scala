@@ -18,10 +18,47 @@ import models.AcademicTitle
 
 /**
  * @author andreas
- * @version 0.1.2, 2013-04-21
+ * @version 0.1.3, 2013-04-21
  */
 object CustomFormatters {
 
+  /**
+   * Maps an {@link LetterSalutation} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val letterSalutationFormatter = new Formatter[LetterSalutation] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[LetterSalutation].either(Bbr.getLetterSalutation(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadLetterSalutation", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, ls: LetterSalutation) = Map(key -> ls.id.toString())
+  }
+  
+  /**
+   * Maps an {@link FormOfAddress} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val formOfAddressFormatter = new Formatter[FormOfAddress] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[FormOfAddress].either(Mr.getFormOfAddress(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadFormOfAddress", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, foa: FormOfAddress) = Map(key -> foa.id.toString())
+  }
+  
+  
   /**
    * Maps an {@link AcademicTitle} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
@@ -32,7 +69,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
         Exception.allCatch[AcademicTitle].either(AcademicTitle.load(id.toInt).get).left.map {
-          e => Seq(FormError(key, Messages("error.failedToLoadUsagetype", id), Nil))
+          e => Seq(FormError(key, Messages("error.failedToLoadAcademicTitle", id), Nil))
         }
       }
     }
