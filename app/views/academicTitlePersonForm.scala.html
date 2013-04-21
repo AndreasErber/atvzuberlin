@@ -1,0 +1,26 @@
+@**
+* Select an {@link AcademicTitle} in this form.
+*
+* @author andreas
+* @version 0.0.1, 2013-04-21
+*@
+@(f: Form[AcademicTitle], titles: Seq[AcademicTitle], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Atv
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("academicTitle")) {
+    @Logger.debug("Rendering academic title form")
+	<h1>@Messages("academicTitle")</h1>
+	@form(routes.AcademicTitleCtrl.submitPersonTitle(pid)) {
+	  @select(f("atid"), 
+              titles.map{t => t.id.get.toString -> t.abbr.toString},
+              '_label -> Messages("academicTitle.abbr")
+        )
+      @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering academic title form")
+}

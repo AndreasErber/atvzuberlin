@@ -1,3 +1,9 @@
+@**
+* Enter or modify an {@link AcademicTitle} in this form.
+*
+* @author andreas
+* @version 0.0.2, 2013-04-21
+*@
 @(atForm: Form[AcademicTitle])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -6,9 +12,9 @@
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
 @main(Messages("academicTitle")) {
-    @Logger.debug("Rendering academicTitle form")
+    @Logger.debug("Rendering academic title form")
 	<h1>@Messages("academicTitle")</h1>
-	@form(routes.EventCtrl.submit) {
+	@form(routes.AcademicTitleCtrl.submit) {
 	  @inputHidden(atForm("id")) 
 	  @inputText(atForm("abbr"), '_label -> Messages("academicTitle.abbr"))
 	  @inputText(atForm("maleForm"), '_label -> Messages("academicTitle.maleForm"))
@@ -17,5 +23,5 @@
       @submitResetCancel()
 	}
 	
-	@Logger.debug("Done rendering event form")
+	@Logger.debug("Done rendering academic title form")
 }
