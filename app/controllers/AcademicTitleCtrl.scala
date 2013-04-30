@@ -17,7 +17,7 @@ import util.CustomFormatters
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-21
+ * @version 0.0.4, 2013-04-28
  */
 object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
 
@@ -33,6 +33,7 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       "abbr" -> nonEmptyText,
       "maleForm" -> optional(text),
       "femaleForm" -> optional(text),
+      "isPrefix" -> boolean,
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
@@ -43,6 +44,11 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
     "atid" -> titleMapping
   }
 
+  /**
+   * Display a form to add an {@link AcademicTitle} to a {@link Person} identified by <em>pid</em>
+   *
+   * @param pid Identifier of the person to provide the form to select a title to add.
+   */
   def addPersonTitle(pid: Long) = isAuthenticated { username =>
     implicit request =>
       val p = Person.load(pid)
@@ -55,11 +61,19 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       }
   }
 
+  /**
+   * Display a form to create a new {@link AcademicTitle}.
+   */
   def create = isAuthenticated { username =>
     implicit request =>
       Ok(views.html.academicTitleForm(titleForm))
   }
 
+  /**
+   * Remove the {@link AcademicTitle} identified by <em>id</em>.
+   *
+   * @param id Identifier of the {@link AcademicTitle} to remove.
+   */
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
       val result = AcademicTitle.delete(id)
@@ -72,12 +86,23 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       }
   }
 
+  /**
+   * Remove the relation between an {@link AcademicTitle} and a {@link Person}
+   *
+   * @param pid Identifier of the {@link Person} involved.
+   * @param id Identifier of the {@link AcademicTitle} involved.
+   */
   def deletePersonTitle(pid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
       // @FIXME 
       Redirect(routes.PersonCtrl.show(pid))
   }
 
+  /**
+   * Display a form to modify an existing {@link AcademicTitle} instance.
+   *
+   * @param id Identifier of the {@link AcademicTitle} to load into the form.
+   */
   def edit(id: Long) = isAuthenticated { username =>
     implicit request =>
       val e = AcademicTitle.load(id)
@@ -91,6 +116,12 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       }
   }
 
+  /**
+   * Display a form to modify the relation between a {@link Person} and an {@link AcademicTitle}.
+   *
+   * @param pid Identifier of the {@link Person} involved
+   * @param id Identifier of the current {@link AcademicTitle} involved
+   */
   def editPersonTitle(pid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
       val at = AcademicTitle.load(id)
@@ -106,6 +137,9 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
       }
   }
 
+  /**
+   * Display the list of all existing {@link AcademicTitle}.
+   */
   def list = Action { implicit request =>
     val result = AcademicTitle.getAll
     if (result.isSuccess) {
@@ -123,11 +157,17 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
     }
   }
 
+  /**
+   * Display the details of the {@link AcademicTitle} identified by <em>id</em>
+   *
+   * @param id Identifier of the {@link AcademicTitle} to be display in detail.
+   */
   def show(id: Long) = Action { implicit request =>
     val result = AcademicTitle.load(id)
     result match {
       case None =>
-        Logger.logger.debug("No academic title with ID " + id + " found."); NotFound
+        Logger.logger.debug("No academic title with ID " + id + " found.")
+        NotFound
       case Some(at) =>
         Logger.logger.debug("Found academic title with ID " + id + ".")
         val req = Ok(views.html.academicTitle(at))
@@ -142,11 +182,17 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
     }
   }
 
+  /**
+   * Handle the form data that was entered by the user to create a new or modify an existing {@link AcademicTitle}.
+   */
   def submit = isAuthenticated { username =>
     implicit request =>
       titleForm.bindFromRequest.fold(
         errors => {
           Logger.error("An error occurred when trying to process the academic title form.")
+          for (err <- errors.errors) {
+            Logger.error(err.key + " - " + err.message)
+          }
           BadRequest(views.html.academicTitleForm(errors))
         },
         at => {
@@ -161,6 +207,11 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
         })
   }
 
+  /**
+   * Handle the form data that was submitted to create a new or modify an existing relation between a {@link Person} and an {@link AcademicTitle}.
+   *
+   * @param pid Identifier of the {@link Person} involved.
+   */
   def submitPersonTitle(pid: Long) = isAuthenticated { username =>
     implicit request =>
       titlePersonForm.bindFromRequest.fold(
@@ -173,17 +224,19 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             BadRequest(views.html.academicTitlePersonForm(errors, result.toOption.get, pid))
           } else {
+            Logger.error(result.toString(), result.fail.toOption.get)
             BadRequest(views.html.academicTitlePersonForm(errors, Nil, pid))
           }
         },
         at => {
           val p = Person.load(pid)
           if (!p.isDefined) {
-        	  Logger.error("Failed to load person with ID " + pid)
-        	  Redirect(routes.PersonCtrl.list).flashing("error" -> Messages("error.failedToLoadPerson", pid))
+            Logger.error("Failed to load person with ID " + pid)
+            Redirect(routes.PersonCtrl.list).flashing("error" -> Messages("error.failedToLoadPerson", pid))
           } else {
             Logger.debug("Storing academic title with ID " + at.id + " for person " + p.get.name)
             val result = PersonHasTitle.add(p.get, at)
+            // display the person in detail
             if (result.isSuccess) {
               Redirect(routes.PersonCtrl.show(p.get.id.get)).flashing("success" -> Messages("success.succeededToStoreAcademicTitle"))
             } else {

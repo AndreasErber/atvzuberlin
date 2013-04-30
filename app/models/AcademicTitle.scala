@@ -16,13 +16,14 @@ import scalaz.Validation
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-21
+ * @version 0.0.3, 2013-04-26
  */
 case class AcademicTitle(
   override val id: Option[Long] = None,
   val abbr: String,
   val maleForm: Option[String],
   val femaleForm: Option[String],
+  val isPrefix: Boolean = true,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -165,13 +166,14 @@ object AcademicTitles extends Table[AcademicTitle](AcademicTitle.tablename) {
   def abbr = column[String]("abbr")
   def maleForm = column[String]("maleForm", O.Nullable)
   def femaleForm = column[String]("femaleForm", O.Nullable)
+  def isPrefix = column[Boolean]("isPrefix")
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ abbr ~ maleForm.? ~ femaleForm.? ~ created ~ creator ~ modified.? ~ modifier.? <> (AcademicTitle.apply _, AcademicTitle.unapply _)
+  def * = id.? ~ abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? <> (AcademicTitle.apply _, AcademicTitle.unapply _)
 
-  def withoutId = abbr ~ maleForm.? ~ femaleForm.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (at: AcademicTitle) => withoutId.insert(at.abbr, at.maleForm, at.femaleForm, at.created, at.creator, at.modified, at.modifier)
+  def withoutId = abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix  ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def insert = (at: AcademicTitle) => withoutId.insert(at.abbr, at.maleForm, at.femaleForm, at.isPrefix, at.created, at.creator, at.modified, at.modifier)
   def update(at: AcademicTitle): Int = AcademicTitles.where(_.id === at.id).update(at.copy(modified = Some(System.currentTimeMillis())))
 }

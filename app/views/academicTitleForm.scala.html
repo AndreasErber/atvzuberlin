@@ -19,7 +19,12 @@
 	  @inputText(atForm("abbr"), '_label -> Messages("academicTitle.abbr"))
 	  @inputText(atForm("maleForm"), '_label -> Messages("academicTitle.maleForm"))
 	  @inputText(atForm("femaleForm"), '_label -> Messages("academicTitle.femaleForm"))
+	  @inputRadioGroup(atForm("isPrefix"),
+          options = options("true" -> Messages("academicTitle.isPrefix.true"), "false" -> Messages("academicTitle.isPrefix.false")),
+          '_label -> Messages("academicTitle.isPrefix"), '_class -> "radio inline", '_help -> "")
+      
       @createModifyFormPart(atForm)
+      <br/>
       @submitResetCancel()
 	}
 	

@@ -42,6 +42,15 @@
         @at.femaleForm
         </td>
       </tr>
+      
+      <tr>
+        <th>
+          @Messages("academicTitle.isPrefix")
+        </th>
+        <td>
+        @{if (at.isPrefix) Messages("academicTitle.isPrefix.true") else Messages("academicTitle.isPrefix.false")}
+        </td>
+      </tr>
     </tbody>
   </table>
 
