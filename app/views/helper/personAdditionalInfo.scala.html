@@ -1,0 +1,18 @@
+@**
+* Display the additional information for a person.
+*
+* @author andreas
+* @version 0.0.1, 2013-04-28
+*@
+@(pai: PersonAdditionalInfo)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import util.StandardUser
+@import java.text.SimpleDateFormat
+  <p>
+  @if(ctx.user.isDefined && ctx.user.get.role != StandardUser) {
+    pai.formOfAddress.toString, pai.letterSalutation.toString
+  }
+  @Messages("personAI.enlistment"): @pai.enlistmentFormatted(new SimpleDateFormat("dd.MM.yyyy"))<br/>
+  @Messages("personAI.withdrawal"): @pai.withdrawalFormatted(new SimpleDateFormat("dd.MM.yyyy"))<br/>
+  @Messages("personAI.profession"): @pai.profession.getOrElse("")<br/>
+  @Messages("personAI.employer"): @pai.employer.getOrElse("")
+  </p>

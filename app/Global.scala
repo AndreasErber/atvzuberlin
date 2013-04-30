@@ -30,10 +30,11 @@ import models.PersonHasHomepages
 import models.PersonAdditionalInfos
 import models.AcademicTitles
 import models.PersonHasTitles
+import models.Enrollments
 
 /**
  * @author andreas
- * @version 0.0.8, 2013-04-20
+ * @version 0.0.9, 2013-04-28
  */
 object Global extends GlobalSettings {
 
@@ -164,6 +165,12 @@ object Global extends GlobalSettings {
       
       try {
     	  PersonHasTitles.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+    	  Enrollments.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }

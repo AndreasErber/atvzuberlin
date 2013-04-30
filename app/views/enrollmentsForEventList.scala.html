@@ -1,0 +1,26 @@
+@(es: Seq[(Enrollment, Person)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+	<h2>@{if(es.size == 1) Messages("es") else Messages("es")}</h2>
+	<table>
+      <thead>
+        <tr>
+          <th>@Messages("enrollment.list.name")</th>
+          <th>@Messages("enrollment.list.nickname")</th>
+          <th>@Messages("enrollment.numberOfAdults")</th>
+          <th>@Messages("enrollment.numberOfKids")</th>
+          <th>@Messages("enrollment.list.status")</th>
+        </tr>
+      </thead>
+      <tbody>
+	@es.map { e =>
+	    <tr>
+	      <td>@e._2.name</td>
+	      <td>@e._2.nickname</td>
+	      <td>@e._1.numberOfAdults</td>
+	      <td>@e._1.numberOfKids</td>
+	      <td>@Messages("enrollment.confirmed." + e._1.confirmed)</td>
+	    </tr>
+	}
+	  </tbody>
+    </table>	
