@@ -117,7 +117,6 @@ GET   /pai/:pid/new               controllers.PersonAdditionalInfoCtrl.create(pi
 GET   /pai/:pid/edit              controllers.PersonAdditionalInfoCtrl.edit(pid: Long)
 POST  /pai/submit                 controllers.PersonAdditionalInfoCtrl.submit
 
-
 # Academic Titles
 GET   /ats                        controllers.AcademicTitleCtrl.list
 GET   /at/new                     controllers.AcademicTitleCtrl.create
@@ -125,6 +124,14 @@ GET   /at/delete/:id              controllers.AcademicTitleCtrl.delete(id: Long)
 GET   /at/edit/:id                controllers.AcademicTitleCtrl.edit(id: Long)
 POST  /at/edit                    controllers.AcademicTitleCtrl.submit
 GET   /at/:id                     controllers.AcademicTitleCtrl.show(id: Long)
+
+# Enrollments
+GET   /event/:eid/enrs            controllers.EnrollmentCtrl.listForEvent(eid: Long)
+GET   /person/:pid/enrs           controllers.EnrollmentCtrl.listForPerson(pid: Long)
+GET   /event/:eid/enr/new         controllers.EnrollmentCtrl.create(eid: Long)
+GET   /enr/delete/:id             controllers.EnrollmentCtrl.delete(id: Long)
+GET   /enr/edit/:id               controllers.EnrollmentCtrl.edit(id: Long)
+POST  /enr/edit                   controllers.EnrollmentCtrl.submit
 
 GET   /registration               controllers.UserCtrl.showRegistrationForm
 POST  /registration               controllers.UserCtrl.register

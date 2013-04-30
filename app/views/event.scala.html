@@ -67,6 +67,11 @@
         </td>
       </tr>
       }
+      <tr>
+        <td colspan="2" class="enroll">
+          <span style="cursor: pointer;" onclick="$.get('/event/@e.id/enr/new', function(data) { $('td.enroll').html(data); });">Anmelden ...</span>
+        </td>
+      </tr>
     </tbody>
   </table>
 

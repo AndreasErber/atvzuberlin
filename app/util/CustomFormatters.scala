@@ -15,15 +15,34 @@ import models.Country
 import java.text.ParseException
 import play.api.i18n.Messages
 import models.AcademicTitle
+import models.Event
 
 /**
  * @author andreas
- * @version 0.1.3, 2013-04-21
+ * @version 0.1.4, 2013-04-28
  */
 object CustomFormatters {
 
   /**
-   * Maps an {@link LetterSalutation} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps an {@link Event} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val eventFormatter = new Formatter[Event] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[Event].either(Event.load(id.toLong).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadEvent", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, e: Event) = Map(key -> e.id.get.toString())
+  }
+
+  /**
+   * Maps a {@link LetterSalutation} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val letterSalutationFormatter = new Formatter[LetterSalutation] {
 
@@ -41,7 +60,7 @@ object CustomFormatters {
   }
   
   /**
-   * Maps an {@link FormOfAddress} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a {@link FormOfAddress} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val formOfAddressFormatter = new Formatter[FormOfAddress] {
 
