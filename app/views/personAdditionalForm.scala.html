@@ -1,6 +1,14 @@
+@**
+* Edit additional person information.
+*
+* @author andreas
+* @version 0.0.1, 2013-04-28
+*@
 @(paiForm: Form[PersonAdditionalInfo])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
+@import util.Mr
+@import util.Bbr
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -9,8 +17,13 @@
 	<h2>@Messages("personAI")</h2>
 	@form(routes.PersonAdditionalInfoCtrl.submit) { 
 		@inputHidden(paiForm("id")) 
-		@inputText(paiForm("formOfAddress"), '_label -> Messages("personAI.formOfAddress"))
-		@inputText(paiForm("letterSalutation"), '_label -> Messages("personAI.letterSalutation"))
+		@select(paiForm("formOfAddress"), 
+              Mr.getFormsOfAddresses().map{foa => foa.id.toString -> foa.name},
+              '_label -> Messages("personAI.formOfAddress")
+        )
+		@select(paiForm("letterSalutation"),
+		      Bbr.getLetterSalutations().map{ls => ls.id.toString -> ls.name}, 
+		      '_label -> Messages("personAI.letterSalutation"))
 		@inputDate(paiForm("enlistment"), '_label -> (Messages("personAI.enlistment") + " (" + Messages("personAI.enlistment.date.format") + ")"))
 		@inputDate(paiForm("withdrawal"), '_label -> (Messages("personAI.withdrawal") + " (" + Messages("personAI.withdrawal.date.format") + ")"))
 		@inputText(paiForm("profession"), '_label -> Messages("personAI.profession"))

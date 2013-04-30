@@ -11,7 +11,7 @@ import play.api.mvc.Security._
 
 /**
  * @author andreas
- *
+ * @version 0.0.1, 2013-04-28
  */
 trait Security {
 

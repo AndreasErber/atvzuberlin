@@ -18,10 +18,12 @@ import util.LetterSalutation
 import java.sql.Date
 import util.Mr
 import util.Bbr
+import java.text.DateFormat
+import java.util.Calendar
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-20
+ * @version 0.0.2, 2013-04-28
  */
 case class PersonAdditionalInfo(
     private val pid: Long,
@@ -34,7 +36,26 @@ case class PersonAdditionalInfo(
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
-    override val modifier: Option[String] = None) extends Entity(Some(pid), created, creator, modified, modifier)
+    override val modifier: Option[String] = None) extends Entity(Some(pid), created, creator, modified, modifier) {
+  
+  def enlistmentFormatted(df: DateFormat): String = {
+    require(Option(df).isDefined)
+    val cal = Calendar.getInstance()
+    if (this.enlistment.isDefined) {
+      cal.setTimeInMillis(this.enlistment.get.getTime())
+      df.format(cal.getTime())
+    } else ""
+  }
+  
+  def withdrawalFormatted(df: DateFormat): String = {
+    require(Option(df).isDefined)
+    val cal = Calendar.getInstance()
+    if (this.withdrawal.isDefined) {
+      cal.setTimeInMillis(this.withdrawal.get.getTime())
+      df.format(cal.getTime())
+    } else ""
+  }
+}
 
 object PersonAdditionalInfo {
   implicit lazy val db = Database.forDataSource(DB.getDataSource())

@@ -1,4 +1,4 @@
-@(p: Person, ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)], hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(p: Person, pai: Option[PersonAdditionalInfo], ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)], hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 
 @main(Messages("person.details")) {
@@ -19,7 +19,7 @@
         }
 	  }
 	
-	<h2>@(p.name)</h2>
+	<h2 data-toggle="tooltip" data-placement="top" title="edit">@(p.name)</h2>
 	@if(p.nickname.isDefined) {
 	<h3><em>@p.nickname.getOrElse("")</em></h3>
 	}
@@ -38,12 +38,16 @@
 	  @Messages("person.gender"): @Messages("person.gender." + p.gender)
 	</p>
 	
-	@if(ctx.user.isDefined) {
+	@if(ctx.user.isDefined && !pai.isDefined) {
 	<div class="pull-right">
           <a href="/pai/@p.id.get/new" title="@Messages("personAI.add")"><i class="icon-plus-sign"></i></a> ...
     </div>
-    }
-	
+    } else {
+    <div class="pull-right">
+          <a href="/pai/@p.id.get/edit" title="@Messages("personAI.edit")"><i class="icon-pencil"></i></a> ...
+    </div>
+	@personAdditionalInfo(pai.get)
+	}
 	@adrTable(p, adrs)
 	@phoneTable(p, ps)
 	@emailTable(p, es)

@@ -17,6 +17,7 @@ import models.Phone
 import models.AcademicTitle
 import models.PersonHasTitle
 import models.Homepage
+import models.PersonAdditionalInfo
 
 /**
  * @author andreas
@@ -103,6 +104,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           Logger.logger.debug("No person with ID " + id + " found."); NotFound
         case Some(pers) =>
           Logger.logger.debug("Found person with ID " + id + ".")
+          val pai = PersonAdditionalInfo.load(id)
           val tList = AcademicTitle.getPersonTitles(pers)
           val titles = if (tList.isSuccess) tList.toOption.get else Nil
           val alist = Address.getPersonAddresses(pers)
@@ -113,7 +115,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           val emails = if (elist.isSuccess) elist.toOption.get else Nil
           val hpList = Homepage.getPersonHomepages(pers)
           val hps = if (hpList.isSuccess) hpList.toOption.get else Nil
-          Ok(views.html.person(pers, titles, adrs, phones, emails, hps))
+          Ok(views.html.person(pers, pai, titles, adrs, phones, emails, hps))
         case _ => NotFound
       }
   }
