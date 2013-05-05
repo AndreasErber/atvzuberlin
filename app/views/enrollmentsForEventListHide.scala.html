@@ -1,0 +1,5 @@
+@(eid: Long, size: Int)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@size 
+        <span class="pull-right" style="cursor: pointer;" onclick="$.get('/event/@eid/enrs/list', function(data) { $('td.event-participants').html(data); });">
+        <i class="icon-arrow-down" title="@Messages("event.participants.show") ..."></i>
+        </span>

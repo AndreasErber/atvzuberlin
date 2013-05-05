@@ -18,6 +18,8 @@ import util.EventType
 import java.sql.Date
 import java.sql.Timestamp
 import play.api.i18n.Messages
+import models.Enrollment
+import play.api.templates.Html
 /**
  * @author andreas
  * @version 0.0.4, 2013-03-16
@@ -60,7 +62,7 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
         Logger.error(result.toString(), result.fail.toOption.get)
         Redirect(routes.EventCtrl.listUpcoming).flashing(("error" -> Messages("error.failedToDeletePerson")))
       }
-      
+
   }
 
   def edit(id: Long) = isAuthenticated { username =>
@@ -94,21 +96,25 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
     }
   }
 
-  def show(id: Long) = Action { implicit request =>
+  def show(id: Long, showEnrs: Boolean = false) = Action { implicit request =>
     val e = Event.load(id)
     e match {
       case None =>
         Logger.logger.debug("No event with ID " + id + " found."); NotFound
       case Some(ev) =>
         Logger.logger.debug("Found event with ID " + id + ".")
-        val req = Ok(views.html.event(ev))
+        val participants = Enrollment.loadByEvent(id)
+        var req = Ok(views.html.event(ev, Nil, None, None))
+        if (participants.isSuccess) {
+          req = Ok(views.html.event(ev, participants.toOption.get, None, None, showEnrs))
+        } 
         if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
-      } else {
-        req
-      }
+          req.flashing(("error" -> flash.get("error").get))
+        } else if (flash.get("success").isDefined) {
+          req.flashing(("success" -> flash.get("success").get))
+        } else {
+          req
+        }
       case _ => NotFound
     }
   }
@@ -124,10 +130,10 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
           Logger.debug("Storing event " + event)
           val result = Event.saveOrUpdate(event)
           if (result.isSuccess) {
-            Redirect(routes.EventCtrl.show(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStoreEvent"))
+            Redirect(routes.EventCtrl.show(result.toOption.get.id.get, false)).flashing("success" -> Messages("success.succeededToStoreEvent"))
           } else {
             Logger.error(result.toString(), result.fail.toOption.get)
-            BadRequest(views.html.eventForm(eventForm)).flashing("error"-> Messages("error.failedToStoreEvent"))
+            BadRequest(views.html.eventForm(eventForm)).flashing("error" -> Messages("error.failedToStoreEvent"))
           }
         })
   }

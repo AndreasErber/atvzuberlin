@@ -14,6 +14,7 @@ import controllers.ext.Security
 import util.CustomFormatters
 import models.{ Enrollment, Event, Person }
 import scalaz.Success
+import java.sql.Timestamp
 
 /**
  * @author andreas
@@ -47,14 +48,18 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         val event = Event.load(eid)
         if (event.isDefined) {
-          Ok(views.html.enrollmentForm(enrollmentForm.bind(Map("event" -> event.get.id.get.toString)).discardingErrors, result.toOption.get))
+          val participants = Enrollment.loadByEvent(eid)
+          val pers = if (participants.isSuccess) {
+            removeEnrolledFromPersonList(result.toOption.get, participants.toOption.get)
+          } else result.toOption.get
+          Ok(views.html.enrollmentForm(enrollmentForm.bind(Map("event" -> event.get.id.get.toString, "numberOfAdults" -> "1", "numberOfKids" -> "0")).discardingErrors, pers))
         } else {
           Logger.error("Could not find event with ID " + eid)
-          Redirect(routes.EventCtrl.show(eid)).flashing("error" -> Messages("error.failedToLoadEvent"))
+          Redirect(routes.EventCtrl.listUpcoming).flashing("error" -> Messages("error.failedToLoadEvent"))
         }
       } else {
         Logger.error(result.toString(), result.fail.toOption.get)
-        Redirect(routes.EventCtrl.show(eid)).flashing("error" -> Messages("error.failedToLoadPersonList"))
+        Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadPersonList"))
       }
   }
 
@@ -65,13 +70,18 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
    */
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
+      val enr = Enrollment.load(id)
+      var req = routes.EventCtrl.listUpcoming
+      if (enr.isSuccess){
+        req = routes.EventCtrl.show(enr.toOption.get.get.event, true)
+      }
       val result = Enrollment.delete(id)
       if (result.isSuccess) {
         Logger.debug("Successfully deleted enrollment with ID " + id + ".")
-        Redirect(routes.EventCtrl.listUpcoming).flashing(("success" -> Messages("success.succeededToDeleteEnrollment")))
+        Redirect(req).flashing(("success" -> Messages("success.succeededToDeleteEnrollment")))
       } else {
         Logger.error(result.toString(), result.fail.toOption.get)
-        Redirect(routes.EventCtrl.listUpcoming).flashing(("error" -> Messages("error.failedToDeleteEnrollment")))
+        Redirect(req).flashing(("error" -> Messages("error.failedToDeleteEnrollment")))
       }
   }
 
@@ -106,7 +116,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
     val event = Event.load(eid)
     val result = Enrollment.loadByEvent(eid)
     if (result.isSuccess) {
-      val req = Ok(views.html.enrollmentsForEventList(result.toOption.get.sortBy(e => e._1.created)))
+      val req = Ok(views.html.enrollmentsForEventList(eid, result.toOption.get.sortBy(e => e._1.created)))
       if (flash.get("error").isDefined) {
         req.flashing(("error" -> flash.get("error").get))
       } else if (flash.get("success").isDefined) {
@@ -116,9 +126,22 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
       }
     } else {
       Logger.error(result.toString(), result.fail.toOption.get)
-      Redirect(routes.EventCtrl.show(eid)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForEventList", event.get.title))
+      Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForEventList", event.get.title))
     }
   }
+  
+  def listForEventHide(eid: Long) = Action { implicit request =>
+    val result = Enrollment.loadByEvent(eid)
+    if (result.isSuccess) {
+      Ok(views.html.enrollmentsForEventListHide(eid, result.toOption.get.size))
+    } else {
+      Logger.error(result.toString(), result.fail.toOption.get)
+      val event = Event.load(eid)
+      val title: String = if (event.isDefined) event.get.title else eid.toString
+      Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForEventList", title))
+    }
+  }
+  
 
   /**
    * Display a list of {@link Enrollment}s to upcoming {@link Event}s a {@link Person} has.
@@ -154,29 +177,84 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
           for (err <- errors.errors) {
             Logger.error(err.key + " - " + err.message)
           }
-          val result = Person.getAll
-          if (result.isSuccess) {
-            BadRequest(views.html.enrollmentForm(errors, result.toOption.get))
+          val evId = errors.data.get("event").get.toInt
+          val ev = Event.load(evId)
+          val participants = Enrollment.loadByEvent(evId)
+          val pl = Person.getAll
+          if (ev.isDefined && participants.isSuccess && pl.isSuccess) {
+            val pers = Some(removeEnrolledFromPersonList(pl.toOption.get, participants.toOption.get))
+            BadRequest(views.html.event(ev.get, participants.toOption.get, Some(errors), pl.toOption))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
-            BadRequest(views.html.enrollmentForm(errors, Nil)).flashing("error" -> Messages("error.failedToLoadPersonList"))
+            if (!ev.isDefined) {
+              Logger.error("Failed to load event with ID " + evId + ".")
+              val el = Event.getAllUpcoming(new Timestamp(System.currentTimeMillis()))
+              if (el.isSuccess) {
+                BadRequest(views.html.eventList(el.toOption.get)).flashing("error" -> Messages("error.failedToLoadEvent", evId))
+              } else {
+                BadRequest(views.html.index("")).flashing("error" -> Messages("error.failedToLoadEvent", evId))
+              }
+            } else {
+              val parts = if (participants.isFailure) {
+                Logger.error(participants.toString(), participants.fail.toOption.get)
+                Nil
+              } else {
+                participants.toOption.get
+              }
+              val pers = if (pl.isFailure) {
+                Logger.error(pl.toString(), pl.fail.toOption.get)
+                None
+              } else {
+                // remove all participants that are already enrolled
+                Some(removeEnrolledFromPersonList(pl.toOption.get, parts))
+              }
+              BadRequest(views.html.event(ev.get, parts, Some(errors), pers)).flashing("error" -> Messages("error.failedToLoadPersonList"))
+            }
+
           }
         },
         e => {
           Logger.debug("Storing enrollment " + e)
           val result = Enrollment.saveOrUpdate(e)
           if (result.isSuccess) {
-            Redirect(routes.EnrollmentCtrl.listForEvent(result.toOption.get.event)).flashing("success" -> Messages("success.succeededToStoreEnrollment"))
+            Redirect(routes.EventCtrl.show(e.event, true)).flashing("success" -> Messages("success.succeededToStoreEnrollment"))
           } else {
             Logger.error(result.toString(), result.fail.toOption.get)
-            val res = Person.getAll
-            if (res.isSuccess) {
-              BadRequest(views.html.enrollmentForm(enrollmentForm, res.toOption.get)).flashing("error" -> Messages("error.failedToStoreEnrollment"))
+            val ev = Event.load(e.event)
+            val participants = Enrollment.loadByEvent(e.event)
+            val pl = Person.getAll
+            if (ev.isDefined && participants.isSuccess && pl.isSuccess) {
+              val pers = Some(removeEnrolledFromPersonList(pl.toOption.get, participants.toOption.get))
+              BadRequest(views.html.event(ev.get, participants.toOption.get, Some(enrollmentForm), pers)).flashing("error" -> Messages("error.failedToStoreEnrollment"))
             } else {
-              Logger.error(result.toString(), result.fail.toOption.get)
-              BadRequest(views.html.enrollmentForm(enrollmentForm, Nil)).flashing("error" -> Messages("error.failedToLoadPersonList"))
+              if (!ev.isDefined) {
+                Logger.error("Failed to load event with ID " + e.event + ".")
+                val el = Event.getAllUpcoming(new Timestamp(System.currentTimeMillis()))
+                if (el.isSuccess) {
+                  BadRequest(views.html.eventList(el.toOption.get)).flashing("error" -> Messages("error.failedToLoadEvent", e.event))
+                } else {
+                  BadRequest(views.html.index("")).flashing("error" -> Messages("error.failedToLoadEvent", e.event))
+                }
+              } else {
+                val parts = if (participants.isFailure) {
+                  Logger.error(participants.toString(), participants.fail.toOption.get)
+                  Nil
+                } else {
+                  participants.toOption.get
+                }
+                val pers = if (pl.isFailure) {
+                  Logger.error(pl.toString(), pl.fail.toOption.get)
+                  None
+                } else {
+                  // remove all participants that are already enrolled
+                  Some(removeEnrolledFromPersonList(pl.toOption.get, parts))
+                }
+                BadRequest(views.html.event(ev.get, parts, Some(enrollmentForm.fill(e)), pers)).flashing("error" -> Messages("error.failedToLoadPersonList"))
+              }
             }
           }
         })
   }
+
+  private def removeEnrolledFromPersonList(pl: List[Person], participants: List[(Enrollment, Person)]): List[Person] = 
+    for (p <- pl if !participants.unzip._2.contains(p)) yield p
 }

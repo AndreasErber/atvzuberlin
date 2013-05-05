@@ -25,7 +25,7 @@ GET   /event/new                  controllers.EventCtrl.create
 GET   /event/delete/:id           controllers.EventCtrl.delete(id: Long)
 GET   /event/edit/:id             controllers.EventCtrl.edit(id: Long)
 POST  /event/edit                 controllers.EventCtrl.submit
-GET   /event/:id                  controllers.EventCtrl.show(id: Long)
+GET   /event/:id/:showEnrs        controllers.EventCtrl.show(id: Long, showEnrs: Boolean)
 
 # News
 GET   /newslist                   controllers.NewsCtrl.list
@@ -126,7 +126,8 @@ POST  /at/edit                    controllers.AcademicTitleCtrl.submit
 GET   /at/:id                     controllers.AcademicTitleCtrl.show(id: Long)
 
 # Enrollments
-GET   /event/:eid/enrs            controllers.EnrollmentCtrl.listForEvent(eid: Long)
+GET   /event/:eid/enrs/list       controllers.EnrollmentCtrl.listForEvent(eid: Long)
+GET   /event/:eid/enrs/hide       controllers.EnrollmentCtrl.listForEventHide(eid: Long)
 GET   /person/:pid/enrs           controllers.EnrollmentCtrl.listForPerson(pid: Long)
 GET   /event/:eid/enr/new         controllers.EnrollmentCtrl.create(eid: Long)
 GET   /enr/delete/:id             controllers.EnrollmentCtrl.delete(id: Long)

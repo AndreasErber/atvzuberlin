@@ -1,26 +1,28 @@
-@(es: Seq[(Enrollment, Person)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(eid: Long, es: Seq[(Enrollment, Person)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
-
-	<h2>@{if(es.size == 1) Messages("es") else Messages("es")}</h2>
-	<table>
-      <thead>
-        <tr>
-          <th>@Messages("enrollment.list.name")</th>
-          <th>@Messages("enrollment.list.nickname")</th>
-          <th>@Messages("enrollment.numberOfAdults")</th>
-          <th>@Messages("enrollment.numberOfKids")</th>
-          <th>@Messages("enrollment.list.status")</th>
-        </tr>
-      </thead>
-      <tbody>
+  <span class="pull-right" style="cursor: pointer;" onclick="$.get('/event/@eid/enrs/hide', function(data) { $('td.event-participants').html(data); });">
+  <i class="icon-arrow-up" title="@Messages("event.participants.unshow") ..."></i>
+  </span>
+  @if(es.isEmpty) {
+  <p>@Messages("event.participants.empty")</p>
+  } else {
+  <ol>
 	@es.map { e =>
-	    <tr>
-	      <td>@e._2.name</td>
-	      <td>@e._2.nickname</td>
-	      <td>@e._1.numberOfAdults</td>
-	      <td>@e._1.numberOfKids</td>
-	      <td>@Messages("enrollment.confirmed." + e._1.confirmed)</td>
-	    </tr>
+	  <li>
+	    @e._2.name - <em>@e._2.nickname</em> (@e._1.numberOfAdults 
+	    @{if (e._1.numberOfAdults == 1) Messages("enrollment.adult") else Messages("enrollment.adults")},
+	    @if(e._1.numberOfKids > 0) { 
+	      @e._1.numberOfKids 
+	      @{if (e._1.numberOfKids == 1) Messages("enrollment.kid") else Messages("enrollment.kids")},
+	    } 
+	    @Messages("enrollment.confirmed." + e._1.confirmed))
+	    @if(ctx.user.isDefined) {
+	      <span style="cursor: pointer;" onclick="$.get('/enr/edit/@e._1.id.get', function(data) { $('td.event-enroll-form').html(data); });">
+        <i class="icon-pencil" title="@Messages("enrollment.edit")"></i>
+        </span>
+        <a href="/enr/delete/@e._1.id.get" title="@Messages("delete")"><i class="icon-trash"></i></a>
+	    }
+	  </li>
 	}
-	  </tbody>
-    </table>	
+	</ol>	
+  }

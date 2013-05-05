@@ -16,15 +16,15 @@ import scalaz.Success
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-28
+ * @version 0.0.3, 2013-05-05
  */
 case class Enrollment(override val id: Option[Long],
   val event: Long,
   val person: Long,
-  val numberOfAdults: Int,
-  val numberOfKids: Int,
-  val confirmed: Boolean,
-  val cancelled: Boolean,
+  val numberOfAdults: Int = 1,
+  val numberOfKids: Int = 0,
+  val confirmed: Boolean = false,
+  val cancelled: Boolean = false,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -93,7 +93,7 @@ object Enrollment {
    * @param id The identifier of the {@link Enrollment} to be removed.
    * @return <code>true</code> if the removal was successful, <code>false</code> otherwise.
    */
-  def delete(id: Long): Validation[Throwable, Boolean] = {
+  def delete(id: Long): Validation[Throwable, Boolean] = db withSession {
     try {
       val delCount = Query(Enrollments).filter(_.id === id).delete
       if (delCount > 0) Success(true) else Failure(new RuntimeException("Failed to delete enrollment with id " + id))

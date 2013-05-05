@@ -1,4 +1,4 @@
-@(e: Event)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(e: Event, es: Seq[(Enrollment, Person)], enr: Option[Form[Enrollment]], pl: Option[List[Person]], showEnr: Boolean = false)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.twitterBootstrap._
 @import helper.deleteConfirmation
 
@@ -10,9 +10,9 @@
       <h3>@e.title</h3>
       <span class="pull-right">
       @if(ctx.user.isDefined) {
-        <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
-        <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="icon-trash"></i></a>
-	  }
+      <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
+      <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="icon-trash"></i></a>
+	    }
 	    <a href="/events" title="@Messages("event.list")"><i class="icon-th-list"></i></a>
       </span>
     </caption>
@@ -21,7 +21,7 @@
     <tbody>
       @if(e.description.isDefined) {
       <tr>
-        <th>
+        <th width="30%">
           @Messages("event.description")
         </th>
   		<td>
@@ -68,8 +68,26 @@
       </tr>
       }
       <tr>
-        <td colspan="2" class="enroll">
-          <span style="cursor: pointer;" onclick="$.get('/event/@e.id/enr/new', function(data) { $('td.enroll').html(data); });">Anmelden ...</span>
+        <th>@Messages("event.participants")</th>
+        <td class="event-participants">
+          @if(showEnr) {
+          @views.html.enrollmentsForEventList(e.id.get, es)
+          } else {
+          @es.foldLeft(0)(_ + _._1.numberOfAdults) @Messages("enrollment.adults"), @es.foldLeft(0)(_ + _._1.numberOfKids) @Messages("enrollment.kids")  
+          <span class="pull-right" style="cursor: pointer;" onclick="$.get('/event/@e.id.get/enrs/list', function(data) { $('td.event-participants').html(data); });">
+          <i class="icon-arrow-down" title="@Messages("event.participants.show") ..."></i>
+          </span>
+        }
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="event-enroll-form">
+          @if(enr.isDefined) {
+            @views.html.enrollmentForm(enr.get, pl.get)
+          } else {
+          <span class="link-like" style="cursor: pointer;" onclick="$.get('/event/@e.id.get/enr/new', function(data) { $('td.event-enroll-form').html(data); });"><i class="icon-hand-up"></i> @Messages("event.enroll") ...</span>
+          }
         </td>
       </tr>
     </tbody>

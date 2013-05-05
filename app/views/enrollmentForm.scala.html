@@ -2,7 +2,7 @@
 * Form to enter or modify the {@link Enrollment} of a {@link Person} to an {@link Event}.
 *
 * @author andreas
-* @version 0.0.1, 2013-04-28
+* @version 0.0.2, 2013-05-04
 *@
 @(enrollmentForm: Form[Enrollment], persons: List[Person])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
@@ -16,7 +16,7 @@
 	  @inputHidden(enrollmentForm("event"))
 	  @select(enrollmentForm("person"), 
               persons.map{p => p.id.get.toString -> p.fullname},
-              '_label -> Messages("enrollment.person"),
+              '_label -> "",
               '_help -> "")
       @inputText(enrollmentForm("numberOfAdults"), '_label -> Messages("enrollment.numberOfAdults"), '_help -> "")
 	  @inputText(enrollmentForm("numberOfKids"), '_label -> Messages("enrollment.numberOfKids"), '_help -> "")

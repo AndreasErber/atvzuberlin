@@ -12,8 +12,8 @@
 	  @inputHidden(eventForm("id")) 
 	  @inputText(eventForm("title"), '_label -> Messages("event.title"))
 	  @inputText(eventForm("description"), '_label -> Messages("event.description"))
-	  @inputDate(eventForm("start"), '_label -> Messages("event.start"))
-	  @inputDate(eventForm("end"), '_label -> Messages("event.end"))
+	  @inputDate(eventForm("start"), '_label -> Messages("event.start.form"))
+	  @inputDate(eventForm("end"), '_label -> Messages("event.end.form"))
 	  @inputText(eventForm("location"), '_label -> Messages("event.location"))
 	  @inputText(eventForm("url"), '_label -> Messages("event.url"))
 	  @select(eventForm("priority"),
@@ -22,13 +22,12 @@
               '_label -> Messages("event.priority")
       )
 	  @select(eventForm("typus"), 
-              Atv.getEventTypes().map{et => et.id.toString -> et.name},
+              Atv.getEventTypes().map{et => et.id.toString -> Messages("event.typus." + et.name)},
               '_default -> ("<-- " + Messages("event.typus.select") + " -->"),
               '_label -> Messages("event.typus")
       )
       @createModifyFormPart(eventForm)
       @submitResetCancel()
 	}
-	
 	@Logger.debug("Done rendering event form")
 }
