@@ -8,21 +8,31 @@ import util.Ctx
 import display.Header
 import display.Menu
 import play.api.i18n.Messages
+import display.MenuItem
 
 /**
  * @author andreas
- *
+ * @version 0.0.3, 2013-06-29
  */
 trait ProvidesCtx {
 
   implicit def getCtxt[A](implicit request: Request[A]): Ctx = {
-    val menus = List(
-        Menu(Messages("persons"), "/persons", List()), 
-        Menu(Messages("program"), "/events", List()), 
-        Menu(Messages("organizations"), "/organizations", List()),
-        Menu(Messages("about"), "", List()),
-        Menu(Messages("imprint"), "", List())
-    )
-    Ctx(Header(), Some(menus))
+    val publicMenus = List(
+      Menu(Messages("about"), "/about",
+        List(
+          MenuItem(Messages("about"), "/about"),
+          MenuItem(Messages("house"), "/house"),
+          MenuItem(Messages("history"), "/history"))),
+      Menu(Messages("program"), "/events", List()),
+      Menu(Messages("sport"), "/sport", List()),
+      Menu(Messages("members"), "/members", List()),
+      Menu(Messages("organizations"), "/organizations", List()))
+
+    val privateMenus = List(
+      Menu(Messages("persons"), "/persons", List()),
+      Menu(Messages("documents"), "", List()),
+      Menu(Messages("organizations"), "/organizations", List()))
+
+    Ctx(Header(), Some(publicMenus), Some(privateMenus))
   }
 }
