@@ -44,7 +44,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
       .verifying(Messages("registration.error.password.too.short"), t => (t._2.length() > 8))
       .verifying(Messages("registration.error.password.confirmation.failed"), t => t._2 == t._3))
 
-  def index() = Action { implicit request =>
+  def displayLoginForm() = Action { implicit request =>
     Logger.logger.debug("Display login form")
     val req = Ok(views.html.login(Ctx.loginForm, None))
     if (flash.get("error").isDefined) {
@@ -56,6 +56,11 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     }
   }
 
+  def index() = Action { implicit request =>
+    Ok(views.html.index("Des is die Messetsch!"))
+
+  }
+
   /**
    * Trying to log in a user.
    */
@@ -64,23 +69,23 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     // binding will evaluate the credentials against the DB
     Ctx.loginForm.bindFromRequest.fold(
       hasErrors = { form =>
-        Logger.logger.error("Authentication failed.")
+        Logger.logger.error("Authentication of user '" + form.data.get("username").get + "' failed.")
         Redirect(routes.UserCtrl.index).withNewSession.flashing(Flash(form.data) + ("error" -> Messages("error.loginFailed")))
       },
       tuple => {
         val result = User.auth(tuple._1, tuple._2)
         if (result.isSuccess) {
           Logger.logger.debug("Authentication of user " + tuple._1 + " was successful!")
-          Redirect(routes.UserCtrl.index).withSession(Security.username -> tuple._1)
+          Redirect(getCtxt.referer.get).withSession(Security.username -> tuple._1).flashing("success" -> Messages("login.successful"))
         } else {
           Logger.logger.debug("Authentication of user " + tuple._1 + " failed!", result.fail.toOption.get)
-          Redirect(routes.UserCtrl.index).flashing("error" -> Messages("error.loginFailed"))
+          Redirect(routes.UserCtrl.displayLoginForm).flashing("error" -> Messages("error.loginFailed"))
         }
       })
   }
 
   def logout = Action { implicit request =>
-    Redirect(routes.UserCtrl.index).withNewSession
+    Redirect(getCtxt.referer.get).withNewSession.flashing("success" -> Messages("logout.successful"))
   }
 
   def showRegistrationForm = Action { implicit request =>
@@ -99,7 +104,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     Logger.logger.debug("Registering user ...")
     // binding will evaluate the credentials against the DB
     registrationForm.bindFromRequest.fold(
-      errors => { 
+      errors => {
         Logger.logger.error("Registration failed.")
         val req = BadRequest(views.html.register(errors, getUsernameSelection))
         if (errors.globalError.isDefined) {
