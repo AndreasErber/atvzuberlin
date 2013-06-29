@@ -10,13 +10,14 @@
     <head>
         <title>@title</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    	<link href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")" rel="stylesheet">
+    	  <link href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-wysihtml5.css")">
         <link href="@routes.Assets.at("stylesheets/atv.css")" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/bootstrap.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/bootstrap-dropdown.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/bootstrap-tooltip.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/bootstrap-wysihtml5-0.0.2.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/wysihtml5-0.3.0.js")" type="text/javascript"></script>
@@ -25,11 +26,11 @@
     <body>
     
       <!-- The page header -->
-      @header(ctx.menu)
+      @header(ctx.topMenu)
         
       <header class="jumbotron subhead" id="overview">
+        <br/><br/>
         <div class="container">
-        <br/>
           <h1>ATV zu Berlin</h1>
           <p class="lead">Mens sana in corpore sano</p>
         </div>
@@ -38,16 +39,17 @@
       <div class="container-fluid">
         <!-- The navigation menu -->
         <div class="row-fluid">
-          @if(ctx.menu.isDefined) {
-            <div class="span1 bs-docs-sidebar">
+          <div class="span1 bs-docs-sidebar">
+          @if(ctx.user.isDefined && ctx.sideMenu.isDefined) {
+            
               <ul class="nav nav-list bs-docs-sidenav">
-                <li><a href="/"><i class="icon-home"></i> @Messages("home")</a></li>
-              @ctx.menu.get.map { m =>
+              @ctx.sideMenu.get.map { m =>
           	    <li><a href="@m.url">@m.name</a></li>
               }
               </ul>
-            </div>
+          } else {
           }
+          </div>
       
           <!-- The page content -->
           <div class="span5 offset1">
