@@ -13,11 +13,16 @@
 # 
 
 # Home page
-GET   /                           controllers.Application.index
-GET   /login                      controllers.UserCtrl.index
+GET   /                           controllers.UserCtrl.index
+GET   /login                      controllers.UserCtrl.displayLoginForm
 POST  /                           controllers.UserCtrl.login
 
 GET   /logout                     controllers.UserCtrl.logout
+
+# statics
+GET   /about                      controllers.Application.about
+GET   /house                      controllers.Application.house
+GET   /history                    controllers.Application.history
 
 # Event
 GET   /events                     controllers.EventCtrl.listUpcoming
