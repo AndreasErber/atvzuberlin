@@ -3,6 +3,23 @@
   text-decoration: none;
 }
 
+.long-text {
+	text-align: justify;
+	width: 500px;
+}
+
+.img-caption {
+	font-size: small;
+	font-style: italic;
+	padding-bottom: 15px;
+	width: 400px;
+}
+
+.mini {
+	font-size: x-small;
+	padding-right: 200px;
+	text-align: right;
+}
 .wysiwyg-color-blue {
   color: blue;
 }
