@@ -14,11 +14,13 @@ import display.Header
 import display.Menu
 
 /**
+ * Context for requests.
+ *
  * @author andreas
- * @version 0.0.2, 2013-03-16
+ * @version 0.0.3, 2013-06-29
  */
-case class Ctx(header: Header, menu: Option[List[Menu]])(implicit request: Request[_]) {
-  
+case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[List[Menu]])(implicit request: Request[_]) {
+
   val user: Option[User] = getUser
   val referer = request.headers.get("referer")
 
