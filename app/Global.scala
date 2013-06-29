@@ -31,6 +31,10 @@ import models.PersonAdditionalInfos
 import models.AcademicTitles
 import models.PersonHasTitles
 import models.Enrollments
+import play.api._
+import play.api.mvc._
+import play.api.mvc.Results._
+import play.api.i18n.Messages
 
 /**
  * @author andreas
@@ -44,136 +48,140 @@ object Global extends GlobalSettings {
 
     database.withSession {
       try {
-    	  Persons.ddl.create
+        Persons.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Emails.ddl.create
+        Emails.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonHasEmails.ddl.create
+        PersonHasEmails.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Users.ddl.create
+        Users.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Events.ddl.create
+        Events.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Organizations.ddl.create
+        Organizations.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Countries.ddl.create
+        Countries.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Addresses.ddl.create
+        Addresses.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonHasAddresses.ddl.create
+        PersonHasAddresses.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  OrgHasAddresses.ddl.create
+        OrgHasAddresses.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  NewsTable.ddl.create
+        NewsTable.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Phones.ddl.create
+        Phones.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonHasPhones.ddl.create
+        PersonHasPhones.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  OrgHasPhones.ddl.create
+        OrgHasPhones.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  OrgHasEmails.ddl.create
+        OrgHasEmails.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Homepages.ddl.create
+        Homepages.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  OrgHasHomepages.ddl.create
+        OrgHasHomepages.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonHasHomepages.ddl.create
+        PersonHasHomepages.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonAdditionalInfos.ddl.create
+        PersonAdditionalInfos.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  AcademicTitles.ddl.create
+        AcademicTitles.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  PersonHasTitles.ddl.create
+        PersonHasTitles.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
-      
+
       try {
-    	  Enrollments.ddl.create
+        Enrollments.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
     }
+  }
+
+  override def onError(request: RequestHeader, ex: Throwable) = {
+    Ok("/").flashing("error" -> ex.getMessage())
   }
 }
