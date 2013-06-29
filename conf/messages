@@ -147,6 +147,8 @@ event.typus.Sport = Sport
 event.url = Link
 event.view = Details ansehen
 
+history = Geschichte
+
 home = Startseite
 
 homepage = Homepage
@@ -156,6 +158,8 @@ homepage.descr = Beschreibung
 homepage.edit = Bearbeiten
 homepage.url = URL
 homepages.of = Homepages von
+
+house = Unser Haus
 
 imprint = Impressum
 
@@ -169,8 +173,10 @@ login.username = Benutzername
 login.password = Passwort
 login.email = E-mail
 login.failed = Benutzername oder Passwort ist falsch.
+login.successful = Anmeldung war erfolgreich.
 
 logout = Abmelden
+logout.successful = Abmeldung war erfolgreich.
 
 news = Neuigkeiten
 news.add = Neuigkeit eingeben
