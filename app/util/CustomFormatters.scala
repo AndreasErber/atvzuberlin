@@ -16,6 +16,7 @@ import java.text.ParseException
 import play.api.i18n.Messages
 import models.AcademicTitle
 import models.Event
+import java.sql.Time
 
 /**
  * @author andreas
@@ -58,7 +59,7 @@ object CustomFormatters {
 
     def unbind(key: String, ls: LetterSalutation) = Map(key -> ls.id.toString())
   }
-  
+
   /**
    * Maps a {@link FormOfAddress} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
@@ -76,8 +77,7 @@ object CustomFormatters {
 
     def unbind(key: String, foa: FormOfAddress) = Map(key -> foa.id.toString())
   }
-  
-  
+
   /**
    * Maps an {@link AcademicTitle} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
@@ -95,7 +95,7 @@ object CustomFormatters {
 
     def unbind(key: String, at: AcademicTitle) = Map(key -> at.id.toString())
   }
-  
+
   /**
    * Maps a user instance to its username and vice versa.
    */
@@ -213,7 +213,7 @@ object CustomFormatters {
 
     def unbind(key: String, c: Country) = Map(key -> c.id.get.toString())
   }
-  
+
   val privacyFormatter = new Formatter[Privacy] {
     def bind(key: String, data: Map[String, String]) = {
       data.get(key).toRight {
@@ -287,6 +287,21 @@ object CustomFormatters {
     }
 
     def unbind(key: String, ts: Timestamp) = Map(key -> new SimpleDateFormat("yyyy-MM-dd HH:mm").format(ts))
+  }
+
+  val sqlTimeFormatter = new Formatter[Time] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { time =>
+        Exception.allCatch[Time].either(stringToSqlTime(time)).left.map {
+          e => Seq(FormError(key, e.getMessage(), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, t: Time) = Map(key -> new SimpleDateFormat("HH:mm").format(t))
   }
 
   /**
@@ -400,5 +415,22 @@ object CustomFormatters {
     val cal = Calendar.getInstance()
     cal.setTime(date)
     new Timestamp(cal.getTimeInMillis())
+  }
+
+  /**
+   * Can parse a time string in the format 'HH:mm'.
+   */
+  def stringToSqlTime(s: String): Time = {
+
+    val de = new SimpleDateFormat("HH:mm")
+    var date: Date = null
+    try {
+      date = de.parse(s)
+    } catch {
+      case e: ParseException => throw new RuntimeException(Messages("error.failedToParseDate", s))
+    }
+    val cal = Calendar.getInstance()
+    cal.setTime(date)
+    new Time(cal.getTimeInMillis())
   }
 }
