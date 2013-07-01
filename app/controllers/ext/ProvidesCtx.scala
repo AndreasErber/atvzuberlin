@@ -24,7 +24,14 @@ trait ProvidesCtx {
           MenuItem(Messages("house"), "/house"),
           MenuItem(Messages("history"), "/history"))),
       Menu(Messages("program"), "/events", List()),
-      Menu(Messages("sport"), "/sport", List()),
+      Menu(Messages("sports"), "/sports",
+        List(
+          MenuItem(Messages("sports"), "/sports"),
+          MenuItem(Messages("sports.dates"), "/sportsdates"),
+          MenuItem(Messages("sports.actives"), "/sportsactives"),
+          MenuItem(Messages("sports.rowing"), "/rowing"),
+          MenuItem(Messages("sports.handball"), "/handball"),
+          MenuItem(Messages("sports.volleyball"), "/volleyball"))),
       Menu(Messages("members"), "/members", List()),
       Menu(Messages("organizations"), "/organizations", List()))
 
