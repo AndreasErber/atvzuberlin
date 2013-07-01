@@ -276,6 +276,14 @@ registration.selRole = Select a user role.
 
 required = Required
 
+sports = Sports
+sports.dates = Dates
+sports.actives = Student Sports
+sports.rowing = Rowing
+sports.handball = Handball
+sports.fistball = Fistball
+sports.volleyball = Volleyball
+
 submit = Save
 
 success.succeededToDeleteAddress = Address successfully deleted.

@@ -286,6 +286,14 @@ registration.selRole = Rolle des Benutzers wählen
 
 required = Pflichtfeld
 
+sports = Sport
+sports.dates = Sporttermine
+sports.actives = Aktivensport
+sports.rowing = Rudern
+sports.handball = Handball
+sports.fistball = Faustball
+sports.volleyball = Volleyball
+
 submit = Speichern
 
 success.succeededToDeleteAddress = Die Adresse wurde gelöscht.

@@ -23,6 +23,13 @@ GET   /logout                     controllers.UserCtrl.logout
 GET   /about                      controllers.Application.about
 GET   /house                      controllers.Application.house
 GET   /history                    controllers.Application.history
+GET   /sports                     controllers.Application.sports
+GET   /sportsdates                controllers.Application.sportsdates
+GET   /sportsactives              controllers.Application.sportsactives
+GET   /rowing                     controllers.Application.rowing
+GET   /handball                   controllers.Application.handball
+GET   /fistball                   controllers.Application.fistball
+GET   /volleyball                 controllers.Application.volleyball
 
 # Event
 GET   /events                     controllers.EventCtrl.listUpcoming
