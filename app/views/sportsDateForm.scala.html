@@ -1,0 +1,31 @@
+@(sportsDateForm: Form[SportsDate], sports: Seq[Sports])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.Weekday
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("sports")) {
+    @Logger.debug("Rendering sports dates form")
+  <h1>@Messages("sports.dates.add")</h1>
+  @form(routes.SportCtrl.submitSportsDate) {
+    @inputHidden(sportsDateForm("id")) 
+    @select(sportsDateForm("sports"), 
+              sports.map{s => s.id.get.toString -> s.title},
+              '_label -> Messages("sports.dates.sports")
+    )
+    @inputText(sportsDateForm("locationName"), '_label -> Messages("sports.dates.location.name"))
+    @inputText(sportsDateForm("locationStreet"), '_label -> Messages("sports.dates.location.street"))
+    @inputText(sportsDateForm("Zip"), '_label -> Messages("sports.dates.location.zip"))
+    @inputText(sportsDateForm("locationCity"), '_label -> Messages("sports.dates.location.city"))
+    @select(sportsDateForm("weekday"), 
+              Weekday.values.toList.map{w => w.toString -> Messages("weekday." + w)},
+              '_label -> Messages("sports.dates.weekday")
+    )
+    @inputText(sportsDateForm("start"), '_label -> Messages("sports.dates.start"))
+    @inputText(sportsDateForm("end"), '_label -> Messages("sports.dates.end"))
+    @createModifyFormPart(sportsDateForm)
+    @submitResetCancel()
+  }
+  @Logger.debug("Done rendering sports dates form")
+}

@@ -1,0 +1,19 @@
+@(sportsForm: Form[Sports])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("sports")) {
+    @Logger.debug("Rendering sports form")
+  <h1>@Messages("sports.add")</h1>
+  @form(routes.SportCtrl.submitSports) {
+    @inputHidden(sportsForm("id")) 
+    @inputText(sportsForm("title"), '_label -> Messages("sports.title"), 'style -> "width: 600px")
+    @richTextEditor(sportsForm("description"), '_label -> Messages("sports.description"),
+     'placeholder -> Messages("wysihtml5.placholder"), 'style -> "width: 600px; height: 200px")
+    @createModifyFormPart(sportsForm)
+    @submitResetCancel()
+  }
+  @Logger.debug("Done rendering sports form")
+}
