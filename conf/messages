@@ -72,6 +72,8 @@ error.failedToDeleteEnrollment = Die Anmeldung konnte leider nicht gelöscht wer
 error.failedToDeleteOrg = Die Organisation konnte leider nicht gelöscht werden.
 error.failedToDeletePerson = Die Person konnte leider nicht gelöscht werden.
 error.failedToDeletePhone = Die Telefonnummer konnte leider nicht gelöscht werden.
+error.failedToDeleteSports = Die Sportart konnte leider nicht gelöscht werden.
+error.failedToDeleteSportsDate = Der Sporttermin konnte nicht gelöscht werden.
 error.failedToFindEmailAddress = Die E-Mail-Adresse {0} konnte nicht im System gefunden werden.
 error.failedToFindUserByName = Ein Benutzer mit dem Namen {0} konnte nicht gefunden werden. 
 error.failedToIdentifyCharacter = Es konnte kein einzelner Buchstabe erkannt werden.
@@ -91,6 +93,8 @@ error.failedToLoadPersonAI = Die zusätzliche Information zur Person mit der ID 
 error.failedToLoadPersonList = Die Liste der Personen konnte nicht geladen werden.
 error.failedToLoadPhoneType = Die Art des Telefonanschlusses mit der ID {0} konnte nicht geladen werden.
 error.failedToLoadPrivacy = Die Privatsphäreneinstellung mit der ID {0} konnte nicht geladen werden.
+error.failedToLoadSportsDateList = Die Liste der Sporttermine konnte nicht geladen werden.
+error.failedToLoadSportsList = Die Liste der Sportarten konnte nicht geladen werden.
 error.failedToLoadUpcomingEventsList = Die Liste der kommenden Veranstaltungen konnte nicht geladen werden.
 error.failedToLoadUsagetype = Der Verwendungstyp mit der ID {0} konnte nicht geladen werden.
 error.failedToLoadUserRole = Die Benutzerrolle mit der ID {0} konnte nicht geladen werden.
@@ -103,6 +107,8 @@ error.failedToStoreEvent = Das Speichern der Veranstaltung ist leider fehlgeschl
 error.failedToStoreOrg = Das Speichern der Organisation ist leider fehlgeschlagen.
 error.failedToStorePersonAI = Das Speichern zusätzlicher Information zur Person mit der ID {0} ist leider fehlgeschlagen.
 error.failedToStorePhone = Das Speichern der Telefonnummer ist leider fehlgeschlagen.
+error.failedToStoreSports = Das Speichern der Sportart ist leider fehlgeschlagen.
+error.failedToStoreSportsDate = Das Speichern des Sporttermins ist leider fehlgeschlagen.
 error.loginFailed = Anmeldung ist fehlgeschlagen. Benutzername und/oder Password sind falsch.
 error.number = Hier ist eine Zahl einzugeben. 
 error.registrationFailed = Die Registrierung ist leider fehlgeschlagen.
@@ -287,12 +293,25 @@ registration.selRole = Rolle des Benutzers wählen
 required = Pflichtfeld
 
 sports = Sport
-sports.dates = Sporttermine
 sports.actives = Aktivensport
-sports.rowing = Rudern
-sports.handball = Handball
+sports.add = Sportart hinzufügen
+sports.dates = Sporttermine
+sports.description = Beschreibung
 sports.fistball = Faustball
+sports.handball = Handball
+sports.rowing = Rudern
+sports.title = Titel
 sports.volleyball = Volleyball
+
+sports.dates.add = Sporttermin hinzufügen
+sports.dates.end = Ende (HH:mm)
+sports.dates.location.city = Stadt des Veranstaltungsortes
+sports.dates.location.name = Name des Veranstaltungsortes
+sports.dates.location.street = Straße des Veranstaltungsortes 
+sports.dates.location.zip = Postleitzahl des Veranstaltungsortes
+sports.dates.sports = Sportart
+sports.dates.start = Beginn (HH:mm)
+sports.dates.weekday = Wochentag
 
 submit = Speichern
 
@@ -303,6 +322,8 @@ success.succeededToDeleteHomepage = Die Homepage wurde gelöscht.
 success.succeededToDeleteOrg = Die Organisation wurde gelöscht.
 success.succeededToDeletePerson = Die Person wurde gelöscht.
 success.succeededToDeletePhone = Die Telefonnummer wurde gelöscht.
+success.succeededToDeleteSports = Die Sportart wurde gelöscht.
+success.succeededToDeleteSportsDate = Die Sportzeit wurde gelöscht.
 success.succeededToStoreAcademicTitle = Der akademische Titel wurde gespeichert.
 success.succeededToStoreAddress = Die Adresse wurde gespeichert.
 success.succeededToStoreEmail = Die E-Mail-Adresse wurde gespeichert.
@@ -313,6 +334,8 @@ success.succeededToStoreNews = Die Neuigkeit wurde gespeichert.
 success.succeededToStoreOrg = Die Organisation wurde gespeichert.
 success.succeededToStorePersonAI = Die zusätzliche Information zur Person mit ID {0} wurde gespeichert
 success.succeededToStorePhone = Die Telefonnummer wurde gespeichert.
+success.succeededToStoreSports = Die Sportart wurde gespeichert.
+success.succeededToStoreSportsDate = Der Sporttermin wurde gespeichert.
 
 top.of.page = Zum Seitenanfang
 
@@ -325,6 +348,14 @@ usagetype.personal = privat
 
 user.logged.in = Eingeloggter Benutzer
 user.log.out = Ausloggen des Benutzers
+
+weekday.Mon = Montag
+weekday.Tue = Dienstag
+weekday.Wed = Mittwoch
+weekday.Thu = Donnerstag
+weekday.Fri = Freitag
+weekday.Sat = Samstag
+weekday.Sun = Sonntag
 
 welcome = Willkommen beim ATV zu Berlin
 

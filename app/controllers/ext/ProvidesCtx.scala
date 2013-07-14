@@ -26,12 +26,12 @@ trait ProvidesCtx {
       Menu(Messages("program"), "/events", List()),
       Menu(Messages("sports"), "/sports",
         List(
-          MenuItem(Messages("sports"), "/sports"),
-          MenuItem(Messages("sports.dates"), "/sportsdates"),
-          MenuItem(Messages("sports.actives"), "/sportsactives"),
-          MenuItem(Messages("sports.rowing"), "/rowing"),
-          MenuItem(Messages("sports.handball"), "/handball"),
-          MenuItem(Messages("sports.volleyball"), "/volleyball"))),
+          MenuItem(Messages("sports"), "/sports/list"),
+          MenuItem(Messages("sports.dates"), "/sportsdate/list"),
+          MenuItem(Messages("sports.actives"), "/sports/1"),
+          MenuItem(Messages("sports.rowing"), "/sports/2"),
+          MenuItem(Messages("sports.handball"), "/sports/3"),
+          MenuItem(Messages("sports.volleyball"), "/sports/4"))),
       Menu(Messages("members"), "/members", List()),
       Menu(Messages("organizations"), "/organizations", List()))
 

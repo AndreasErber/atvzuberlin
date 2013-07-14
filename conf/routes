@@ -23,8 +23,6 @@ GET   /logout                     controllers.UserCtrl.logout
 GET   /about                      controllers.Application.about
 GET   /house                      controllers.Application.house
 GET   /history                    controllers.Application.history
-GET   /sports                     controllers.Application.sports
-GET   /sportsdates                controllers.Application.sportsdates
 GET   /sportsactives              controllers.Application.sportsactives
 GET   /rowing                     controllers.Application.rowing
 GET   /handball                   controllers.Application.handball
@@ -146,8 +144,24 @@ GET   /enr/delete/:id             controllers.EnrollmentCtrl.delete(id: Long)
 GET   /enr/edit/:id               controllers.EnrollmentCtrl.edit(id: Long)
 POST  /enr/edit                   controllers.EnrollmentCtrl.submit
 
+# Registration
 GET   /registration               controllers.UserCtrl.showRegistrationForm
 POST  /registration               controllers.UserCtrl.register
+
+# Sports Dates
+GET   /sportsdate/new            controllers.SportCtrl.createSportsDate
+GET   /sportsdate/delete/:id     controllers.SportCtrl.deleteSportsDate(id: Long)
+GET   /sportsdate/edit/:id       controllers.SportCtrl.editSportsDate(id: Long)
+POST  /sportsdate/edit           controllers.SportCtrl.submitSportsDate
+GET   /sportsdate/list           controllers.SportCtrl.listSportsDates
+
+# Sports
+GET   /sports/new                 controllers.SportCtrl.createSports
+GET   /sports/delete/:id          controllers.SportCtrl.deleteSports(id: Long)
+GET   /sports/edit/:id            controllers.SportCtrl.editSports(id: Long)
+POST  /sports/edit                controllers.SportCtrl.submitSports
+GET   /sports/list                controllers.SportCtrl.listSports
+GET   /sports/:id                 controllers.SportCtrl.showSports(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET   /assets/*file               controllers.Assets.at(path="/public", file)

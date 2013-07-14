@@ -24,14 +24,6 @@ object Application extends Controller with ProvidesCtx with Security {
     Ok(views.html.house(Messages("house")))
   }
 
-  def sports = Action { implicit request =>
-    Ok(views.html.sports(Messages("sports")))
-  }
-
-  def sportsdates = Action { implicit request =>
-    Ok(views.html.sportsdates(Messages("sports.dates")))
-  }
-
   def sportsactives = Action { implicit request =>
     Ok(views.html.sportsactives(Messages("sports.actives")))
   }

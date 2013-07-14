@@ -71,6 +71,8 @@ error.failedToDeleteEnrollment = Failed to delete enrollment.
 error.failedToDeleteOrg = Failed to delete organization.
 error.failedToDeletePerson = Failed to delete person.
 error.failedToDeletePhone = Failed to delete phone number.
+error.failedToDeleteSports = Failed to delete sports.
+error.failedToDeleteSportsDate = Failed to delete sports date.
 error.failedToFindEmailAddress = Could not find the email address {0} in the system.
 error.failedToFindUserByName = Failed to find a user with name {0}.
 error.failedToIdentifyCharacter = Failed to identify single character.
@@ -89,6 +91,8 @@ error.failedToLoadPerson = Failed to load person with ID {0}.
 error.failedToLoadPersonAI = Failed to load person additional information for person with ID {0}.
 error.failedToLoadPhoneType = Failed to load phone type with ID {0}.
 error.failedToLoadPrivacy = Failed to load privacy settings with ID {0}.
+error.failedToLoadSportsDateList = Failed to load sports dates list.
+error.failedToLoadSportsList = Failed to load sports list.
 error.failedToLoadUpcomingEventsList = Failed to load list of upcoming events.
 error.failedToLoadUsagetype = Failed to load usage type with ID {0}.
 error.failedToLoadUserRole = Failed to load user role with ID {0}.
@@ -101,6 +105,8 @@ error.failedToStoreEvent = Failed to store event.
 error.failedToStoreOrg = Failed to store organization.
 error.failedToStorePersonAI = Failed to store additional information on person with ID {0}.
 error.failedToStorePhone = Failed to store phone number.
+error.failedToStoreSports = Failed to store sports.
+error.failedToStoreSportsDate = Failed to store sports date.
 error.loginFailed = Login failed.
 error.registrationFailed = Registration failed.
 error.required=This field is required.
@@ -277,12 +283,25 @@ registration.selRole = Select a user role.
 required = Required
 
 sports = Sports
-sports.dates = Dates
 sports.actives = Student Sports
-sports.rowing = Rowing
-sports.handball = Handball
+sports.add = Add Sports
+sports.dates = Dates
+sports.description = Description
 sports.fistball = Fistball
+sports.handball = Handball
+sports.rowing = Rowing
+sports.title = Title
 sports.volleyball = Volleyball
+
+sports.dates.add = Add a Sports Date
+sports.dates.end = End Time (HH:mm)
+sports.dates.location.city = City of the Venue
+sports.dates.location.name = Name of the Venue
+sports.dates.location.street = Street of the Venue
+sports.dates.location.zip = Zip-Code of the V enue
+sports.dates.sports = Sports
+sports.dates.start = Start Time (HH:mm)
+sports.dates.weekday = Weekday
 
 submit = Save
 
@@ -293,6 +312,8 @@ success.succeededToDeleteHomepage = Homepage successfully deleted.
 success.succeededToDeleteOrg = Organization was successfully deleted.
 success.succeededToDeletePerson = Person was successfully deleted.
 success.succeededToDeletePhone = Phone was successfully deleted.
+success.succeededToDeleteSports = Sports was successfully deleted.
+success.succeededToDeleteSportsDate = Sports date was successfully deleted.
 success.succeededToStoreAcademicTitle = Academic Title was successfully stored.
 success.succeededToStoreAddress = Address successfully stored.
 success.succeededToStoreEmail = Email was successfully stored.
@@ -303,6 +324,8 @@ success.succeededToStoreNews = News were successfully stored.
 success.succeededToStoreOrg = Organization was successfully stored.
 success.succeededToStorePersonAI = Additional information on the person with ID {0} was successfully stored.
 success.succeededToStorePhone = Phone number was successfully stored.
+success.succeededToStoreSports = The sports was successfully stored.
+success.succeededToStoreSportsDate = The sports date was successfully stored.
 
 top.of.page = Go to top
 
@@ -314,6 +337,14 @@ usagetype.honorary = Honorary
 
 user.logged.in = Currently Logged in User
 user.log.out = Log out User
+
+weekday.Mon = Monday
+weekday.Tue = Tuesday
+weekday.Wed = Wednesday
+weekday.Thu = Thursday
+weekday.Fri = Friday
+weekday.Sat = Saturday
+weekday.Sun = Sunday
 
 welcome = Welcome to ATV zu Berlin
 

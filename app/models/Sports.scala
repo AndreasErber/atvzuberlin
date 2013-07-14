@@ -85,6 +85,69 @@ object Sports {
 
   implicit val db = Database.forDataSource(DB.getDataSource())
   val tablename = "Sports"
+
+  /**
+   * Retrieve all sports from the persistence store.
+   */
+  def getAll(): Validation[Throwable, List[Sports]] = db withSession {
+    def q = Query(Sportss).sortBy(n => n.title).list
+    try {
+      Success(q)
+    } catch {
+      case e: Throwable => Failure(e)
+    }
+  }
+
+  /**
+   * Load the sports related to the given identifier.
+   */
+  def load(id: Long): Option[Sports] = db withSession {
+    Query(Sportss).filter(_.id === id).firstOption
+  }
+
+  /**
+   * Persist a new sports or update an existing one.
+   */
+  def saveOrUpdate(s: Sports): Validation[Throwable, Sports] = {
+    db withSession {
+
+      require(Option(s).isDefined)
+      // if the object has an identifier it is an update
+      if (s.id.isDefined) {
+        try {
+          val count = Sportss.update(s)
+          if (count == 0) {
+            Failure(new RuntimeException("Failed to update sports " + s))
+          } else {
+            Success(s)
+          }
+        } catch {
+          case e: Throwable => Failure(e)
+        }
+      } // objects without identifier are new and must be inserted
+      else {
+        try {
+          val id = Sportss.insert(s)
+          Success(s.copy(id = Some(id)))
+        } catch {
+          case e: Throwable => Failure(e)
+        }
+      }
+    }
+  }
+
+  /**
+   * Delete the sports identified by id.
+   */
+  def delete(id: Long): Validation[Throwable, Boolean] = db withSession {
+    try {
+      val delCount = Query(Sportss).filter(_.id === id).delete
+      if (delCount > 0) Success(true) else Failure(new RuntimeException("Failed to delete sports with id " + id))
+    } catch {
+      case e: Throwable => Failure(e)
+    }
+  }
+
 }
 
 /**
@@ -95,7 +158,7 @@ object Sportss extends Table[Sports](Sports.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def title = column[String]("title")
-  def description = column[String]("description", O.Nullable)
+  def description = column[String]("description", O.Nullable, O.DBType("text"))
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)

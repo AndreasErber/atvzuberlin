@@ -1,61 +1,24 @@
-@(message: String)(implicit flash: Flash, ctx: util.Ctx)
+@(sportsDates: Seq[SportsDate])(implicit flash: Flash, ctx: util.Ctx)
 
 @main(Messages("welcome")) {
 
   <h2>Sporttermine</h2>
-<!-- End of Top level heading -->
-<h3 id="Aktivensport">@Messages("sports.actives")</h3>
-<p class="aktuell-content">montags, 20:00:00  
-  <div class="vcard">
-    <div class="adr">
-      <p class="n">Halle der Schmidt-Ott-Schule</p>
-      <p class="str">Plantagenstra&szlig;e 8-9</p>
-      <span class="postal-code">12169</span> <span class="locality">Berlin-Steglitz</span>
-    </div>
-  </div>
-</p>
-
-<h3 id="Handball">@Messages("sports.handball")</h3>
-<p class="aktuell-content">mittwochs, 20:00:00
-  <div class="vcard">
-    <div class="adr">
-      <p class="n">Sochos-Halle</p>
-      <p class="str">Lessingstra&szlig;e 5-8</p>
-      <span class="postal-code">12169</span> <span class="locality">Berlin-Steglitz</span>
-    </div>
-  </div>
-</p>
-
-<p class="aktuell-content">freitags, 19:00:00  <div class="vcard">
-    <div class="adr">
-      <p class="n">Sochos-Halle</p>
-      <p class="str">Lessingstra&szlig;e 5-8</p>
-      <span class="postal-code">12169</span> <span class="locality">Berlin-Steglitz</span>
-    </div>
-  </div>
-</p>
-
-<h3 id="Faustball">@Messages("sports.fistball")</h3>
-<p class="aktuell-content">mittwochs, 18:30:00
-  <div class="vcard">
-    <div class="adr">
-      <p class="n">Turnhalle der Dreilinden-Oberschule</p>
-      <p class="str">Dreilindenstra&szlig;e 49</p>
-      <span class="postal-code">14109</span> <span class="locality">Berlin-Nikolassee</span>
-    </div>
-  </div>
-</p>
-
-<h3 id="Rudern">@Messages("sports.rowing")</h3>
-<p class="aktuell-content">sonntags, 14:00:00
-  <div class="vcard">
-    <div class="adr">
-      <p class="n">Bootshaus</p>
-      <p class="str">Regattastra&szlig;e 245</p>
-      <span class="postal-code">12527</span> <span class="locality">Berlin-Gr&uuml;nau</span>
-    </div>
-  </div>
-</p>
+  @if(!sportsDates.isEmpty) {
+    @sportsDates.groupBy(s => s.sports).map{ elem =>
+    <h3>@Sports.load(elem._1).get.title</h3>
+      @elem._2.map{ sd =>
+      <p class="aktuell-content">@Messages("weekday." + sd.weekday.getOrElse("")).toLowerCase()s, @sd.start </br>
+        <div class="vcard">
+          <div class="adr">
+            <p class="n">@sd.locationName.getOrElse("")</p>
+            <p class="str">@sd.locationStreet.getOrElse("")</p>
+            <span class="postal-code">@sd.locationZip.getOrElse("")</span> <span class="locality">@sd.locationCity.getOrElse("")</span>
+          </div>
+        </div>
+      </p>
+      }
+    }
+  }
 
 <p class="long-text">Weitere Information gibt es bei:</p>
 <ul class="long-text">
