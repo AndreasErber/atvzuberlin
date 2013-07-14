@@ -10,27 +10,29 @@ import play.api.Logger
 import play.api.Play.current
 import models.Persons
 import org.postgresql.util.PSQLException
-import models.Emails
-import models.Users
-import models.Events
-import models.Organizations
-import models.Countries
-import models.Addresses
-import models.NewsTable
-import models.Phones
-import models.PersonHasAddresses
-import models.OrgHasAddresses
-import models.PersonHasPhones
-import models.OrgHasPhones
-import models.PersonHasEmails
-import models.OrgHasEmails
-import models.Homepages
-import models.OrgHasHomepages
-import models.PersonHasHomepages
-import models.PersonAdditionalInfos
 import models.AcademicTitles
-import models.PersonHasTitles
+import models.Addresses
+import models.Countries
+import models.Emails
 import models.Enrollments
+import models.Events
+import models.Homepages
+import models.NewsTable
+import models.Organizations
+import models.OrgHasAddresses
+import models.OrgHasEmails
+import models.OrgHasHomepages
+import models.OrgHasPhones
+import models.PersonAdditionalInfos
+import models.PersonHasAddresses
+import models.PersonHasEmails
+import models.PersonHasHomepages
+import models.PersonHasPhones
+import models.PersonHasTitles
+import models.Phones
+import models.SportsDates
+import models.Sportss
+import models.Users
 import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -38,7 +40,7 @@ import play.api.i18n.Messages
 
 /**
  * @author andreas
- * @version 0.0.9, 2013-04-28
+ * @version 0.0.11, 2013-07-14
  */
 object Global extends GlobalSettings {
 
@@ -175,6 +177,18 @@ object Global extends GlobalSettings {
 
       try {
         Enrollments.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        Sportss.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        SportsDates.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
