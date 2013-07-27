@@ -8,31 +8,8 @@ import Database.threadLocalSession
 import play.api.Application
 import play.api.Logger
 import play.api.Play.current
-import models.Persons
+import models._
 import org.postgresql.util.PSQLException
-import models.AcademicTitles
-import models.Addresses
-import models.Countries
-import models.Emails
-import models.Enrollments
-import models.Events
-import models.Homepages
-import models.NewsTable
-import models.Organizations
-import models.OrgHasAddresses
-import models.OrgHasEmails
-import models.OrgHasHomepages
-import models.OrgHasPhones
-import models.PersonAdditionalInfos
-import models.PersonHasAddresses
-import models.PersonHasEmails
-import models.PersonHasHomepages
-import models.PersonHasPhones
-import models.PersonHasTitles
-import models.Phones
-import models.SportsDates
-import models.Sportss
-import models.Users
 import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -189,6 +166,18 @@ object Global extends GlobalSettings {
 
       try {
         SportsDates.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        Charges.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        PersonInCharges.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
