@@ -1,0 +1,39 @@
+@(pic: Seq[PersonInCharge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+@import helper.lastModificationIcon
+
+@main(Messages("personincharge")) {
+	<h2>@Messages("personincharge")</h2>
+	<table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>@Messages("personincharge.charge.name")</th>
+        <th>@Messages("personincharge.person.name")</th>
+        <th>@Messages("personincharge.charge.email")</th>
+      </tr>
+    </thead>
+    <tbody>
+    @pic.map { c =>
+      <tr>
+        <td>@c.charge.name</td>
+        <td>@c.person.name</td>
+        <td><a href="mailto:@c.charge.email" title="@Messages("personincharge.mail.to.charge", c.charge.name)">@c.charge.email</a></td>
+        <td> 
+          @if(ctx.user.isDefined) {
+            <a href="/pic/edit/@c.id.get" title="@Messages("personincharge.edit")"><i class="icon-pencil"></i></a>
+            <a href="#" data-toggle="modal" title="@Messages("personincharge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="icon-trash"></i></a>
+          }
+          @lastModificationIcon(c)
+          </td>
+        </tr>
+    }
+    @if(ctx.user.isDefined) {
+      <tr>
+        <td colspan="3"></td>
+        <td><a href="/pic/new" title="@Messages("personincharge.add")"><i class="icon-plus"></i></a> ...</td>
+      </tr>
+    }
+    </tbody>
+  </table>	
+@deleteConfirmation("charge")
+}

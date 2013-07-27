@@ -1,0 +1,28 @@
+@(theForm: Form[PersonInCharge], persons: Seq[Person], charges: Seq[Charge], div: String)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("personincharge")) {
+    @Logger.debug("Rendering person in charge form")
+	<h1>@Messages("personincharge.add")</h1>
+	@form(routes.ChargeCtrl.submitPiC) {
+	  @inputHidden(theForm("id"))
+	  @select(theForm("person"), 
+              persons.map{p => p.id.get.toString -> p.name.toString},
+              '_label -> Messages("personincharge.person")
+    )
+    @select(theForm("charge"), 
+              charges.map{c => c.id.get.toString -> c.name.toString},
+              '_label -> Messages("personincharge.charge")
+    )  
+	  @inputHidden(theForm("division"), '_value -> div)
+	  @inputText(theForm("start"), '_label -> Messages("personincharge.start"))
+	  @inputText(theForm("end"), '_label -> Messages("personincharge.end"))
+    @createModifyFormPart(theForm)
+    @submitResetCancel()
+	}
+	
+	@Logger.debug("Done rendering person in charge form")
+}
