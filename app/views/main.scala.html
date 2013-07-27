@@ -28,23 +28,34 @@
       <!-- The page header -->
       @header(ctx.topMenu)
         
-      <header class="jumbotron subhead" id="overview">
-        <br/><br/>
-        <div class="container">
-          <h1>ATV zu Berlin</h1>
-          <p class="lead">Mens sana in corpore sano</p>
-        </div>
-      </header>
+<!--       <header class="jumbotron subhead" id="overview"> -->
+<!--         <br/><br/> -->
+<!--         <div class="container"> -->
+<!--           <h1>ATV zu Berlin</h1> -->
+<!--           <p class="lead">Mens sana in corpore sano</p> -->
+<!--         </div> -->
+<!--       </header> -->
       
       <div class="container-fluid">
         <!-- The navigation menu -->
         <div class="row-fluid">
-          <div class="span1 bs-docs-sidebar">
+          <br/><br/><br/>
+          <div class="span2 bs-docs-sidebar">
           @if(ctx.user.isDefined && ctx.sideMenu.isDefined) {
             
               <ul class="nav nav-list bs-docs-sidenav">
               @ctx.sideMenu.get.map { m =>
-          	    <li><a href="@m.url">@m.name</a></li>
+          	    @if(!m.items.isEmpty) {
+                    <li class="dropdown">
+                      <a class="dropdown-toggle" href="#" data-toggle="dropdown">@m.name&nbsp;<strong class="caret"></strong></a>
+                      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                        @m.items.map { mi =>
+                        <li><a href="@mi.url">@mi.name</a>
+                        }
+                      </ul>
+                 } else {
+                 <li><a href="@m.url">@m.name</a>
+                 }</li>
               }
               </ul>
           } else {
@@ -52,7 +63,7 @@
           </div>
       
           <!-- The page content -->
-          <div class="span5 offset1">
+          <div class="span6">
             @if(flash.get("success").isDefined){
               <div class="alert alert-success">
               @flash.get("success")
