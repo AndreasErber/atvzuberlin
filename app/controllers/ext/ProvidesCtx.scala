@@ -9,6 +9,7 @@ import display.Header
 import display.Menu
 import play.api.i18n.Messages
 import display.MenuItem
+import models.Sports
 
 /**
  * @author andreas
@@ -17,6 +18,11 @@ import display.MenuItem
 trait ProvidesCtx {
 
   implicit def getCtxt[A](implicit request: Request[A]): Ctx = {
+    val sports = Sports.getAll
+    var sportsMenu: List[MenuItem] = Nil
+    if (sports.isSuccess) {
+      sportsMenu = sports.toOption.get.map(s => MenuItem(s.title, "/sports/" + s.id.get))
+    }
     val publicMenus = List(
       Menu(Messages("about"), "/about",
         List(
@@ -27,18 +33,19 @@ trait ProvidesCtx {
       Menu(Messages("sports"), "/sports",
         List(
           MenuItem(Messages("sports"), "/sports/list"),
-          MenuItem(Messages("sports.dates"), "/sportsdate/list"),
-          MenuItem(Messages("sports.actives"), "/sports/1"),
-          MenuItem(Messages("sports.rowing"), "/sports/2"),
-          MenuItem(Messages("sports.handball"), "/sports/3"),
-          MenuItem(Messages("sports.volleyball"), "/sports/4"))),
+          MenuItem(Messages("sports.dates"), "/sportsdate/list")) ++ sportsMenu),
       Menu(Messages("members"), "/members", List()),
       Menu(Messages("organizations"), "/organizations", List()))
 
     val privateMenus = List(
       Menu(Messages("persons"), "/persons", List()),
-      Menu(Messages("documents"), "", List()),
-      Menu(Messages("organizations"), "/organizations", List()))
+      Menu(Messages("documents"), "/documents", List()),
+      Menu(Messages("organizations"), "/organizations", List()),
+      Menu(Messages("administration"), "/administration",
+        List(
+          MenuItem(Messages("administration.overview"), "/administration"),
+          MenuItem(Messages("charges"), "/charge/list"),
+          MenuItem(Messages("sports"), ""))))
 
     Ctx(Header(), Some(publicMenus), Some(privateMenus))
   }
