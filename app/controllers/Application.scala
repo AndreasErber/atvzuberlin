@@ -16,6 +16,11 @@ object Application extends Controller with ProvidesCtx with Security {
     Ok(views.html.about(Messages("about")))
   }
 
+  def administration = isAuthenticated { username =>
+    implicit request =>
+      Ok(views.html.administration(Messages("administration")))
+  }
+
   def history = Action { implicit request =>
     Ok(views.html.history(Messages("history")))
   }
