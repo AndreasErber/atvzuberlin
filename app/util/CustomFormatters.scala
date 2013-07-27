@@ -17,12 +17,48 @@ import play.api.i18n.Messages
 import models.AcademicTitle
 import models.Event
 import java.sql.Time
+import models.Charge
 
 /**
  * @author andreas
- * @version 0.1.4, 2013-04-28
+ * @version 0.1.5, 2013-07-27
  */
 object CustomFormatters {
+
+  /**
+   * Maps a {@link Charge} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val chargeFormatter = new Formatter[Charge] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[Charge].either(Charge.load(id.toLong).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadCharge", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, c: Charge) = Map(key -> c.id.get.toString())
+  }
+
+  /**
+   * Turns a {@link Division} into a string and vice versa.
+   */
+  val divisionFormatter = new Formatter[Division.Division] {
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { name =>
+        Exception.allCatch[Division.Division].either(Division.withName(name)).left.map {
+          e => Seq(FormError(key, Messages("error.failedToDetectDivision", name), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, div: Division.Division) = Map(key -> div.toString())
+  }
 
   /**
    * Maps an {@link Event} instance to its identifier and vice versa. The identifier is taken and returned as String.
