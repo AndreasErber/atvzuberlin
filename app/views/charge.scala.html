@@ -1,0 +1,27 @@
+@**
+* Display the details of a {@link Charge}.
+*
+* @author andreas
+* @version 0.0.1, 2013-07-16
+*@
+@(c: Charge)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("charge")) {
+  <div class="pull-right">
+  @if(ctx.user.isDefined && ctx.user.get.username == c.creator) {
+    <a href="/charge/edit/@c.id.get" title="@Messages("charge.edit")"><i class="icon-pencil"></i></a>
+    <a data-toggle="modal" title="@Messages("charge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="icon-trash"></i></a>
+  }
+	<a href="/charge/list" title="@Messages("charge.list")"><i class="icon-th-list"></i></a>
+  @if(ctx.user.isDefined) {
+  	<a href="/charge/new" title="@Messages("charge.add")"><i class="icon-plus"></i></a> ...
+  }
+  </div>
+  <h2>@c.name</h2>
+  <p>@c.abbr.getOrElse("") (@c.division.toString)</p>
+  <p>@c.email.getOrElse("")</p>
+  <p class="lead">@c.shortDesc.getOrElse("")</p>
+  <p>@Html(c.longDesc.getOrElse(""))</p>
+@deleteConfirmation("charge")
+}
