@@ -16,7 +16,7 @@ import scalaz.Validation
 
 /**
  * @author andreas
- * @version 0.0.3, 2013-04-26
+ * @version 0.0.4, 2013-07-27
  */
 case class AcademicTitle(
   override val id: Option[Long] = None,
@@ -101,7 +101,7 @@ object AcademicTitle {
       }
     }
   }
-  
+
   /**
    * Retrieve all {@link AcademicTitle}s from the persistence store.
    */
@@ -117,13 +117,13 @@ object AcademicTitle {
     require(Option(p).isDefined)
     val phts = PersonHasTitle.getAllForPerson(p)
     if (phts.isSuccess) {
-    	val titles = for (pht <- phts.toOption.get) yield (AcademicTitle.load(pht.tid).get)
-    	Success(titles)
+      val titles = for (pht <- phts.toOption.get) yield (AcademicTitle.load(pht.tid).get)
+      Success(titles)
     } else {
       Failure(phts.fail.toOption.get)
     }
   }
-  
+
   def load(id: Long): Option[AcademicTitle] = db withSession {
     Query(AcademicTitles).filter(_.id === id).firstOption
   }
@@ -173,7 +173,7 @@ object AcademicTitles extends Table[AcademicTitle](AcademicTitle.tablename) {
   def modifier = column[String]("modifier", O.Nullable)
   def * = id.? ~ abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? <> (AcademicTitle.apply _, AcademicTitle.unapply _)
 
-  def withoutId = abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix  ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def withoutId = abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? returning id
   def insert = (at: AcademicTitle) => withoutId.insert(at.abbr, at.maleForm, at.femaleForm, at.isPrefix, at.created, at.creator, at.modified, at.modifier)
   def update(at: AcademicTitle): Int = AcademicTitles.where(_.id === at.id).update(at.copy(modified = Some(System.currentTimeMillis())))
 }
