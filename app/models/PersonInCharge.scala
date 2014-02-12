@@ -6,7 +6,11 @@ package models
 import util.Division
 import java.sql.Date
 import db.GenericDao
+import play.api.db._
+import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.lifted.Query
+import Database.threadLocalSession
 import scalaz.Failure
 import scalaz.Success
 import scalaz.Validation
@@ -35,7 +39,7 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
   implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).get)
   implicit val chargeMapper: TypeMapper[Charge] = base[Charge, Long](c => c.id.get, id => Charge.load(id).get)
 
-  //  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+  override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def person = column[Person]("person")
   def charge = column[Charge]("charge")
   def division = column[Division.Division]("division")
@@ -48,12 +52,21 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
 
   def * = id.? ~ person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonInCharge.apply _, PersonInCharge.unapply _)
 
+  //  def withoutId = person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? <>
+  //    ({ (p: Person, c: Charge, d: Division.Division, s: Date, e: Date, cr1: Long, cr2: String, m1: Option[Long], m2: Option[String]) => PersonInCharge(None, p, c, d, s, e, cr1, cr2, m1, m2) },
+  //      { pic: PersonInCharge => Some((pic.person, pic.charge, pic.division, pic.start, pic.end, pic.created, pic.creator, pic.modified, pic.modifier)) })
+
+  def withoutId = person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
+  def insert = db withSession { (c: PersonInCharge) => withoutId.insert(c.person, c.charge, c.division, c.start, c.end, c.created, c.creator, c.modified, c.modifier) }
+  override def update(c: PersonInCharge): Int = db withSession { PersonInCharges.where(_.id === c.id).update(c.copy(modified = Some(System.currentTimeMillis()))) }
+
   /**
    * Persist a {@link PersonInCharge} item in the data store.
    *
    * If the specified instance is new, e.g., has no identifier set, it gets inserted into the database otherwise the existing entry with the same ID gets updated.
    */
-  def saveOrUpdate(pic: PersonInCharge): Validation[Throwable, PersonInCharge] = {
+  def saveOrUpdate(pic: PersonInCharge): Validation[Throwable, PersonInCharge] = db withSession {
     if (pic.id.isDefined) {
       val picUpd = pic.copy(modified = Some(System.currentTimeMillis()))
       try {

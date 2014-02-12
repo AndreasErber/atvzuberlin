@@ -38,7 +38,7 @@ object User {
 
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
   val tablename = "User"
-    
+
   def insert(u: User): Validation[Throwable, User] = {
     db withSession {
       try {
@@ -63,7 +63,7 @@ object User {
       }
     }
   }
-  
+
   def findByName(u: String): Validation[Throwable, User] = {
     db withSession {
       try {
@@ -77,7 +77,7 @@ object User {
       }
     }
   }
-  
+
   def register(u: User): Validation[Throwable, User] = {
     db withSession {
       try {

@@ -14,6 +14,9 @@ import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.i18n.Messages
+import accesscontrol.Roles
+import accesscontrol.Privileges
+import accesscontrol.RoleHasPrivileges
 
 /**
  * @author andreas
@@ -178,6 +181,24 @@ object Global extends GlobalSettings {
 
       try {
         PersonInCharges.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        Roles.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        Privileges.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
+      try {
+        RoleHasPrivileges.ddl.create
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
