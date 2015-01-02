@@ -19,7 +19,7 @@ import util.Division
  * Class to define a charge or duty that is to be taken by a person.
  *
  * @author andreas
- * @version 0.0.1, 2013-07-16
+ * @version 0.0.2, 2015-01-02
  */
 case class Charge(override val id: Option[Long],
   val name: String,
@@ -147,7 +147,7 @@ object Charges extends Table[Charge](Charge.tablename) {
   def abbr = column[String]("abbr", O.Nullable)
   def division = column[Division.Division]("division")
   def shortDesc = column[String]("shortDesc", O.Nullable)
-  def longDesc = column[String]("longDesc", O.Nullable)
+  def longDesc = column[String]("longDesc", O.Nullable, O.DBType("text"))
   def email = column[String]("email", O.Nullable)
   def created = column[Long]("created")
   def creator = column[String]("creator")
