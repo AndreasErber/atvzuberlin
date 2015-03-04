@@ -6,22 +6,38 @@
 
 @main(Messages("personincharge")) {
     @Logger.debug("Rendering person in charge form")
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Datepicker f&uuml;r zwei Felder fehlt.
+    </div>
+    
 	<h1>@Messages("personincharge.add")</h1>
 	@form(routes.ChargeCtrl.submitPiC) {
 	  @inputHidden(theForm("id"))
+	  <div class="form-group">
 	  @select(theForm("person"), 
               persons.map{p => p.id.get.toString -> p.name.toString},
-              '_label -> Messages("personincharge.person")
-    )
-    @select(theForm("charge"), 
+              '_label -> Messages("personincharge.person"),
+              'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">
+      @select(theForm("charge"), 
               charges.map{c => c.id.get.toString -> c.name.toString},
-              '_label -> Messages("personincharge.charge")
-    )  
+              '_label -> Messages("personincharge.charge"),
+              'class -> "form-control"
+      )
+      </div>
 	  @inputHidden(theForm("division"), '_value -> div)
-	  @inputText(theForm("start"), '_label -> Messages("personincharge.start"))
-	  @inputText(theForm("end"), '_label -> Messages("personincharge.end"))
-    @createModifyFormPart(theForm)
-    @submitResetCancel()
+	  <div class="form-group">
+	  @inputText(theForm("start"), '_label -> Messages("personincharge.start"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(theForm("end"), '_label -> Messages("personincharge.end"), 'class -> "form-control")
+	  </div>
+      @createModifyFormPart(theForm)
+      @submitResetCancel()
 	}
 	
 	@Logger.debug("Done rendering person in charge form")

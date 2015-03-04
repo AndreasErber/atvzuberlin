@@ -1,0 +1,35 @@
+@** 
+* registrationForm Template File 
+*
+* @author andreas
+* @version 0.0.2, 2015-01-10
+*@
+@(regForm: Form[String], persons: List[Person])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+
+@main(Messages("registration")) {
+  <h1>@Messages("registration")</h1>	
+  <div class="panel panel-default">
+    <div class="panel-heading">
+    
+    </div>
+    <div class="panel-body">
+    Um dich zu registrieren, brauchst du nichts weiter zu tun, als deinen Biernamen auszuw&auml;hlen und auf den 
+    <em>@Messages("registration.register.button")</em>-Knopf zu dr&uuml;cken. Dadurch wird automatisch ein Link
+    generiert, der an eine uns bekannte E-Mail-Adresse von dir versandt wird. Wenn du diesen Link besuchst, kannst
+    du dich dort anmelden. <br/>
+    Es kann durchaus einige Minuten dauern, bis die Mail bei dir ankommt. Also nicht 
+    ungelduldig werden. Kontrolliere bitte auch, ob die Mail versehentlich im Spam gelandet ist.
+    </div>
+  </div>
+  @form(routes.UserCtrl.registration) { 
+    @select(regForm("nickname"), 
+      persons.filter(p => p.nickname.isDefined).map(p => p.nickname.get -> p.nickname.get),
+      '_default -> Messages("registration.selPerson.default"),
+      '_label -> Messages("login.username"),
+      '_showConstraints -> false,
+      'class -> "form-control"
+    )
+    <input type="submit" class="btn btn-primary" value="@Messages("registration.register.button")" />
+  }
+}

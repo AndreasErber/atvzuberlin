@@ -19,8 +19,10 @@ import util.Personal
 import util.MembersPrivate
 
 /**
+ * The association of {@link Person}s to {@link AcademicTitle}s.
+ * 
  * @author andreas
- * @verson 0.0.2, 2013-04-21
+ * @verson 0.0.4, 2015-01-05
  */
 case class PersonHasTitle(pid: Long, tid: Long, pos: Int)
 
@@ -62,7 +64,7 @@ object PersonHasTitle {
           case e: Throwable => Failure(e)
         }
       } else {
-        Failure(phts.fail.toOption.get)
+        Failure(phts.toEither.left.get)
       }
     } catch {
       case e: Throwable => Failure(e)
@@ -92,8 +94,15 @@ object PersonHasTitle {
 
   }
 
-  def getAllForPerson(p: Person): Validation[Throwable, List[PersonHasTitle]] = db withSession {
-    getAllForPerson(p.id.get)
+  /**
+   * Retrieve all {@link AcademicTitle}s that are associated with the given <em>person</em>.
+   * 
+   * @param person The {@link Person} to get the {@link AcademicTitle}s for.
+   * @returns A {@link Validation} that holds the possibly empty list of {@link AcademicTitle}s of the <em>person</em>
+   *          or the {@link Throwable} in case of error. 
+   */
+  def getAllForPerson(person: Person): Validation[Throwable, List[PersonHasTitle]] = db withSession {
+    getAllForPerson(person.id.get)
   }
 
   private def getAllForPerson(pid: Long): Validation[Throwable, List[PersonHasTitle]] = db withSession {
@@ -137,11 +146,27 @@ object PersonHasTitle {
           case e: Throwable => Failure(e)
         }
       } else {
-        Failure(phts.fail.toOption.get)
+        Failure(phts.toEither.left.get)
       }
     }
   }
 
+  /**
+   * Delete a possible association between a {@link Person} identified by <em>pid</em> and an {@link AcademicTitle}
+   * specified by <em>tid</em>.
+   * 
+   * @param pid Identifier of the {@link Person} involved.
+   * @param tid Identifier of the {@link AcademicTitle} involved.
+   * @returns A {@link Validation} that either holds the {@link Throwable} that occurred in case of error or the 
+   *          {@link Int} indicating the number of rows that were removed.
+   */
+  def delete(pid: Long, tid: Long): Validation[Throwable, Int] = db withSession {
+    try {
+      Success(Query(PersonHasTitles).where(_.pid === pid).where(_.tid === tid).delete)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
+  }
 }
 
 object PersonHasTitles extends Table[PersonHasTitle](PersonHasTitle.tablename) {

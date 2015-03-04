@@ -9,15 +9,13 @@
       <h3>@o.name</h3>
       <span class="pull-right">
       @if(ctx.user.isDefined) {
-        <a href="/organization/edit/@o.id.get" title="@Messages("organization.edit")"><i class="icon-pencil"></i></a>
-        <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="icon-trash"></i></a>
+        <a href="/organization/edit/@o.id.get" title="@Messages("organization.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        <a data-toggle="modal" title="@Messages("organization.delete")" data-target="#delConfirm" onclick="delId = @o.id.get"><i class="glyphicon glyphicon-trash"></i></a>
 	  }
-	    <a href="/organizations" title="@Messages("organization.list")"><i class="icon-th-list"></i></a>
+	    <a href="/organizations" title="@Messages("organization.list")"><i class="glyphicon glyphicon-th-list"></i></a>
 	  @lastModificationIcon(o)
       </span>
     </caption>
-    <thead>
-    </thead>
     <tbody>
       <tr>
         <th>
@@ -66,6 +64,26 @@
           @o.city.get
         }
         </td>
+      </tr>
+      <tr>
+        <th>@Messages("addresses")</th>
+        <td>@adrOrgTable(o, adrs)</td>
+        <td><a href="/o/@o.id.get/address/new" title="@Messages("address.add")"><i class="glyphicon glyphicon-plus"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("phone")</th>
+        <td>@phoneOrgTable(o, ps)</td>
+        <td><a href="/o/@o.id.get/phone/edit" title="@Messages("phone.add")"><i class="glyphicon glyphicon-plus"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("email")</th>
+        <td>@emailOrgTable(o, es)</td>
+        <td><a href="/o/@o.id.get/email/edit" title="@Messages("email.add")"><i class="glyphicon glyphicon-plus"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("homepage")</th>
+        <td>@homepageOrgTable(o, hps)</td>
+        <td><a href="/o/@o.id.get/hp/edit" title="@Messages("homepage.add")"><i class="glyphicon glyphicon-plus"></i></a> ...</td>
       </tr>
     </tbody>
   </table>

@@ -24,17 +24,17 @@
           </td>
   	      <td>@at.femaleForm</td>
           <td> 
-            <a href="/ate/@at.id.get" title="@Messages("academicTitle.view")"><i class="icon-eye-open"></i></a>
+            <a href="/ate/@at.id.get" title="@Messages("academicTitle.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
           @if(ctx.user.isDefined) {
-            <a href="/at/edit/@at.id.get" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
-            <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @at.id.get"><i class="icon-trash"></i></a>
+            <a href="/at/edit/@at.id.get" title="@Messages("academicTitle.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+            <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @at.id.get"><i class="glyphicon glyphicon-trash"></i></a>
           }
           </td>
         </tr>
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="4"><a href="/at/new" title="@Messages("academicTitle.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="4"><a href="/at/new" title="@Messages("academicTitle.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

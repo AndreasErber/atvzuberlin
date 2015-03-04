@@ -3,7 +3,6 @@
  */
 package models
 
-import play.data.validation.Constraints
 import play.api.db._
 import play.api.Logger
 import play.api.Play.current
@@ -17,7 +16,7 @@ import scalaz.Success
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-06-30
+ * @version 0.0.2, 2014-11-30
  */
 case class Sports(override val id: Option[Long],
   val title: String,

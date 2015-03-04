@@ -20,9 +20,10 @@ import java.sql.Timestamp
 import play.api.i18n.Messages
 import models.Enrollment
 import play.api.templates.Html
+
 /**
  * @author andreas
- * @version 0.0.4, 2013-03-16
+ * @version 0.0.6, 2015-01-03
  */
 object EventCtrl extends Controller with ProvidesCtx with Security {
 
@@ -59,7 +60,7 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
         Logger.debug("Successfully deleted event with ID " + id + ".")
         Redirect(routes.EventCtrl.listUpcoming).flashing(("success" -> Messages("success.succeededToDeletePerson")))
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.EventCtrl.listUpcoming).flashing(("error" -> Messages("error.failedToDeletePerson")))
       }
 
@@ -83,15 +84,15 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
     val result = Event.getAllUpcoming(today)
     if (result.isSuccess) {
       val req = Ok(views.html.eventList(result.toOption.get.sortBy(e => e.start.getTime())))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.eventList(List())).flashing("error" -> Messages("error.failedToLoadUpcomingEventsList"))
     }
   }
@@ -108,10 +109,10 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
         if (participants.isSuccess) {
           req = Ok(views.html.event(ev, participants.toOption.get, None, None, showEnrs))
         } 
-        if (flash.get("error").isDefined) {
-          req.flashing(("error" -> flash.get("error").get))
-        } else if (flash.get("success").isDefined) {
-          req.flashing(("success" -> flash.get("success").get))
+        if (request.flash.get("error").isDefined) {
+          req.flashing(("error" -> request.flash.get("error").get))
+        } else if (request.flash.get("success").isDefined) {
+          req.flashing(("success" -> request.flash.get("success").get))
         } else {
           req
         }
@@ -132,7 +133,7 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.EventCtrl.show(result.toOption.get.id.get, false)).flashing("success" -> Messages("success.succeededToStoreEvent"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.eventForm(eventForm)).flashing("error" -> Messages("error.failedToStoreEvent"))
           }
         })

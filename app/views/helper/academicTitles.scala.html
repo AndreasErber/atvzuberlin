@@ -1,0 +1,20 @@
+@* academicTitles Template File *@
+@(p: Person, titles: List[AcademicTitle])(implicit lang: Lang, ctx: util.Ctx)
+@import helper._
+
+  <table class="table">
+    <tbody>
+    @for(t <- titles) {
+      <tr>
+        <td>
+  	    @Html("<abbr title=\"" + (if (p.gender == 'm') t.maleForm.getOrElse("") else t.femaleForm.getOrElse("")) + "\">" + t.abbr + "</abbr>")
+  	    </td>
+  	    <td>
+  	      <a href="#" data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm_academicTitle" onclick="delId = @t.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+  	    </td>
+  	  </tr> 
+    }
+    </tbody>
+  </table>
+
+@deleteConfirmationModal("academicTitle", "/p/" + p.id.get + "/at/delete/")

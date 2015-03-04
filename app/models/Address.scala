@@ -19,8 +19,10 @@ import util.Privacy
 import util.MembersPrivate
 
 /**
+ * Entity to provide a postal address.
+ * 
  * @author andreas
- * @version 0.0.3, 2013-03-29
+ * @version 0.0.5, 2015-01-05
  */
 case class Address(override val id: Option[Long] = None,
   val addon: Option[String],
@@ -152,7 +154,7 @@ object Address {
       if (result.isSuccess) {
         o1 = result.toOption.get
       } else {
-        return Failure(result.fail.toOption.get)
+        return Failure(result.toEither.left.get)
       }
     }
     db withSession {
@@ -166,7 +168,7 @@ object Address {
           } 
           result1
         } else
-          Failure(result1.fail.toOption.get)
+          Failure(result1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }
@@ -186,7 +188,7 @@ object Address {
       if (result.isSuccess) {
         p1 = Person.saveOrUpdate(p).toOption.get
       } else {
-        return Failure(result.fail.toOption.get)
+        return Failure(result.toEither.left.get)
       }
     }
     db withSession {
@@ -200,7 +202,7 @@ object Address {
           }
           result1
         } else
-          Failure(result1.fail.toOption.get)
+          Failure(result1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }
@@ -235,23 +237,6 @@ object Address {
           case e: Throwable => Failure(e)
         }
       }
-    }
-  }
-
-  /**
-   * Delete the address identified by id.
-   */
-  def deletePersonAddress(pid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(PersonHasAddresses).where(_.pid === pid).where(_.aid === id).delete
-    if (del > 0) {
-      try {
-        val delCount = Query(Addresses).filter(_.id === id).delete
-        if (delCount > 0) Success(true) else Failure(new RuntimeException("Failed to delete address with id " + id))
-      } catch {
-        case e: Throwable => Failure(e)
-      }
-    } else {
-      Failure(new RuntimeException("Failed to delete the connection between the person and the address. (" + pid + ", " + id + ")"))
     }
   }
   

@@ -1,0 +1,27 @@
+@**
+* Form to select roles for a user.
+*
+* @author andreas
+* @version 0.0.1, 2014-05-29
+*@
+@(userHasRoleForm: Form[(String, List[accesscontrol.Role])], uhrs: List[accesscontrol.Role])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@main(Messages("")) {
+
+  <h2>@Messages("userHasRoles.select")</h2>
+  @form(routes.UserHasRoleCtrl.submit) {
+    @inputHidden(userHasRoleForm("username"))
+    @inputCheckboxGroup(userHasRoleForm("roles"), 
+    	                options = uhrs.map(role => (role.name -> role.name)), 
+    	                '_label -> Messages("userHasRoles.select")) 
+    @createModifyFormPart(userHasRoleForm)
+    @submitResetCancel()
+  
+  @Logger.debug("Done rendering user has role form")
+  }
+}
+
+
+

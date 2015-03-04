@@ -16,23 +16,24 @@ import scala.slick.lifted.Query
 import scalaz.Validation
 import scalaz.Failure
 import scalaz.Success
+import util.MemberState
 
 /**
  * @author andreas
  * @version 0.0.7, 2013-04-12
  */
 case class Person(
-    override val id: Option[Long] = None,
-    val lastname: String,
-    val firstname: Option[String] = None,
-    val nickname: Option[String] = None,
-    val birth: Option[Date] = None,
-    val death: Option[Date] = None,
-    val gender: Char = 'm',
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
+  override val id: Option[Long] = None,
+  val lastname: String,
+  val firstname: Option[String] = None,
+  val nickname: Option[String] = None,
+  val birth: Option[Date] = None,
+  val death: Option[Date] = None,
+  val gender: Char = 'm',
+  override val created: Long = System.currentTimeMillis(),
+  override val creator: String,
+  override val modified: Option[Long] = None,
+  override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
 
   // lastname is the only required argument
   require(Option(lastname).isDefined)
@@ -48,20 +49,20 @@ case class Person(
     val name: StringBuffer = new StringBuffer
     if (this.firstname.isDefined) {
       name.append(this.firstname.get + " ")
-    } 
-    name.append(this.lastname)  
+    }
+    name.append(this.lastname)
     name.toString()
   }
-    
+
   def fullname: String = {
     val name: StringBuffer = new StringBuffer
     if (this.firstname.isDefined) {
       name.append(this.firstname.get + " ")
-    } 
-    name.append(this.lastname) 
+    }
+    name.append(this.lastname)
     if (this.nickname.isDefined) {
       name.append(" - " + this.nickname.get)
-    } 
+    }
     name.toString()
   }
   /**
@@ -231,11 +232,140 @@ object Person {
     }
   }
 
+  def deleteCascading(id: Long): Validation[Throwable, Boolean] = {
+    try {
+      Success(this.deleteCompletely(id))
+    } catch {
+      case t: Throwable => Failure(t)
+    }
+  }
+
+  /**
+   * Deletes not only the {@link Person} instance but also its associations to other entities.
+   *
+   * The method will remove
+   * <ul>
+   *   <li>entries in {@link PersonHasTitles} having <em>id</em> for the pid</li>
+   *   <li>entries in {@link PersonHasEmails} having <em>id</em> for the pid and the entries in {@link Emails}
+   *       referenced by the deleted entries of {@link PersonHasEmails} entries</li>
+   *   <li>entries in {@link PersonHasPhones} having <em>id</em> for the pid and the entries in {@link Phones}
+   *       referenced by the deleted entries of {@link PersonHasPhones} entries</li>
+   *   <li>entries in {@link PersonHasHomepages} having <em>id</em> for the pid and the entries in {@link Homepages}
+   *       referenced by the deleted entries of {@link PersonHasHomepages} entries</li>
+   *   <li>the corresponding entry in {@link PersonAdditionalInfo}</li>
+   *   <li>the entry in {@link Persons} referenced by <em>id</em></li>
+   * </ul>
+   *
+   * @param id The identifier of the {@link Person} and its associations to delete.
+   * @returns <code>true</code> if all associations and the {@link Person} identified by <em>id</em> could be removed
+   *          successfully.
+   */
+  private def deleteCompletely(id: Long): Boolean = db withTransaction {
+    // delete association with titles
+    Query(PersonHasTitles).where(_.pid === id).delete
+
+    // remove associations to emails and the emails themselves
+    val pheList = Query(PersonHasEmails).where(_.pid === id).list
+    Query(PersonHasEmails).where(_.pid === id).delete
+    val emailQuery = for {
+      email <- Emails
+      if email.id inSetBind pheList.map(phe => phe.eid)
+    } yield email
+    emailQuery.delete
+
+    // remove associations to phone numbers and the phone numbers themselves
+    val phpList = Query(PersonHasPhones).where(_.pid === id).list
+    Query(PersonHasPhones).where(_.pid === id).delete
+    val phoneQuery = for {
+      phone <- Phones
+      if phone.id inSetBind phpList.map(php => php.phid)
+    } yield phone
+    phoneQuery.delete
+
+    // delete associations with homepages and the homepage entries as well
+    val phhList = Query(PersonHasHomepages).where(_.pid === id).list
+    Query(PersonHasHomepages).where(_.pid === id).delete
+    val homepageQuery = for {
+      homepage <- Homepages
+      if homepage.id inSetBind phhList.map(phh => phh.hid)
+    } yield homepage
+
+    Query(PersonAdditionalInfos).where(_.id === id).delete
+    Query(Persons).where(_.id === id).delete
+    true
+  }
+
+  /**
+   * Retrieve all {@link Person}s having the given {@link MemberState}.
+   *
+   * Note, the information about the {@link MemberState} of a {@link Person} is kept in the accompanying
+   * {@link PersonAdditionalInfo} instance.
+   *
+   * @param status The {@link MemberState} to filter by.
+   * @returns A {@link Validation} with a {@link List} of {@link Person}s having the given status or the
+   *          {@link Throwable} in case of error.
+   */
+  def getAllByStatus(status: MemberState): Validation[Throwable, List[Person]] = db withSession {
+    val paiVal = PersonAdditionalInfos.getByStatus(status)
+    if (paiVal.isFailure) {
+      Failure(paiVal.toEither.left.get)
+    }
+    val ids = paiVal.toOption.get.map(pai => pai.id.get)
+    this.getByIds(ids)
+  }
+
+  /**
+   * Retrieve all {@link Person}s having the given {@link MemberState}s.
+   *
+   * Note, the information about the {@link MemberState} of a {@link Person} is kept in the accompanying
+   * {@link PersonAdditionalInfo} instance.
+   *
+   * @param status The {@link MemberState}s to filter by.
+   * @returns A {@link Validation} with a {@link List} of {@link Person}s having the given status or the
+   *          {@link Throwable} in case of error.
+   */
+  def getAllByStatus(status: List[MemberState]): Validation[Throwable, List[Person]] = db withSession {
+    val paiVal = PersonAdditionalInfos.getByStatus(status)
+    if (paiVal.isFailure) {
+      Failure(paiVal.toEither.left.get)
+    }
+    val ids = paiVal.toOption.get.map(pai => pai.id.get)
+    this.getByIds(ids)
+  }
+
+  /**
+   * Retrieve the {@link Person}s that match the identifiers in the given <em>ids</em> list.
+   *
+   * Note, this method needs to be called within an existing database session context.
+   *
+   * @param ids Identifiers of {@link Persons}
+   * @returns A {@link Validation} with a {@link List} of {@link Person}s having one of the given IDs or the
+   *          {@link Throwable} in case of error.
+   */
+  private def getByIds(ids: List[Long]): Validation[Throwable, List[Person]] = {
+    try {
+      val q = for (
+        p <- Persons if p.id inSetBind ids
+      ) yield p
+      Success(q.list)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
+  }
+
   /**
    * Count the number of occurrences of persons.
    */
   def count(): Int = db withSession {
     Persons.count
+  }
+
+  def getByNickname(nick: String): Validation[Throwable, Person] = db withSession {
+    try {
+      Success(Query(Persons).filter(_.nickname === nick).firstOption.get)
+    } catch {
+      case e: Throwable => Failure(e)
+    }
   }
 }
 
@@ -259,7 +389,7 @@ object Persons extends Table[Person](Person.tablename) {
   def modifier = column[String]("modifier", O.Nullable)
   def * = id.? ~ lastname ~ firstname.? ~ nickname.? ~ birth.? ~ death.? ~ gender ~ created ~ creator ~ modified.? ~ modifier.? <> (Person.apply _, Person.unapply _)
 
-  def withoutId = lastname ~ firstname.? ~ nickname.? ~ birth.? ~ death.?  ~ gender ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def withoutId = lastname ~ firstname.? ~ nickname.? ~ birth.? ~ death.? ~ gender ~ created ~ creator ~ modified.? ~ modifier.? returning id
   def insert = (p: Person) => withoutId.insert(p.lastname, p.firstname, p.nickname, p.birth, p.death, p.gender, p.created, p.creator, p.modified, p.modifier)
   def update(p: Person): Int = Persons.where(_.id === p.id).update(p.copy(modified = Some(System.currentTimeMillis())))
   def count(): Int = Persons.count

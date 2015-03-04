@@ -12,19 +12,40 @@
 
 @main(Messages("organization")) {
     @Logger.debug("Rendering organization form")
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Datepicker f&uuml;r Gr&uuml;ndung und Wiedergr&uuml;ndung fehlt.
+    </div>
+    
 	<h1>@Messages("organization")</h1>
 	@form(routes.OrganizationCtrl.submit) {
-	  @inputHidden(orgForm("id")) 
-	  @inputText(orgForm("name"), '_label -> Messages("organization.name"))
+	  @inputHidden(orgForm("id"))
+	  <div class="form-group">
+	  @inputText(orgForm("name"), '_label -> Messages("organization.name"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
 	  @select(orgForm("gender"), 
               Seq(("m" -> Messages("organization.gender.m")), ("f" -> Messages("organization.gender.f")), "g" -> Messages("organization.gender.g")),
-              '_label -> Messages("organization.selGender")
-        )
-	  @inputDate(orgForm("founded"), '_label -> Messages("organization.founded"))
-	  @inputDate(orgForm("refounded"), '_label -> Messages("organization.refounded"))
-	  @inputText(orgForm("motto"), '_label -> Messages("organization.motto"))
-	  @inputText(orgForm("colors"), '_label -> Messages("organization.colors"))
-	  @inputText(orgForm("city"), '_label -> Messages("organization.city"))
+              '_label -> Messages("organization.selGender"), 
+              'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">  
+	  @inputDate(orgForm("founded"), '_label -> Messages("organization.founded"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputDate(orgForm("refounded"), '_label -> Messages("organization.refounded"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(orgForm("motto"), '_label -> Messages("organization.motto"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(orgForm("colors"), '_label -> Messages("organization.colors"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(orgForm("city"), '_label -> Messages("organization.city"), 'class -> "form-control")
+	  </div>
       @createModifyFormPart(orgForm)
       @submitResetCancel()
 	}

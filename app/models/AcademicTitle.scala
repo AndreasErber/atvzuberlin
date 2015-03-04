@@ -16,7 +16,7 @@ import scalaz.Validation
 
 /**
  * @author andreas
- * @version 0.0.4, 2013-07-27
+ * @version 0.0.5, 2015-01-03
  */
 case class AcademicTitle(
   override val id: Option[Long] = None,
@@ -120,7 +120,7 @@ object AcademicTitle {
       val titles = for (pht <- phts.toOption.get) yield (AcademicTitle.load(pht.tid).get)
       Success(titles)
     } else {
-      Failure(phts.fail.toOption.get)
+      Failure(phts.toEither.left.get)
     }
   }
 

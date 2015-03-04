@@ -3,7 +3,6 @@
  */
 package models
 
-import play.data.validation.Constraints
 import play.api.db._
 import play.api.Logger
 import play.api.Play.current
@@ -23,7 +22,7 @@ import util.Landline
 
 /**
  * @author andreas
- * @version 0.0.3, 2013-03-29
+ * @version 0.0.5, 2015-01-03
  */
 case class Phone(override val id: Option[Long],
   val areacode: Int,
@@ -64,11 +63,13 @@ object Phone {
   }
 
   def deletePersonPhone(pid: Long, id: Long): Validation[Throwable, Boolean] = db withSession {
-    val del = Query(PersonHasPhones).where(_.pid === pid).where(_.phid === id).delete
-    if (del > 0) {
+    try {
+      // first delete association
+      Query(PersonHasPhones).where(_.pid === pid).where(_.phid === id).delete
+      // then delete email address
       delete(id)
-    } else {
-      Failure(new RuntimeException("Failed to delete the connection between the person and the phone number. (" + pid + ", " + id + ")"))
+    } catch {
+      case t: Throwable => Failure(t)
     }
   }
 
@@ -182,7 +183,7 @@ object Phone {
             OrgHasPhones.insert(OrgHasPhone(o1.id.get, ph1.toOption.get.id.get, l.length + 1));
           }
           ph1
-        } else Failure(ph1.fail.toOption.get)
+        } else Failure(ph1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }
@@ -211,7 +212,7 @@ object Phone {
             PersonHasPhones.insert(PersonHasPhone(p1.id.get, ph1.toOption.get.id.get, l.length + 1));
           }
           ph1
-        } else Failure(ph1.fail.toOption.get)
+        } else Failure(ph1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }

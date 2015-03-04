@@ -23,8 +23,8 @@ import models.Person
 import java.sql.Date
 
 /**
- * @author aer
- * @version 0.0.1, 2013-07-16
+ * @author andreas
+ * @version 0.0.3, 2015-01-03
  */
 object ChargeCtrl extends Controller with ProvidesCtx with Security {
 
@@ -87,7 +87,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
         Logger.debug("Successfully deleted charge with ID " + id + ".")
         Redirect(routes.ChargeCtrl.list).flashing(("success" -> Messages("success.succeededToDeleteCharge")))
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.ChargeCtrl.list).flashing(("error" -> Messages("error.failedToDeleteCharge")))
       }
   }
@@ -115,15 +115,15 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
     val result = Charge.getAll()
     if (result.isSuccess) {
       val req = Ok(views.html.chargesList(result.toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.chargesList(List())).flashing("error" -> Messages("error.failedToLoadChargesList"))
     }
   }
@@ -136,10 +136,10 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
       case Some(ch) =>
         Logger.logger.debug("Found charge with ID " + id + ".")
         val req = Ok(views.html.charge(ch))
-        if (flash.get("error").isDefined) {
-          req.flashing(("error" -> flash.get("error").get))
-        } else if (flash.get("success").isDefined) {
-          req.flashing(("success" -> flash.get("success").get))
+        if (request.flash.get("error").isDefined) {
+          req.flashing(("error" -> request.flash.get("error").get))
+        } else if (request.flash.get("success").isDefined) {
+          req.flashing(("success" -> request.flash.get("success").get))
         } else {
           req
         }
@@ -160,7 +160,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.ChargeCtrl.show(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStoreCharge"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.chargeForm(chargeForm)).flashing("error" -> Messages("error.failedToStoreCharge"))
           }
         })
@@ -202,7 +202,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
   //        Logger.debug("Successfully deleted charge with ID " + id + ".")
   //        Redirect(routes.ChargeCtrl.list).flashing(("success" -> Messages("success.succeededToDeleteCharge")))
   //      } else {
-  //        Logger.error(result.toString(), result.fail.toOption.get)
+  //        Logger.error(result.toString(), result.toEither.left.get)
   //        Redirect(routes.ChargeCtrl.list).flashing(("error" -> Messages("error.failedToDeleteCharge")))
   //      }
   //  }
@@ -233,15 +233,15 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
     val result = PersonInCharges.getAll
     if (result.isSuccess) {
       val req = Ok(views.html.personInChargeList(result.toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.personInChargeList(List())).flashing("error" -> Messages("error.failedToLoadPersonInChargeList"))
     }
   }
@@ -254,10 +254,10 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
   //      case Some(ch) =>
   //        Logger.logger.debug("Found charge with ID " + id + ".")
   //        val req = Ok(views.html.charge(ch))
-  //        if (flash.get("error").isDefined) {
-  //          req.flashing(("error" -> flash.get("error").get))
-  //        } else if (flash.get("success").isDefined) {
-  //          req.flashing(("success" -> flash.get("success").get))
+  //        if (request.flash.get("error").isDefined) {
+  //          req.flashing(("error" -> request.flash.get("error").get))
+  //        } else if (request.flash.get("success").isDefined) {
+  //          req.flashing(("success" -> request.flash.get("success").get))
   //        } else {
   //          req
   //        }
@@ -283,7 +283,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.ChargeCtrl.listPiC(pic.division.toString())).flashing("success" -> Messages("success.succeededToStorePersonInCharge"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             val charges = Charge.getAllForDivision(pic.division)
             // TODO: error handling
             BadRequest(views.html.personInChargeForm(piCForm, persons.toOption.get, charges.toOption.get, pic.division.toString())).flashing("error" -> Messages("error.failedToStorePersonInCharge"))

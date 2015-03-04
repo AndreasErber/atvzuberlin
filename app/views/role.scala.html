@@ -1,0 +1,59 @@
+@**
+* Display a {@link Role} item.
+*
+* @param r The {@link Role} instance to display.
+* @author andreas
+* @version 0.0.3, 2015-01-04
+*@
+@(r: accesscontrol.Role, privs: List[accesscontrol.Privilege])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("role")) {
+  <h2>@Messages("role.view")</h2>
+  <table class="table">
+    <caption>
+      <span class="pull-right">
+      @if(ctx.user.isDefined) {
+      	@if(ctx.userHasPrivilege(ctx.user.get, "edit.role")) {
+        <a href="/role/edit/@r.id.get" title="@Messages("role.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        }
+        @if(ctx.userHasPrivilege(ctx.user.get, "delete.role")) {
+        <a data-toggle="modal" title="@Messages("role.delete")" data-target="#delConfirm" onclick="delId = @r.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+        }
+      }
+      <a href="/roles" title="@Messages("role.list")"><i class="glyphicon glyphicon-th-list"></i></a>
+      @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.role")) {
+        <a href="/role/new" title="@Messages("role.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+      }
+      </span>
+    </caption>
+    <tbody>
+      <tr>
+        <th>@Messages("role.name")</th>
+        <td>@r.name</td>
+      </tr>
+      <tr>
+        <th>@Messages("role.description")</th>
+        <td>
+        @if(r.description.isDefined) {
+          @r.description
+        } else {
+          <em>@Messages("role.no.description.available")</em>
+        }
+        </td>
+      </tr>
+      <tr>
+        <th>@Messages("role.privileges")</th>
+        <td>
+          <ul>
+          @for(priv <- privs) {
+  	        <li>@priv.name</li>
+          }
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+@deleteConfirmation("role")
+}

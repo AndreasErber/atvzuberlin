@@ -1,13 +1,15 @@
+@*
+* Inline table to display the {@link Email} addresses of a {@link Person}.
+*
+* @param p The {@link Person} to display the {@link Email} addresses for.
+* @param phones A {@link List} of {@link Email} addresses and additional information.
+* @author andreas
+* @version 0.0.2, 2015-01-05
+*@
 @(p: Person, emails: List[(Email, PersonHasEmail)])(implicit lang: Lang, ctx: util.Ctx)
+@import helper._
 
-    <table class="table table-striped table-hover">
-	  <thead>
-	    <tr>
-	      <th>@Messages("email.address")</th>
-	      <th>@Messages("usagetype")</th>
-	      <th>@Messages("actions")</th>
-	    <tr>
-	  </thead>
+    <table class="table table-hover">
 	  <tbody>
 	  @for(em <- emails) {
 		<tr>
@@ -15,18 +17,16 @@
 		  <td>@Messages("usagetype." + em._2.usage)</td>
 		  <td>
 		  @if(ctx.user.isDefined) {
-		    <a href="/p/@p.id.get/email/edit/@em._1.id.get" title="@Messages("email.edit")"><i class="icon-pencil"></i></a>
-		    <a href="/p/@p.id.get/email/delete/@em._1.id.get" title="@Messages("email.delete")"><i class="icon-trash"></i></a>
+		  	@if(ctx.userHasPrivilege(ctx.user.get, "edit.person.email")) {
+		    <a href="/p/@p.id.get/email/edit/@em._1.id.get" title="@Messages("email.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+		    }
+		    @if(ctx.userHasPrivilege(ctx.user.get, "delete.person.email")) {
+		      <a href="#" data-toggle="modal" title="@Messages("email.delete")" data-target="#delConfirm_email" onclick="delId = @em._1.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+		    }
 		  }
-		  @lastModificationIcon(em._1)
 		  </td>
 		</tr>
 	  }
-	  @if(ctx.user.isDefined) {
-	    <tr>
-	      <td colspan="2"></td>
-	      <td><a href="/p/@p.id.get/email/edit" title="@Messages("email.add")"><i class="icon-plus"></i></a> ...</td>
-	    </tr>
-	  }
 	  </tbody>
 	</table>
+@deleteConfirmationModal("email", "/p/" + p.id.get + "/email/delete/")	

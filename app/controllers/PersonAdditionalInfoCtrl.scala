@@ -16,19 +16,22 @@ import controllers.ext.{ ProvidesCtx, Security }
 import util.{ FormOfAddress, LetterSalutation }
 import models.PersonAdditionalInfo
 import play.api.i18n.Messages
+import util.MemberState
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-21
+ * @version 0.0.2, 2015-01-03
  */
 object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Security {
 
   implicit val formOfAddressFormatter = CustomFormatters.formOfAddressFormatter
   implicit val letterSalutationFormatter = CustomFormatters.letterSalutationFormatter
+  implicit val memberStateFormatter = CustomFormatters.memberStateFormatter
   implicit val sqlDateFormatter = CustomFormatters.sqlDateFormatter
 
   val formOfAddressMapping = of[FormOfAddress]
   val letterSalutationMapping = of[LetterSalutation]
+  val personStatusMapping = of[MemberState]
   val sqlDateMapping = of[java.sql.Date]
 
   val paiForm = Form[PersonAdditionalInfo](
@@ -38,6 +41,7 @@ object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Securit
       "letterSalutation" -> letterSalutationMapping,
       "enlistment" -> optional(sqlDateMapping),
       "withdrawal" -> optional(sqlDateMapping),
+      "status" -> personStatusMapping,
       "profession" -> optional(text),
       "employer" -> optional(text),
       "created" -> longNumber,
@@ -72,7 +76,7 @@ object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Securit
           if (result.isSuccess) {
             Redirect(routes.PersonCtrl.show(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStorePersonAI", result.toOption.get.id.get))
           } else {
-            Logger.logger.error(result.toString(), result.fail.toOption.get)
+            Logger.logger.error(result.toString(), result.toEither.left.get)
             Redirect(routes.PersonCtrl.list).flashing("error" -> Messages("error.failedToStorePersonAI", paiForm.data.get("id").get))
           }
 

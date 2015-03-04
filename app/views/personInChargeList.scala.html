@@ -1,8 +1,12 @@
 @(pic: Seq[PersonInCharge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
 @import helper.lastModificationIcon
+@import helper.permanentError
 
 @main(Messages("personincharge")) {
+	@permanentError("Hinzuf&uuml;gen-Link ist falsch.")
+    @permanentError("Inhalt ist nicht abteilungsbezogen.")
+    
 	<h2>@Messages("personincharge")</h2>
 	<table class="table table-striped table-hover">
     <thead>
@@ -20,8 +24,8 @@
         <td><a href="mailto:@c.charge.email" title="@Messages("personincharge.mail.to.charge", c.charge.name)">@c.charge.email</a></td>
         <td> 
           @if(ctx.user.isDefined) {
-            <a href="/pic/edit/@c.id.get" title="@Messages("personincharge.edit")"><i class="icon-pencil"></i></a>
-            <a href="#" data-toggle="modal" title="@Messages("personincharge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="icon-trash"></i></a>
+            <a href="/pic/edit/@c.id.get" title="@Messages("personincharge.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+            <a href="#" data-toggle="modal" title="@Messages("personincharge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="glyphicon glyphicon-trash"></i></a>
           }
           @lastModificationIcon(c)
           </td>
@@ -30,7 +34,7 @@
     @if(ctx.user.isDefined) {
       <tr>
         <td colspan="3"></td>
-        <td><a href="/pic/new" title="@Messages("personincharge.add")"><i class="icon-plus"></i></a> ...</td>
+        <td><a href="/pic/new" title="@Messages("personincharge.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
       </tr>
     }
     </tbody>

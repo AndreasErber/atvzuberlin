@@ -1,3 +1,10 @@
+@*
+* Form to enter or modify homepage data.
+*
+* @param hpForm Form data to display
+* @author andreas
+* @version 0.0.2, 2015-01-05
+*@
 @(hpForm: Form[(Homepage, util.UsageType)], pid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -10,13 +17,20 @@
     @Logger.debug("Rendering homepage form")
 	<h2>@Messages("homepage")</h2>
 	@form(routes.HomepageCtrl.submitPersonHomepage(pid)) {
-	  @inputHidden(hpForm("homepage.id")) 
-	  @inputText(hpForm("homepage.url"), '_label -> Messages("homepage.url"))
-	  @inputText(hpForm("homepage.descr"), '_label -> Messages("homepage.descr"))
+	  @inputHidden(hpForm("homepage.id"))
+	  <div class="form-group"> 
+	  @inputText(hpForm("homepage.url"), '_label -> Messages("homepage.url"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(hpForm("homepage.descr"), '_label -> Messages("homepage.descr"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
 	  @select(hpForm("usage"), 
               Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
-              '_label -> Messages("email.selUsageType")
+              '_label -> Messages("email.selUsageType"),
+              'class -> "form-control"
       )
+      </div>
       @createModifyFormPart(hpForm, "homepage.")
       @submitResetCancel()
 	}

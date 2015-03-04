@@ -3,23 +3,23 @@
 *
 * Example:
 * {{{
-*   @richtTextEditor(field = myForm("name"), args = 'data-ref -> 0)
+*   $('#@id').wysihtml5({locale: "de-DE"});
 * }}}
 *
 * @param field The form field.
-* @param args Set of extra attributes.
+* @param args Set of extra attributes to be passed to the HTML textarea element.
 * @param handler The field constructor.
 * @param lang i18n
 * @param ctx Session context
+*
+* @author andreas
+* @version 0.0.3, 2015-01-04
 *@
 @(field: play.api.data.Field, args: (Symbol,Any)*)(implicit handler: FieldConstructor, lang: play.api.i18n.Lang, ctx: util.Ctx)
 @input(field, args.filter(_._1 != 'type):_*) { (id, name, value, htmlArgs) =>
-	@wysihtml5toolbar()      
+	<script src="@routes.Assets.at("bootstrap3-wysiwyg/locales/bootstrap-wysihtml5.de-DE.js")"></script>
     <textarea id="@id" name="@name" @toHtmlArgs(htmlArgs)>@value</textarea>
-    <script type="text/javascript">
-	  var editor = new wysihtml5.Editor("content", {
-          toolbar:      "wysihtml5-toolbar",
-          parserRules:  wysihtml5ParserRules
-      });
+    <script>
+      $('#@id').wysihtml5({locale: "de-DE"});
 	</script>
 }

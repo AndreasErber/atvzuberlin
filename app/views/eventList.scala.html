@@ -30,7 +30,7 @@
 	      <td>
 	        @if(e.location.isDefined) {
 	          @if(e.location.get.contains("Onkel-Tom-Str")) {
-	          <i class="icon-home"></i>
+	          <i class="glyphicon glyphicon-home"></i>
 	          } else {
 	          @e.location.get
 	          }
@@ -38,10 +38,10 @@
           </td>
   	      <td><strong>@e.title</strong></td>
           <td> 
-            <a href="/event/@e.id.get" title="@Messages("event.view")"><i class="icon-eye-open"></i></a>
+            <a href="/event/@e.id.get/true" title="@Messages("event.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
           @if(ctx.user.isDefined) {
-            <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
-            <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="icon-trash"></i></a>
+            <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+            <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="glyphicon glyphicon-trash"></i></a>
           }
           </td>
         </tr>
@@ -55,7 +55,7 @@
 	  }
 	  @if(ctx.user.isDefined) {
 	    <tr>
-	      <td colspan="4"><a href="/event/new" title="@Messages("event.add")"><i class="icon-plus"></i></a> ...</td>
+	      <td colspan="4"><a href="/event/new" title="@Messages("event.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
 	    </tr>
 	  }
 	  </tbody>

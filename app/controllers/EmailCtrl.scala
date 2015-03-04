@@ -21,7 +21,7 @@ import models.Organization
 
 /**
  * @author andreas
- * @version 0.0.3, 2013-03-31
+ * @version 0.0.5, 2015-01-03
  */
 object EmailCtrl extends Controller with ProvidesCtx with Security {
 
@@ -62,7 +62,7 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.EmailCtrl.showOrgEmail(oid)).flashing(("success" -> Messages("success.succeededToDeleteEmail")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.EmailCtrl.showOrgEmail(oid)).flashing(("error" -> Messages("error.failedToDeleteEmail")))
       }
   }
@@ -73,7 +73,7 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.EmailCtrl.showPersonEmail(pid)).flashing(("success" -> Messages("success.succeededToDeleteEmail")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.EmailCtrl.showPersonEmail(pid)).flashing(("error" -> Messages("error.failedToDeleteEmail")))
       }
   }
@@ -102,10 +102,10 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val o = Organization.load(oid).get
       val req = Ok(views.html.emailOrg(o, Email.getOrgEmails(o).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -115,10 +115,10 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val p = Person.load(pid).get
       val req = Ok(views.html.email(p, Email.getPersonEmails(p).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -126,9 +126,10 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
 
   def submitOrgEmail(oid: Long) = isAuthenticated { username =>
     implicit request =>
+      Logger.debug("Binding org email request ...")
       emailOrgForm.bindFromRequest.fold(
         errors => {
-          Logger.error("An error occurred when trying to process the email form.")
+          Logger.error("An error occurred when trying to process the organization email form. Hint: " + errors.error("address").toString())
           BadRequest(views.html.emailOrgForm(errors, oid))
         },
         email => {
@@ -138,7 +139,7 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.EmailCtrl.showOrgEmail(oid)).flashing(("success" -> Messages("success.succeededToStoreEmail")))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.emailOrgForm(emailOrgForm, oid)).flashing("error" -> Messages("error.failedToStoreEmail"))
           }
         })
@@ -158,7 +159,7 @@ object EmailCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.EmailCtrl.showPersonEmail(pid)).flashing(("success" -> Messages("success.succeededToStoreEmail")))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.emailForm(emailForm, pid)).flashing("error" -> Messages("error.failedToStoreEmail"))
           }
         })

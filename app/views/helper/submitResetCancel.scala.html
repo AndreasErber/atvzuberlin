@@ -1,6 +1,6 @@
 @()(implicit lang: Lang, ctx: util.Ctx)
       <input type="submit" class="btn btn-primary" value="@Messages("submit")" />
-      <input type="reset" class="btn" value="@Messages("reset")" />
+      <input type="reset" class="btn btn-default" value="@Messages("reset")" />
       @if(ctx.referer.isDefined) {
-        <a href="@ctx.referer" class="btn">@Messages("cancel")</a>
+        <a href="@ctx.referer" class="btn btn-default">@Messages("cancel")</a>
       }

@@ -164,7 +164,7 @@ GET   /pic/atv/new                controllers.ChargeCtrl.createPiC(div = "ATV")
 GET   /pic/eg/new                 controllers.ChargeCtrl.createPiC(div = "Ehrengericht")
 GET   /pic/hb/new                 controllers.ChargeCtrl.createPiC(div = "Handball")
 GET   /pic/fb/new                 controllers.ChargeCtrl.createPiC(div = "Faustball")
-GET   /pic/:picid/edit            controllers.ChargeCtrl.edit(picid: Long)
+GET   /pic/edit/:picid            controllers.ChargeCtrl.edit(picid: Long)
 GET   /pic/ac/list                controllers.ChargeCtrl.listPiC(div = "Aktivitas")
 GET   /pic/kv/list                controllers.ChargeCtrl.listPiC(div = "Korporationsverband")
 GET   /pic/atv/list               controllers.ChargeCtrl.listPiC(div = "ATV")
@@ -173,10 +173,26 @@ GET   /pic/hb/list                controllers.ChargeCtrl.listPiC(div = "Handball
 GET   /pic/fb/list                controllers.ChargeCtrl.listPiC(div = "Faustball")
 POST  /pic/submit                 controllers.ChargeCtrl.submitPiC
 
+# Privileges
+GET   /privileges                 controllers.PrivilegeCtrl.list
+GET   /privilege/delete/:pid      controllers.PrivilegeCtrl.delete(pid: Long)
+GET   /privilege/edit/:pid        controllers.PrivilegeCtrl.edit(pid: Long)
+GET   /privilege/edit             controllers.PrivilegeCtrl.create
+POST  /privilege/edit             controllers.PrivilegeCtrl.submit
 
 # Registration
-GET   /registration               controllers.UserCtrl.showRegistrationForm
-POST  /registration               controllers.UserCtrl.register
+GET   /registration               controllers.UserCtrl.showUsernameSelectionForm
+POST  /registration               controllers.UserCtrl.registration
+GET   /regConf/:link              controllers.UserCtrl.registrationConfirmation(link: String)
+POST  /register                   controllers.UserCtrl.register			 
+
+# Roles
+GET   /roles                      controllers.RoleCtrl.list
+GET   /role/delete/:rid           controllers.RoleCtrl.delete(rid: Long)
+GET   /role/edit/:rid             controllers.RoleCtrl.edit(rid: Long)
+GET   /role/edit                  controllers.RoleCtrl.create
+POST  /role/edit                  controllers.RoleCtrl.submit
+GET   /role/:rid                  controllers.RoleCtrl.show(rid: Long)
 
 # Sports Dates
 GET   /sportsdate/new            controllers.SportCtrl.createSportsDate
@@ -192,6 +208,14 @@ GET   /sports/edit/:id            controllers.SportCtrl.editSports(id: Long)
 POST  /sports/edit                controllers.SportCtrl.submitSports
 GET   /sports/list                controllers.SportCtrl.listSports
 GET   /sports/:id                 controllers.SportCtrl.showSports(id: Long)
+
+# Users
+GET   /user/:un                   controllers.UserCtrl.show(un: String)
+GET   /users                      controllers.UserCtrl.list
+
+# User has Role
+GET   /uhr/:un                    controllers.UserHasRoleCtrl.create(un: String)
+POST  /uhr/edit                   controllers.UserHasRoleCtrl.submit
 
 # Map static resources from the /public folder to the /assets URL path
 GET   /assets/*file               controllers.Assets.at(path="/public", file)

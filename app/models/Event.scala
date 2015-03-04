@@ -15,7 +15,7 @@ import scalaz.Validation
 import scalaz.Failure
 import scalaz.Success
 import util.EventType
-import util.Atv
+import util.AtvEvent
 import java.sql.Timestamp
 
 /**
@@ -123,7 +123,7 @@ object Events extends Table[Event](Event.tablename) {
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
 
-  implicit val EventTypeMapper: TypeMapper[EventType] = base[EventType, Int](et => et.id, t => Atv.getEventType(t).get)
+  implicit val EventTypeMapper: TypeMapper[EventType] = base[EventType, Int](et => et.id, t => AtvEvent.getEventType(t).get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def title = column[String]("title")

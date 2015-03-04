@@ -7,7 +7,7 @@ package util
  * The states members of organizations might have.
  *
  * @author andreas
- * @version 0.0.1, 2013-07-27
+ * @version 0.0.2, 2015-01-07
  */
 sealed abstract class MemberState(val id: Int, val name: String) {
 
@@ -32,6 +32,9 @@ sealed abstract class MemberState(val id: Int, val name: String) {
         case 9 => Option(MitturnerAk)
         case 10 => Option(MitturnerKV)
         case 11 => Option(Witwe)
+        case 12 => Some(ATB)
+        case 13 => Some(Korpo)
+        case 14 => Some(Other)
         case _ => None
       }
     } else None
@@ -41,7 +44,14 @@ sealed abstract class MemberState(val id: Int, val name: String) {
    * Retrieve all existing {@link MemberState}s.
    */
   def getMemberStates(): Seq[MemberState] = {
-    Seq(Hausbewohner, Fux, Aktiv, Inaktiv, Auswaertig, KV, EM, Ehrenhalber, MitturnerAk, MitturnerKV, Witwe)
+    Seq(Hausbewohner, Fux, Aktiv, Inaktiv, Auswaertig, KV, EM, Ehrenhalber, MitturnerAk, MitturnerKV, Witwe, ATB, Korpo, Other)
+  }
+  
+  /**
+   * Retrieve the {@link MemberState}s that ATV members can have.
+   */
+  def getAtvMemberStates(): Seq[MemberState] = {
+    Seq(Fux, Aktiv, Inaktiv, Auswaertig, MitturnerAk, KV, EM, Ehrenhalber, MitturnerKV)
   }
 
   /**
@@ -70,4 +80,6 @@ case object Ehrenhalber extends MemberState(8, "Mitglied ehrenhalber")
 case object MitturnerAk extends MemberState(9, "Mitturner Aktivitas")
 case object MitturnerKV extends MemberState(10, "Mitturner Korporationsverband")
 case object Witwe extends MemberState(11, "Witwe")
-
+case object ATB extends MemberState(12, "ATB")
+case object Korpo extends MemberState(13, "Korporiert")
+case object Other extends MemberState(14, "-")

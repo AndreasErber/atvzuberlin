@@ -6,24 +6,42 @@
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
 @main(Messages("sports")) {
-    @Logger.debug("Rendering sports dates form")
+  @Logger.debug("Rendering sports dates form")
   <h1>@Messages("sports.dates.add")</h1>
   @form(routes.SportCtrl.submitSportsDate) {
-    @inputHidden(sportsDateForm("id")) 
+    @inputHidden(sportsDateForm("id"))
+    <div class="form-group">
     @select(sportsDateForm("sports"), 
               sports.map{s => s.id.get.toString -> s.title},
-              '_label -> Messages("sports.dates.sports")
+              '_label -> Messages("sports.dates.sports"),
+              'class -> "form-control"
     )
-    @inputText(sportsDateForm("locationName"), '_label -> Messages("sports.dates.location.name"))
-    @inputText(sportsDateForm("locationStreet"), '_label -> Messages("sports.dates.location.street"))
-    @inputText(sportsDateForm("Zip"), '_label -> Messages("sports.dates.location.zip"))
-    @inputText(sportsDateForm("locationCity"), '_label -> Messages("sports.dates.location.city"))
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("locationName"), '_label -> Messages("sports.dates.location.name"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("locationStreet"), '_label -> Messages("sports.dates.location.street"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("Zip"), '_label -> Messages("sports.dates.location.zip"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("locationCity"), '_label -> Messages("sports.dates.location.city"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
     @select(sportsDateForm("weekday"), 
               Weekday.values.toList.map{w => w.toString -> Messages("weekday." + w)},
-              '_label -> Messages("sports.dates.weekday")
+              '_label -> Messages("sports.dates.weekday"),
+              'class -> "form-control"
     )
-    @inputText(sportsDateForm("start"), '_label -> Messages("sports.dates.start"))
-    @inputText(sportsDateForm("end"), '_label -> Messages("sports.dates.end"))
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("start"), '_label -> Messages("sports.dates.start"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+    @inputText(sportsDateForm("end"), '_label -> Messages("sports.dates.end"), 'class -> "form-control")
+    </div>
     @createModifyFormPart(sportsDateForm)
     @submitResetCancel()
   }

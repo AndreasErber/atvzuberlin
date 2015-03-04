@@ -1,8 +1,10 @@
 @**
-* List the phone numbers of a person p.
+* Display the {@link Phone} numbers of a {@link Person}.
 *
+* @param p The {@link Person} the {@link Phone} numbers relate to.
+* @param phones A list of {@link Phone} numbers to display.
 * @author andreas
-* @version 0.0.5, 2013-04-13
+* @version 0.0.6, 2015-01-03
 *@
 @(p: Person, phones: List[(Phone, util.UsageType, util.Privacy)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._

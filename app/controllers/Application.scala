@@ -13,39 +13,39 @@ object Application extends Controller with ProvidesCtx with Security {
   }
 
   def about = Action { implicit request =>
-    Ok(views.html.about(Messages("about")))
+    Ok(views.html.staticpages.about(Messages("about")))
   }
 
   def administration = isAuthenticated { username =>
     implicit request =>
-      Ok(views.html.administration(Messages("administration")))
+      Ok(views.html.staticpages.administration(Messages("administration")))
   }
 
   def history = Action { implicit request =>
-    Ok(views.html.history(Messages("history")))
+    Ok(views.html.staticpages.history(Messages("history")))
   }
 
   def house = Action { implicit request =>
-    Ok(views.html.house(Messages("house")))
+    Ok(views.html.staticpages.house(Messages("house")))
   }
 
   def sportsactives = Action { implicit request =>
-    Ok(views.html.sportsactives(Messages("sports.actives")))
+    Ok(views.html.staticpages.sportsactives(Messages("sports.actives")))
   }
 
   def rowing = Action { implicit request =>
-    Ok(views.html.rowing(Messages("sports.rowing")))
+    Ok(views.html.staticpages.rowing(Messages("sports.rowing")))
   }
 
   def handball = Action { implicit request =>
-    Ok(views.html.handball(Messages("sports.handball")))
+    Ok(views.html.staticpages.handball(Messages("sports.handball")))
   }
 
   def fistball = Action { implicit request =>
-    Ok(views.html.fistball(Messages("sports.fistball")))
+    Ok(views.html.staticpages.fistball(Messages("sports.fistball")))
   }
 
   def volleyball = Action { implicit request =>
-    Ok(views.html.volleyball(Messages("sports.volleyball")))
+    Ok(views.html.staticpages.volleyball(Messages("sports.volleyball")))
   }
 }

@@ -10,24 +10,25 @@ $(function() {
 	});
 });
 </script>
-          <div class="navbar navbar-fixed-top">
-            <div class="navbar-inner">
-              <div class="container">
-                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#top-navbar-collapse">
+                  <span class="sr-only">Toggle navigation</span>
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
                 </button>
                
-          		<div class="nav-collapse collapse">
+          		<div class="collapse navbar-collapse" id="top-navbar-collapse">
                 @if(menus.isDefined) {
-                  <ul class="nav">
-                    <li><a href="/" title="@Messages("home")"><i class="icon-home"></i></a></li>
+                  <ul class="nav navbar-nav">
+                    <li><a href="/" title="@Messages("home")"><i class="glyphicon glyphicon-home"></i></a></li>
                   @menus.get.map { m =>
                     @if(!m.items.isEmpty) {
                     <li class="dropdown">
-                      <a class="dropdown-toggle" href="#" data-toggle="dropdown">@m.name <strong class="caret"></strong></a>
-                      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                      <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-expanded="false">@m.name <strong class="caret"></strong></a>
+                      <ul class="dropdown-menu" role="menu">
                         @m.items.map { mi =>
                         <li><a href="@mi.url">@mi.name</a>
                         }
@@ -38,28 +39,29 @@ $(function() {
                   }
                   </ul> 
                 }
-<!--                 </div> -->
-<!--                 <div class="nav-collapse collapse pull-right"> -->
-                  <ul class="nav pull-right">
+
+                  <ul class="nav navbar-nav navbar-right">
                 @if(ctx.user.isDefined) {
-                    <li class="pull-right"><a href="/person/@ctx.user.get.person" title="@Messages("user.logged.in")"><i class="icon-user"></i> @ctx.user.get.username</a></li>
-                    <li class="pull-right"><a href="/logout" title="@{Messages("user.log.out") + " " + ctx.user.get.username}"><i class="icon-off"></i></a></li>
+                    <li><a href="/person/@ctx.user.get.person.id" title="@Messages("user.logged.in")"><i class="glyphicon glyphicon-user"></i> @ctx.user.get.username</a></li>
+                    <li><a href="/logout" title="@{Messages("user.log.out") + " " + ctx.user.get.username}"><i class="glyphicon glyphicon-off"></i></a></li>
                 } else {
-                    <li><a href="/registration">@Messages("registration")</a></li>
-                    <li class="divider-vertical"></li>
                     <li class="dropdown">
-                      <a class="dropdown-toggle" href="#" data-toggle="dropdown">@Messages("login") <strong class="caret"></strong></a>
-                      <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px">
-                        <form class="form-inline" action="@routes.UserCtrl.login" method="POST">
-                          <input type="text" id="username" name="username" class="input-medium" placeholder="@Messages("login.username")">
-                          <input type="password" id="password" name="password" class="input-medium" placeholder="@Messages("login.password")">
-                          <input type="submit" class="btn" value="@Messages("login")" />
+                      <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button">@Messages("login") <strong class="caret"></strong></a>
+                      <ul class="dropdown-menu" role="menu">
+                        <form class="navbar-form navbar-left" action="@routes.UserCtrl.login" method="POST">
+	                      <div class="form-group">                        
+                            <input type="text" id="username" name="username" class="form-control" placeholder="@Messages("login.username")">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="@Messages("login.password")">
+                          </div>
+                          <input type="submit" class="btn btn-default" value="@Messages("login")" />
                         </form>
-                      </div>
+                        <li class="divider"></li>
+	                    <li><a href="/registration">@Messages("registration")</a></li>  
+                      </ul>
                     </li>
                 }
                   </ul>
                 </div>
               </div>
             </div>
-          </div>
+          </nav>

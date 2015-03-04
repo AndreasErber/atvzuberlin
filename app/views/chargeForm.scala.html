@@ -1,3 +1,10 @@
+@**
+* Form to enter or modify a {@link Charge}.
+*
+* @param chargeForm The form data to display.
+* @author andreas
+* @version 0.0.2, 2015-01-03
+*@
 @(chargeForm: Form[Charge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -7,19 +14,34 @@
 
 @main(Messages("charge")) {
     @Logger.debug("Rendering charge form")
-	<h1>@Messages("charge.add")</h1>
+    <h1>@Messages("charge.add")</h1>
 	@form(routes.ChargeCtrl.submit) {
-	  @inputHidden(chargeForm("id")) 
-	  @inputText(chargeForm("name"), '_label -> Messages("charge.name"), 'style -> "width: 600px")
-    @inputText(chargeForm("abbr"), '_label -> Messages("charge.abbr"), 'style -> "width: 600px")
-    @select(chargeForm("division"), 
+	  @inputHidden(chargeForm("id"))
+	  <div class="form-group">
+	  @inputText(chargeForm("name"), '_label -> Messages("charge.name"), 'class -> "form-control")
+	  </div>
+      <div class="form-group">
+      @inputText(chargeForm("abbr"), '_label -> Messages("charge.abbr"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @select(chargeForm("division"), 
               Division.values.toList.map{d => d.toString -> d.toString},
-              '_label -> Messages("charge.division")
-    )
-	  @textarea(chargeForm("shortDesc"), '_label -> Messages("charge.shortDesc"), 'style -> "width: 600px; height: 50px")
-	  @richTextEditor(chargeForm("longDesc"), '_label -> Messages("charge.longDesc"),
-	   'placeholder -> Messages("wysihtml5.placholder"), 'style -> "width: 600px; height: 200px")
-    @inputText(chargeForm("email"), '_label -> Messages("charge.email"), 'style -> "width: 600px")
+              '_label -> Messages("charge.division"),
+              'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">
+	  @textarea(chargeForm("shortDesc"), '_label -> Messages("charge.shortDesc"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @richTextEditor(chargeForm("longDesc"), 
+	  	'_label -> Messages("charge.longDesc"),
+	    'placeholder -> Messages("wysihtml5.placeholder"), 
+	    'class -> "form-control form-control-wysiwyg")
+	  </div>
+	  <div class="form-group">
+      @inputText(chargeForm("email"), '_label -> Messages("charge.email"), 'class -> "form-control")
+      </div>
       @createModifyFormPart(chargeForm)
       @submitResetCancel()
     

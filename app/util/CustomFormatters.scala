@@ -1,23 +1,17 @@
 package util
 
+import accesscontrol.{ Role, Roles, User }
+import java.text.{ ParseException, SimpleDateFormat }
+import java.util.{ Calendar, Date }
+import java.sql.{ Time, Timestamp }
+import models.{ AcademicTitle, Charge, Country, Email, Event, Person }
 import play.api.data.format.Formatter
 import play.api.data.FormError
+import play.api.i18n.Messages
 import play.api.Logger
 import scala.util.control.Exception
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Calendar
-import models.Person
-import models.User
-import models.Email
-import java.sql.Timestamp
-import models.Country
-import java.text.ParseException
-import play.api.i18n.Messages
-import models.AcademicTitle
-import models.Event
-import java.sql.Time
-import models.Charge
+import accesscontrol.UserHasRole
+import accesscontrol.UserHasRoles
 
 /**
  * @author andreas
@@ -192,7 +186,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[EventType].either(Atv.getEventType(id.toInt).get).left.map {
+        Exception.allCatch[EventType].either(AtvEvent.getEventType(id.toInt).get).left.map {
           e => Seq(FormError(key, Messages("error.failedToLoadEventtype", id), Nil))
         }
       }
@@ -277,6 +271,40 @@ object CustomFormatters {
 
     def unbind(key: String, pt: PhoneType) = Map(key -> pt.id.toString())
   }
+
+  val roleFormatter = new Formatter[Role] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[Role].either(Roles.get(id.toLong).get).left.map {
+          e => Seq(FormError(key, Messages("error.failedToLoadRole", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, r: Role) = Map(key -> r.id.get.toString())
+  }
+  
+  /**
+   * Maps an {@link PersonStatus} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val memberStateFormatter = new Formatter[MemberState] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[MemberState].either(KV.getMemberState(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failed.to.load.personstatus", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, ms: MemberState) = Map(key -> ms.id.toString())
+  }
+
 
   /**
    * Takes the first character of the input string and returns it as a char.

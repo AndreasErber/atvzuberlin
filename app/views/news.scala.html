@@ -1,8 +1,8 @@
 @**
-* List the addresses of a person p.
+* Display a news item.
 *
 * @author andreas
-* @version 0.0.5, 2013-04-14
+* @version 0.0.6, 2014-05-28
 *@
 @(n: News)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
@@ -26,5 +26,5 @@
   <p class="lead">@n.lead</p>
   <p>@Html(n.content.getOrElse(""))</p>
   
-@deleteConfirmation("organization")
+@deleteConfirmation("news")
 }

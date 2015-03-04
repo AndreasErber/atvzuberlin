@@ -1,28 +1,49 @@
 @**
 * Form to enter or modify the {@link Enrollment} of a {@link Person} to an {@link Event}.
 *
+* @param enrollmentForm The form data to use.
+* @param persons A {@link List} of {@link Person}s to select from.
 * @author andreas
-* @version 0.0.2, 2013-05-04
+* @version 0.0.3, 2015-01-03
 *@
 @(enrollmentForm: Form[Enrollment], persons: List[Person])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
-
-    @Logger.debug("Rendering enrollment form")
+	@Logger.debug("Rendering enrollment form")
 	@form(routes.EnrollmentCtrl.submit) {
 	  @inputHidden(enrollmentForm("id"))
 	  @inputHidden(enrollmentForm("event"))
+	  <div class="form-group">
+	  @if(ctx.user.isDefined) {
+	  	}
 	  @select(enrollmentForm("person"), 
               persons.map{p => p.id.get.toString -> p.fullname},
               '_label -> "",
-              '_help -> "")
-      @inputText(enrollmentForm("numberOfAdults"), '_label -> Messages("enrollment.numberOfAdults"), '_help -> "")
-	  @inputText(enrollmentForm("numberOfKids"), '_label -> Messages("enrollment.numberOfKids"), '_help -> "")
+              '_help -> "",
+              'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @inputTouchspin(enrollmentForm("numberOfAdults"),
+      	'_label -> Messages("enrollment.numberOfAdults"),
+      	'_help -> ""
+      )
+	  </div>
+      <div class="form-group">
+	  @inputTouchspin(enrollmentForm("numberOfKids"), 
+	  	'_label -> Messages("enrollment.numberOfKids"), 
+	  	'_help -> ""
+	  )
+	  </div>
+      @permanentError("Label f&uuml;r Radio-Button-Group ist nicht i18n'ed.")
+      <div class="form-group">
       @inputRadioGroup(enrollmentForm("confirmed"),
           options = options("true" -> Messages("enrollment.confirmed.true"), "false" -> Messages("enrollment.confirmed.false")),
-          '_label -> Messages("enrollment.confirmed"), '_class -> "radio inline", '_help -> "")
+          '_label -> Messages("enrollment.confirmed"),
+          '_help -> "",
+          'class -> "radio-inline")
+      </div>
       @inputHidden(enrollmentForm("cancelled"), '_value -> "false")
       @createModifyFormPart(enrollmentForm)
       <br/>

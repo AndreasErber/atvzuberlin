@@ -20,25 +20,41 @@
 	<h2>@Messages("phone")</h2>
 	@form(routes.PhoneCtrl.submitPersonPhone(pid)) {
 	  @inputHidden(phoneForm("phone.id")) 
-	  @inputText(phoneForm("phone.areacode"), '_label -> Messages("phone.areacode"))
-	  @inputText(phoneForm("phone.extension"), '_label -> Messages("phone.extension"))
+	  <div class="form-group">
+	  @inputText(phoneForm("phone.areacode"), '_label -> Messages("phone.areacode"), 'class -> "form-control", '_help -> Messages("constraint.numeric"))
+	  </div>
+	  <div class="form-group">
+	  @inputText(phoneForm("phone.extension"), '_label -> Messages("phone.extension"), 'class -> "form-control", '_help -> Messages("constraint.numeric"))
+	  </div>
+	  <div class="form-group">
 	  @select(phoneForm("phone.country"), 
               countries.map{c => c.id.get.toString -> c.phone.get.toString},
-              '_label -> Messages("phone.selCountry")
+              '_label -> Messages("phone.selCountry"),
+              'class -> "form-control"
       )
-      @select(phoneForm("phone.kind"), 
+      </div>
+	  <div class="form-group">
+	  @select(phoneForm("phone.kind"), 
               Landline.getPhoneTypes().map{u => u.id.toString -> Messages("phone.kind." + u.name.toLowerCase)},
-              '_label -> Messages("phone.kind")
+              '_label -> Messages("phone.kind"),
+              'class -> "form-control"
       )
-      @select(phoneForm("usage"), 
+      </div>
+	  <div class="form-group">
+	  @select(phoneForm("usage"), 
               Personal.getUsageTypes().map{u => u.id.toString -> Messages("usagetype." + u.name.toLowerCase)},
-              '_label -> Messages("phone.selUsageType")
+              '_label -> Messages("phone.selUsageType"),
+              'class -> "form-control"
       )
-      @select(phoneForm("privacy"), 
+      </div>
+	  <div class="form-group">
+	  @select(phoneForm("privacy"), 
               Private.getPrivacyLevels().map{p => p.id.toString -> Messages("privacy." + p.name)},
-              '_label -> Messages("phone.selPrivacy")
+              '_label -> Messages("phone.selPrivacy"),
+              'class -> "form-control"
       )
-      @createModifyFormPart(phoneForm, "phone.")
+      </div>
+	  @createModifyFormPart(phoneForm, "phone.")
       @submitResetCancel()
 	}
 	@Logger.debug("Done rendering phone form")

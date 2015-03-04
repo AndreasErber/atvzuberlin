@@ -1,25 +1,42 @@
+@*
+* Modal dialog to confirm the deletion of an entity.
+*
+* @param entity The name of the entity, i.e., 'person', 'event', ... as it is used in URLs
+* @author andreas
+* @version 0.0.2, 2015-01-04
+*@
 @(entity: String)(implicit lang: Lang)
 
  <!-- Modal Deletion Confirmation -->
-			<div id="delConfirm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-			  <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="myModalLabel">@Messages(entity + ".delete.heading")</h3>
-              </div>
-              <div class="modal-body">
-                <p>@Messages(entity + ".delete.body")</p>
-              </div>
-              <div class="modal-footer">
-                <a href="#" class="btn" data-dismiss="modal" aria-hidden="true">@Messages("cancel")</a>
-                <a href="#" id="delConfirmed" class="btn btn-primary" data-dismiss="modal" onclick="jQuery.get('/@entity/delete/' + delId)">@Messages("delete")</a>
-              </div>
-            </div>    
-<!-- Modal Deletion Confirmation -->	
+	<div class="modal fade" id="delConfirm_@entity" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="@Messages("close")">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 id="myModalLabel">@Messages(entity + ".delete.heading")</h4>
+          </div>
+          <div class="modal-body">
+            <p>@Messages(entity + ".delete.body")</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">@Messages("cancel")</button>
+            <button type="button" class="btn btn-primary" onclick="jQuery.get('/@entity/delete/' + delId)" data-dismiss="modal">
+              @Messages("delete")
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>    
 	
 	<script>
       var delId = 0
 
-	$('#delConfirm').on('hidden', function () {
-      window.location.assign("/@(entity)s")
-    })
+      $('#delConfirm_@entity').on('hidden.bs.modal', function () {
+        window.location.reload();
+      })
     </script>
+<!-- Modal Deletion Confirmation -->	
+
+    

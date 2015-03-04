@@ -21,7 +21,7 @@ import models.Organization
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-12
+ * @version 0.0.3, 2015-01-03
  */
 object HomepageCtrl extends Controller with ProvidesCtx with Security {
 
@@ -60,7 +60,7 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.HomepageCtrl.showOrgHomepage(oid)).flashing(("success" -> Messages("success.succeededToDeleteHomepage")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.HomepageCtrl.showOrgHomepage(oid)).flashing(("error" -> Messages("error.failedToDeleteHomepage")))
       }
   }
@@ -71,7 +71,7 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.HomepageCtrl.showPersonHomepage(pid)).flashing(("success" -> Messages("success.succeededToDeleteHomepage")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.HomepageCtrl.showPersonHomepage(pid)).flashing(("error" -> Messages("error.failedToDeleteHomepage")))
       }
   }
@@ -100,10 +100,10 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val o = Organization.load(oid).get
       val req = Ok(views.html.homepageOrg(o, Homepage.getOrgHomepages(o).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -113,10 +113,10 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val p = Person.load(pid).get
       val req = Ok(views.html.homepage(p, Homepage.getPersonHomepages(p).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -139,7 +139,7 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.HomepageCtrl.showOrgHomepage(oid)).flashing(("success" -> Messages("success.succeededToStoreHomepage")))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.homepageOrgForm(hpOrgForm, oid)).flashing("error" -> Messages("error.failedToStoreHomepage"))
           }
         })
@@ -159,7 +159,7 @@ object HomepageCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.HomepageCtrl.showPersonHomepage(pid)).flashing(("success" -> Messages("success.succeededToStoreHomepage")))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.homepageForm(hpPersForm, pid)).flashing("error" -> Messages("error.failedToStoreHomepage"))
           }
         })

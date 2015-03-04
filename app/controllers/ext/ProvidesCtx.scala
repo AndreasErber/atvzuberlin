@@ -10,10 +10,11 @@ import display.Menu
 import play.api.i18n.Messages
 import display.MenuItem
 import models.Sports
+import display.MenuItem
 
 /**
  * @author andreas
- * @version 0.0.3, 2013-06-29
+ * @version 0.0.5, 2015-01-03
  */
 trait ProvidesCtx {
 
@@ -34,7 +35,6 @@ trait ProvidesCtx {
         List(
           MenuItem(Messages("sports"), "/sports/list"),
           MenuItem(Messages("sports.dates"), "/sportsdate/list")) ++ sportsMenu),
-      Menu(Messages("members"), "/members", List()),
       Menu(Messages("organizations"), "/organizations", List()))
 
     val privateMenus = List(
@@ -45,7 +45,11 @@ trait ProvidesCtx {
         List(
           MenuItem(Messages("administration.overview"), "/administration"),
           MenuItem(Messages("charges"), "/charge/list"),
-          MenuItem(Messages("sports"), ""))))
+          MenuItem(Messages("users"), "/users"),
+          MenuItem(Messages("roles"), "/roles"),
+          MenuItem(Messages("privileges"), "/privileges"),
+          MenuItem(Messages("sports"), "/sports/list"),
+          MenuItem(Messages("academicTitles"),"/ats"))))
 
     Ctx(Header(), Some(publicMenus), Some(privateMenus))
   }

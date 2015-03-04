@@ -1,7 +1,7 @@
 @(eventForm: Form[Event])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
-@import util.Atv
+@import util.AtvEvent
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -22,7 +22,7 @@
               '_label -> Messages("event.priority")
       )
 	  @select(eventForm("typus"), 
-              Atv.getEventTypes().map{et => et.id.toString -> Messages("event.typus." + et.name)},
+              AtvEvent.getEventTypes().map{et => et.id.toString -> Messages("event.typus." + et.name)},
               '_default -> ("<-- " + Messages("event.typus.select") + " -->"),
               '_label -> Messages("event.typus")
       )

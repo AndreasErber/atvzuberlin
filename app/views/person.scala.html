@@ -1,57 +1,113 @@
 @(p: Person, pai: Option[PersonAdditionalInfo], ts: List[AcademicTitle], adrs: List[Address], ps: List[(Phone, util.UsageType, util.Privacy)], es: List[(Email, PersonHasEmail)], hps: List[(Homepage, PersonHasHomepage)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
+@import java.text.SimpleDateFormat
 
 @main(Messages("person.details")) {
+  <h2 data-toggle="tooltip" data-placement="top" title="edit">@(p.name)
+  @if(p.nickname.isDefined) {
+    <abbr title="vocat@if(p.gender == 'm') {us">}else{a">}
+      voc.
+    </abbr>
+    <em>@p.nickname.getOrElse("")</em>
+  }
+  </h2>
+
+  <table class="table">
+    <caption>
+      <span class="pull-right">
       @if(ctx.user.isDefined) {
-      	@if(!ts.isEmpty) {
-      	<div class="pull-right">
-	      <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.edit")"><i class="icon-pencil"></i></a>
-          <a data-toggle="modal" title="@Messages("academicTitle.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
-          <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.add")"><i class="icon-plus-sign"></i></a>
-        </div>
-   		<p>
-          @Html(ts.map(x => "<abbr title=\"" + (if (p.gender == 'm') x.maleForm.get else x.femaleForm.get) + "\">" + x.abbr + "</abbr>").mkString(", "))
-        </p>
-        } else {
-        <div class="pull-right">
-          <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.add")"><i class="icon-plus-sign"></i></a> ...
-        </div>
+      	@if(ctx.userHasPrivilege(ctx.user.get, "edit.person")) {
+	    <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+	    }
+	    @if(ctx.userHasPrivilege(ctx.user.get, "delete.person")) {
+        <a href="#" data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm_person" onclick="delId = @p.id.get"><i class="glyphicon glyphicon-trash"></i></a>
         }
 	  }
-	
-	<h2 data-toggle="tooltip" data-placement="top" title="edit">@(p.name)</h2>
-	@if(p.nickname.isDefined) {
-	<h3><em>@p.nickname.getOrElse("")</em></h3>
-	}
-	<div class="pull-right">
-      @if(ctx.user.isDefined) {
-	    <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="icon-pencil"></i></a>
-        <a data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="icon-trash"></i></a>
-	  }
-	  <a href="/persons" title="@Messages("person.list")"><i class="icon-th-list"></i></a>
-	  @lastModificationIcon(p)
-	</div>
-	<p>
-	  <i class="icon-star"></i> @if(p.birth.isDefined) { @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.birth.get)}} else { @Messages("unknown") }
-	  <br/>
-	  @if(p.death.isDefined) { &dagger; @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.death.get)}<br/>}
-	  @Messages("person.gender"): @Messages("person.gender." + p.gender)
-	</p>
-	
-	@if(ctx.user.isDefined && !pai.isDefined) {
-	<div class="pull-right">
-          <a href="/pai/@p.id.get/new" title="@Messages("personAI.add")"><i class="icon-plus-sign"></i></a> ...
-    </div>
-    } else {
-    <div class="pull-right">
-          <a href="/pai/@p.id.get/edit" title="@Messages("personAI.edit")"><i class="icon-pencil"></i></a> ...
-    </div>
-	@personAdditionalInfo(pai.get)
-	}
-	@adrTable(p, adrs)
-	@phoneTable(p, ps)
-	@emailTable(p, es)
-	@homepageTable(p, hps)
+	    <a href="/persons" title="@Messages("person.list")"><i class="glyphicon glyphicon-th-list"></i></a>
+	    @lastModificationIcon(p)
+	  </span>
+    </caption>
+    <tbody>
+      <tr>
+        <th>@Messages("person.birth")</th>
+        <td>@if(p.birth.isDefined) { @{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.birth.get)}} else { @Messages("unknown") }</td>
+        <td rowspan="@if(p.death.isDefined){3}else{2}"></td>
+      </tr>
+      @if(p.death.isDefined) { 
+      <tr>
+        <th>@Messages("person.death")</th>
+        <td>@{new java.text.SimpleDateFormat("dd.MM.yyyy").format(p.death.get)}</td>
+      </tr>
+      }
+      <tr>
+        <th>@Messages("person.gender")</th>
+        <td>@Messages("person.gender." + p.gender)</td>
+      </tr>
+      <tr>
+        <th>@Messages("academicTitles")</th>
+        <td>
+        @if(!ts.isEmpty){
+          @academicTitles(p, ts)
+        }
+        </td>
+        <td>
+          @if(ctx.userHasPrivilege(ctx.user.get, "create.person.academicTitle")) {
+	      <a href="/p/@p.id.get/at/edit" title="@Messages("academicTitle.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+	      }
+        </td>
+      </tr>
+      <tr>
+        <th>@Messages("personAI.status")</th>
+        <td>@if(pai.isDefined) {@pai.get.status.name}</td>
+		<td rowspan="5">
+        @if(ctx.user.isDefined && !pai.isDefined) {
+          @if(ctx.userHasPrivilege(ctx.user.get, "edit.person")) {
+	      <a href="/pai/@p.id.get/new" title="@Messages("personAI.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+	      }
+        } else {
+          @if(ctx.userHasPrivilege(ctx.user.get, "edit.person")) {
+          <a href="/pai/@p.id.get/edit" title="@Messages("personAI.edit")"><i class="glyphicon glyphicon-pencil"></i></a> ...
+          }
+        }
+        </td>        
+      </tr>
+      <tr>
+        <th>@Messages("personAI.enlistment")</th>
+        <td>@if(pai.isDefined) {@pai.get.enlistmentFormatted(new SimpleDateFormat("dd.MM.yyyy"))}</td>
+      </tr>
+      <tr>
+        <th>@Messages("personAI.withdrawal")</th>
+        <td>@if(pai.isDefined) {@pai.get.withdrawalFormatted(new SimpleDateFormat("dd.MM.yyyy"))}</td>
+      </tr>
+      <tr>
+        <th>@Messages("personAI.profession")</th>
+        <td>@if(pai.isDefined) {@pai.get.profession.getOrElse("")}</td>
+      </tr>
+      <tr>
+        <th>@Messages("personAI.employer")</th>
+        <td>@if(pai.isDefined) {@pai.get.employer.getOrElse("")}</td>
+      <tr>
+        <th>@Messages("addresses")</th>
+        <td>@adrTable(p, adrs)</td>
+        <td><a href="/p/@p.id.get/address/new" title="@Messages("address.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("phone")</th>
+        <td>@phoneTable(p, ps)</td>
+        <td><a href="/p/@p.id.get/phone/edit" title="@Messages("phone.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("email")</th>
+        <td>@emailTable(p, es)</td>
+        <td><a href="/p/@p.id.get/email/edit" title="@Messages("email.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
+      </tr>
+      <tr>
+        <th>@Messages("homepage")</th>
+        <td>@homepageTable(p, hps)</td>
+        <td><a href="/p/@p.id.get/hp/edit" title="@Messages("homepage.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
+      </tr>
+    </tbody>
+  </table>
 	
 @deleteConfirmation("person")
 }

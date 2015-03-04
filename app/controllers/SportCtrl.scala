@@ -18,7 +18,7 @@ import models.SportsDates
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-07-14
+ * @version 0.0.4, 2015-01-03
  */
 object SportCtrl extends Controller with ProvidesCtx with Security {
 
@@ -64,7 +64,7 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
         Logger.debug("Successfully deleted sports with ID " + id + ".")
         Redirect(routes.SportCtrl.listSports).flashing(("success" -> Messages("success.succeededToDeleteSports")))
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.SportCtrl.listSports).flashing(("error" -> Messages("error.failedToDeleteSports")))
       }
   }
@@ -87,15 +87,15 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
     val result = Sports.getAll()
     if (result.isSuccess) {
       val req = Ok(views.html.sports(result.toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.sports(List())).flashing("error" -> Messages("error.failedToLoadSportsList"))
     }
   }
@@ -108,10 +108,10 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
       case Some(ev) =>
         Logger.logger.debug("Found sports with ID " + id + ".")
         val req = Ok(views.html.sports(List(ev)))
-        if (flash.get("error").isDefined) {
-          req.flashing(("error" -> flash.get("error").get))
-        } else if (flash.get("success").isDefined) {
-          req.flashing(("success" -> flash.get("success").get))
+        if (request.flash.get("error").isDefined) {
+          req.flashing(("error" -> request.flash.get("error").get))
+        } else if (request.flash.get("success").isDefined) {
+          req.flashing(("success" -> request.flash.get("success").get))
         } else {
           req
         }
@@ -132,7 +132,7 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.SportCtrl.showSports(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStoreSports"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.sportsForm(sportsForm)).flashing("error" -> Messages("error.failedToStoreSports"))
           }
         })
@@ -156,7 +156,7 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
         Logger.debug("Successfully deleted sports date with ID " + id + ".")
         Redirect(routes.SportCtrl.listSports).flashing(("success" -> Messages("success.succeededToDeleteSportsDate")))
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.SportCtrl.listSports).flashing(("error" -> Messages("error.failedToDeleteSportsDate")))
       }
   }
@@ -184,15 +184,15 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
     val result = SportsDate.getAll()
     if (result.isSuccess) {
       val req = Ok(views.html.sportsdates(result.toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.sports(List())).flashing("error" -> Messages("error.failedToLoadSportsDateList"))
     }
   }
@@ -220,7 +220,7 @@ object SportCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.SportCtrl.listSportsDates()).flashing("success" -> Messages("success.succeededToStoreSportsDate"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             val sports = Sports.getAll
             if (sports.isSuccess)
               BadRequest(views.html.sportsDateForm(sportsDatesForm, sports.toOption.get)).flashing("error" -> Messages("error.failedToStoreSportsDate"))

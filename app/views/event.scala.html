@@ -10,10 +10,10 @@
       <h3>@e.title</h3>
       <span class="pull-right">
       @if(ctx.user.isDefined) {
-      <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="icon-pencil"></i></a>
-      <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="icon-trash"></i></a>
+      <a href="/event/edit/@e.id.get" title="@Messages("event.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+      <a data-toggle="modal" title="@Messages("event.delete")" data-target="#delConfirm" onclick="delId = @e.id.get"><i class="glyphicon glyphicon-trash"></i></a>
 	    }
-	    <a href="/events" title="@Messages("event.list")"><i class="icon-th-list"></i></a>
+	    <a href="/events" title="@Messages("event.list")"><i class="glyphicon glyphicon-th-list"></i></a>
       </span>
     </caption>
     <thead>
@@ -75,7 +75,7 @@
           } else {
           @es.foldLeft(0)(_ + _._1.numberOfAdults) @Messages("enrollment.adults"), @es.foldLeft(0)(_ + _._1.numberOfKids) @Messages("enrollment.kids")  
           <span class="pull-right" style="cursor: pointer;" onclick="$.get('/event/@e.id.get/enrs/list', function(data) { $('td.event-participants').html(data); });">
-          <i class="icon-arrow-down" title="@Messages("event.participants.show") ..."></i>
+          <i class="glyphicon glyphicon-arrow-down" title="@Messages("event.participants.show") ..."></i>
           </span>
         }
         </td>
@@ -86,7 +86,7 @@
           @if(enr.isDefined) {
             @views.html.enrollmentForm(enr.get, pl.get)
           } else {
-          <span class="link-like" style="cursor: pointer;" onclick="$.get('/event/@e.id.get/enr/new', function(data) { $('td.event-enroll-form').html(data); });"><i class="icon-hand-up"></i> @Messages("event.enroll") ...</span>
+          <span class="link-like" style="cursor: pointer;" onclick="$.get('/event/@e.id.get/enr/new', function(data) { $('td.event-enroll-form').html(data); });"><i class="glyphicon glyphicon-hand-up"></i> @Messages("event.enroll") ...</span>
           }
         </td>
       </tr>

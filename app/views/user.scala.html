@@ -1,0 +1,65 @@
+@**
+* Display a {@link User}.
+*
+* @param u The {@link User} to be displayed.
+* @param uhrs A {@link List} of {@link UserHasRole} items that relate to the user <em>u</em>.
+* @author andreas
+* @version 0.0.2, 2015-01-03
+*@
+@(u: accesscontrol.User, uhrs: List[accesscontrol.UserHasRole])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+@import helper.permanentError
+
+@main(Messages("user")) {
+  @permanentError("Edit-Link ist in routes nicht definiert.")
+
+  <h2>@Messages("user.view")</h2>
+  <table class="table table-condensed">
+    <caption>
+      <h3>@u.username</h3>
+      <span class="pull-right">
+      @if(ctx.user.isDefined) {
+        <a href="/user/edit/@u.username" title="@Messages("user.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        @if(ctx.user.get != u) {
+        <a data-toggle="modal" title="@Messages("user.delete")" data-target="#delConfirm" onclick="delId = @u.username"><i class="glyphicon glyphicon-trash"></i></a>
+        }
+      }
+        <a href="/users" title="@Messages("user.list")"><i class="glyphicon glyphicon-th-list"></i></a>
+      </span>
+    </caption>
+    <thead>
+    </thead>
+    <tbody>
+      <tr>
+        <th width="30%">@Messages("user.username")</th>
+        <td>@u.username</td>
+      </tr>
+      <tr>
+        <th>@Messages("user.person")</th>
+        <td><a href="/person/@u.person.id.get" title="@Messages("person.view"): @u.person.fullname">@u.person.fullname</a></td>
+      </tr>
+      <tr>
+        <th>@Messages("user.email")</th>
+        <td><a href="mailto:@u.email.address">@u.email.address</a></td>
+      </tr>
+      <tr>
+        <th>@Messages("user.status")</th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>@Messages("user.roles")</th>
+        <td>
+        @if(Option(uhrs).isDefined && !uhrs.isEmpty) {
+          <ul>
+          @uhrs.map(uhr => uhr.role.name).mkString(",")
+          </ul>
+        } else {
+          <em>@Messages("user.no.roles.defined")</em>
+        }
+        </td>
+      </tr>
+    </tbody>
+  </table>
+    
+@deleteConfirmation("user")
+}

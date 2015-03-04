@@ -2,13 +2,14 @@
 * Edit additional person information.
 *
 * @author andreas
-* @version 0.0.1, 2013-04-28
+* @version 0.0.2, 2015-01-07
 *@
 @(paiForm: Form[PersonAdditionalInfo])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
 @import util.Mr
 @import util.Bbr
+@import util.KV
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -16,20 +17,42 @@
     @Logger.debug("Rendering person additional form ")
 	<h2>@Messages("personAI")</h2>
 	@form(routes.PersonAdditionalInfoCtrl.submit) { 
-		@inputHidden(paiForm("id")) 
-		@select(paiForm("formOfAddress"), 
+      @inputHidden(paiForm("id")) 
+      <div class="form-group">
+      @select(paiForm("formOfAddress"), 
               Mr.getFormsOfAddresses().map{foa => foa.id.toString -> foa.name},
-              '_label -> Messages("personAI.formOfAddress")
-        )
-		@select(paiForm("letterSalutation"),
+              '_label -> Messages("personAI.formOfAddress"),
+              'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">
+      @select(paiForm("letterSalutation"),
 		      Bbr.getLetterSalutations().map{ls => ls.id.toString -> ls.name}, 
-		      '_label -> Messages("personAI.letterSalutation"))
-		@inputDate(paiForm("enlistment"), '_label -> (Messages("personAI.enlistment") + " (" + Messages("personAI.enlistment.date.format") + ")"))
-		@inputDate(paiForm("withdrawal"), '_label -> (Messages("personAI.withdrawal") + " (" + Messages("personAI.withdrawal.date.format") + ")"))
-		@inputText(paiForm("profession"), '_label -> Messages("personAI.profession"))
-		@inputText(paiForm("employer"), '_label -> Messages("personAI.employer"))
-	    @createModifyFormPart(paiForm)
-		@submitResetCancel()
+		      '_label -> Messages("personAI.letterSalutation"),
+		      'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">
+      @select(paiForm("status"),
+		      KV.getMemberStates().map{ms => ms.id.toString -> ms.name}, 
+		      '_label -> Messages("personAI.status"),
+		      'class -> "form-control"
+      )
+      </div>
+      <div class="form-group">
+      @inputDate(paiForm("enlistment"), '_label -> Messages("personAI.enlistment"), '_help -> ("Format: " + Messages("personAI.enlistment.date.format")), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @inputDate(paiForm("withdrawal"), '_label -> Messages("personAI.withdrawal"), '_help -> ("Format: " + Messages("personAI.withdrawal.date.format")), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @inputText(paiForm("profession"), '_label -> Messages("personAI.profession"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @inputText(paiForm("employer"), '_label -> Messages("personAI.employer"), 'class -> "form-control")
+      </div>
+      @createModifyFormPart(paiForm)
+      @submitResetCancel()
 	}
 	@Logger.debug("Done rendering person additional form")
 }

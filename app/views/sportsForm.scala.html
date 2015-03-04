@@ -1,3 +1,10 @@
+@**
+* Form to enter or modify a {@link Sport} description.
+*
+* @param sportsForm The form data to display.
+* @author andreas
+* @version 0.0.2, 2015-01-03
+*@
 @(sportsForm: Form[Sports])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -8,10 +15,16 @@
     @Logger.debug("Rendering sports form")
   <h1>@Messages("sports.add")</h1>
   @form(routes.SportCtrl.submitSports) {
-    @inputHidden(sportsForm("id")) 
-    @inputText(sportsForm("title"), '_label -> Messages("sports.title"), 'style -> "width: 600px")
-    @richTextEditor(sportsForm("description"), '_label -> Messages("sports.description"),
-     'placeholder -> Messages("wysihtml5.placholder"), 'style -> "width: 600px; height: 200px")
+    @inputHidden(sportsForm("id"))
+    <div class="form-group"> 
+    @inputText(sportsForm("title"), '_label -> Messages("sports.title"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+	@richTextEditor(sportsForm("description"), 
+		'_label -> Messages("sports.description"),
+	    'placeholder -> Messages("wysihtml5.placeholder"), 
+	    'class -> "form-control form-control-wysiwyg")
+	</div>
     @createModifyFormPart(sportsForm)
     @submitResetCancel()
   }

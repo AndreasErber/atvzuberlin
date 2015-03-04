@@ -1,0 +1,35 @@
+import play.Play.autoImport._
+import PlayKeys._
+import sbt._
+import Keys._
+
+object ApplicationBuild extends Build {
+
+  scalaVersion := "2.10.4"
+  val appName = "atvzuberlin"
+  val appVersion = "1.0-SNAPSHOT"
+
+//  resolvers += "github.com/mcveat" at "https://github.com/mcveat/mail-plugin/releases"
+    
+  val appDependencies = Seq(
+    // Add your project dependencies here,
+    jdbc,
+    anorm,
+    "com.typesafe.slick" %% "slick" % "1.0.0",
+    "com.h2database" % "h2" % "1.4.184",
+    "org.scalatest" %% "scalatest" % "2.2.3",
+    "org.scala-lang" % "scala-actors" % "2.10.4",
+    "org.scalaz" %% "scalaz-core" % "7.1.0",
+    "postgresql" % "postgresql" % "9.1-901.jdbc4",
+    "com.typesafe.play" %% "play-mailer" % "2.3.1"
+    )
+
+  //  val main = play.Project(appName, appVersion, appDependencies).settings(
+  //    // Add your own project settings here      
+  //    testOptions in Test := Nil
+  //  )
+
+  val main = Project(appName, file(".")).enablePlugins(play.PlayScala).settings(
+    version := appVersion,
+    libraryDependencies ++= appDependencies)
+}

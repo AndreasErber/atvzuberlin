@@ -1,13 +1,13 @@
 @**
 * Enter or modify an {@link AcademicTitle} in this form.
 *
+* @param atForm The form data to display.
 * @author andreas
-* @version 0.0.2, 2013-04-21
+* @version 0.0.4, 2015-01-10
 *@
 @(atForm: Form[AcademicTitle])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
-@import util.Atv
 
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
@@ -16,13 +16,22 @@
 	<h1>@Messages("academicTitle")</h1>
 	@form(routes.AcademicTitleCtrl.submit) {
 	  @inputHidden(atForm("id")) 
-	  @inputText(atForm("abbr"), '_label -> Messages("academicTitle.abbr"))
-	  @inputText(atForm("maleForm"), '_label -> Messages("academicTitle.maleForm"))
-	  @inputText(atForm("femaleForm"), '_label -> Messages("academicTitle.femaleForm"))
+	  <div class="form-group">
+	  @inputText(atForm("abbr"), '_label -> Messages("academicTitle.abbr"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(atForm("maleForm"), '_label -> Messages("academicTitle.maleForm"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(atForm("femaleForm"), '_label -> Messages("academicTitle.femaleForm"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
 	  @inputRadioGroup(atForm("isPrefix"),
           options = options("true" -> Messages("academicTitle.isPrefix.true"), "false" -> Messages("academicTitle.isPrefix.false")),
-          '_label -> Messages("academicTitle.isPrefix"), '_class -> "radio inline", '_help -> "")
-      
+          '_label -> Messages("academicTitle.isPrefix"), 
+          '_class -> "radio-inline", 
+          '_help -> "")
+      </div>
       @createModifyFormPart(atForm)
       <br/>
       @submitResetCancel()

@@ -18,7 +18,7 @@ import java.sql.Timestamp
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-04-28
+ * @version 0.0.3, 2015-01-03
  */
 object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
 
@@ -58,7 +58,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
           Redirect(routes.EventCtrl.listUpcoming).flashing("error" -> Messages("error.failedToLoadEvent"))
         }
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadPersonList"))
       }
   }
@@ -80,7 +80,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
         Logger.debug("Successfully deleted enrollment with ID " + id + ".")
         Redirect(req).flashing(("success" -> Messages("success.succeededToDeleteEnrollment")))
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(req).flashing(("error" -> Messages("error.failedToDeleteEnrollment")))
       }
   }
@@ -102,7 +102,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
           val pList = if (result.isSuccess) result.toOption.get else Nil
           Ok(views.html.enrollmentForm(enrollmentForm.fill(e), pList))
         case _ =>
-          Logger.error("Error when attempting to load enrollment with ID " + id + ".", e.fail.toOption.get)
+          Logger.error("Error when attempting to load enrollment with ID " + id + ".", e.toEither.left.get)
           NotFound
       }
   }
@@ -117,15 +117,15 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
     val result = Enrollment.loadByEvent(eid)
     if (result.isSuccess) {
       val req = Ok(views.html.enrollmentsForEventList(eid, result.toOption.get.sortBy(e => e._1.created)))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForEventList", event.get.title))
     }
   }
@@ -135,7 +135,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
     if (result.isSuccess) {
       Ok(views.html.enrollmentsForEventListHide(eid, result.toOption.get.size))
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       val event = Event.load(eid)
       val title: String = if (event.isDefined) event.get.title else eid.toString
       Redirect(routes.EventCtrl.show(eid, false)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForEventList", title))
@@ -153,15 +153,15 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
     val result = Enrollment.loadByPerson(pid)
     if (result.isSuccess) {
       val req = Ok(views.html.enrollmentsForPersonList(result.toOption.get.sortBy(e => e._1.created)))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.failedToLoadEnrollmentsForPersonList", person.get.name))
     }
   }
@@ -195,13 +195,13 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
               }
             } else {
               val parts = if (participants.isFailure) {
-                Logger.error(participants.toString(), participants.fail.toOption.get)
+                Logger.error(participants.toString(), participants.toEither.left.get)
                 Nil
               } else {
                 participants.toOption.get
               }
               val pers = if (pl.isFailure) {
-                Logger.error(pl.toString(), pl.fail.toOption.get)
+                Logger.error(pl.toString(), pl.toEither.left.get)
                 None
               } else {
                 // remove all participants that are already enrolled
@@ -218,7 +218,7 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.EventCtrl.show(e.event, true)).flashing("success" -> Messages("success.succeededToStoreEnrollment"))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             val ev = Event.load(e.event)
             val participants = Enrollment.loadByEvent(e.event)
             val pl = Person.getAll
@@ -236,13 +236,13 @@ object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
                 }
               } else {
                 val parts = if (participants.isFailure) {
-                  Logger.error(participants.toString(), participants.fail.toOption.get)
+                  Logger.error(participants.toString(), participants.toEither.left.get)
                   Nil
                 } else {
                   participants.toOption.get
                 }
                 val pers = if (pl.isFailure) {
-                  Logger.error(pl.toString(), pl.fail.toOption.get)
+                  Logger.error(pl.toString(), pl.toEither.left.get)
                   None
                 } else {
                   // remove all participants that are already enrolled

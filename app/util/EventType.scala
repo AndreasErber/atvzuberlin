@@ -4,8 +4,10 @@
 package util
 
 /**
+ * Types of events.
+ * 
  * @author andreas
- *
+ * @version 0.0.2, 2015-01-07
  */
 sealed abstract class EventType(val id: Int, val name: String) {
 
@@ -13,21 +15,21 @@ sealed abstract class EventType(val id: Int, val name: String) {
     
     if (Option(id).isDefined) {
       id match {
-        case 1 => Option(Academic)
-        case 2 => Option(Sport)
-        case 3 => Option(Atv)
-        case 4 => Option(Atb)
-        case 5 => Option(Cultural)
-        case 6 => Option(Handball)
-        case 7 => Option(Actives)
-        case 8 => Option(Burschen)
+        case 1 => Option(AcademicEvent)
+        case 2 => Option(SportsEvent)
+        case 3 => Option(AtvEvent)
+        case 4 => Option(AtbEvent)
+        case 5 => Option(CulturalEvent)
+        case 6 => Option(HandballEvent)
+        case 7 => Option(ActivesEvent)
+        case 8 => Option(BurschenEvent)
         case _ => None
       }
     } else None
   }
   
   def getEventTypes(): Seq[EventType] = {
-    Seq(Academic, Sport, Atv, Atb, Cultural, Handball, Actives, Burschen)
+    Seq(AcademicEvent, SportsEvent, AtvEvent, AtbEvent, CulturalEvent, HandballEvent, ActivesEvent, BurschenEvent)
   }
   
   /**
@@ -42,11 +44,11 @@ sealed abstract class EventType(val id: Int, val name: String) {
   }
 }
 
-case object Academic extends EventType(1, "Academic")
-case object Sport extends EventType(2, "Sport")
-case object Atv extends EventType(3, "ATV")
-case object Atb extends EventType(4, "ATB")
-case object Cultural extends EventType(5, "Cultural")
-case object Handball extends EventType(6, "Handball")
-case object Actives extends EventType(7, "Actives")
-case object Burschen extends EventType(8, "Burschen")
+case object AcademicEvent extends EventType(1, "Academic")
+case object SportsEvent extends EventType(2, "Sport")
+case object AtvEvent extends EventType(3, "ATV")
+case object AtbEvent extends EventType(4, "ATB")
+case object CulturalEvent extends EventType(5, "Cultural")
+case object HandballEvent extends EventType(6, "Handball")
+case object ActivesEvent extends EventType(7, "Actives")
+case object BurschenEvent extends EventType(8, "Burschen")

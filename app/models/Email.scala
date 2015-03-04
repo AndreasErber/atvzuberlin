@@ -3,7 +3,7 @@
  */
 package models
 
-import play.data.validation.Constraints
+import play.api.data.validation.Constraints
 import play.api.db._
 import play.api.Logger
 import play.api.Play.current
@@ -23,8 +23,10 @@ import util.UsageType
 import util.Privacy
 
 /**
+ * Representation of an email address.
+ * 
  * @author andreas
- * @version 0.0.6, 2013-03-31
+ * @version 0.0.9, 2015-01-10
  */
 case class Email(override val id: Option[Long],
     val address: String,
@@ -36,8 +38,9 @@ case class Email(override val id: Option[Long],
   // check the params
   require(Option(address).isDefined)
 
-  private val validator = new Constraints.EmailValidator
-  require(validator.isValid(address))
+  // TODO: FIXME
+//  private val validator = new Constraints.EmailValidator
+//  require(validator.isValid(address))
 
   /**
    * Redefine the string representation of this class.
@@ -214,7 +217,7 @@ object Email {
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
-  def getPersonEmails(p: Person): Validation[Throwable, List[(Email, PersonHasEmail)]] = {
+  def getPersonEmails(p: Person): Validation[Throwable, List[(Email, PersonHasEmail)]] = db withSession {
     require(p.id.isDefined)
     db withSession {
       try {
@@ -271,7 +274,7 @@ object Email {
             }
           }
           Success((e1.toOption.get, PersonHasEmail(p.id.get, e1.toOption.get.id.get, position, u, pr)))
-        } else Failure(e1.fail.toOption.get)
+        } else Failure(e1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }
@@ -321,7 +324,7 @@ object Email {
             }
           }
           Success((e1.toOption.get, OrgHasEmail(o.id.get,e1.toOption.get.id.get, position)))
-        } else Failure(e1.fail.toOption.get)
+        } else Failure(e1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }

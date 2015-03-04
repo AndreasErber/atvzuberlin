@@ -20,10 +20,16 @@ import util.Mr
 import util.Bbr
 import java.text.DateFormat
 import java.util.Calendar
+import util.FormOfAddress
+import db.GenericDao
+import util.MemberState
+import util.Aktiv
 
 /**
+ * Additional information about a {@link Person}
+ * 
  * @author andreas
- * @version 0.0.2, 2013-04-28
+ * @version 0.0.3, 2015-01-07
  */
 case class PersonAdditionalInfo(
     private val pid: Long,
@@ -31,6 +37,7 @@ case class PersonAdditionalInfo(
     val letterSalutation: LetterSalutation,
     val enlistment: Option[Date] = None,
     val withdrawal: Option[Date] = None,
+    val status: MemberState,
     val profession: Option[String] = None,
     val employer: Option[String] = None,
     override val created: Long = System.currentTimeMillis(),
@@ -110,27 +117,63 @@ object PersonAdditionalInfo {
       }
     }
   }
+  
+  
 }
 
-object PersonAdditionalInfos extends Table[PersonAdditionalInfo](PersonAdditionalInfo.tablename) {
+object PersonAdditionalInfos extends Table[PersonAdditionalInfo](PersonAdditionalInfo.tablename) with GenericDao[PersonAdditionalInfo] {
   
   import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
-  implicit val formOfAddressMapper: TypeMapper[FormOfAddress] = base[FormOfAddress, Int](foa => foa.id, id => Mr.getFormOfAddress(id).get)
-  implicit val letterSalutationMapper: TypeMapper[LetterSalutation] = base[LetterSalutation, Int](ls => ls.id, id => Bbr.getLetterSalutation(id).get)
+
+  implicit val formOfAddressMapper = base[FormOfAddress, Int](foa => foa.id, id => Mr.getFormOfAddress(id).get)
+  implicit val letterSalutationMapper = base[LetterSalutation, Int](ls => ls.id, id => Bbr.getLetterSalutation(id).get)
+  implicit val memberStateMapper = base[MemberState, Int](ps => ps.id, id => Aktiv.getMemberState(id).get)
   
   def id = column[Long]("id", O.PrimaryKey)
   def formOfAddress = column[FormOfAddress]("formOfAddress")
   def letterSalutation = column[LetterSalutation]("letterSalutation")
   def enlistment = column[Date]("enlistment", O.Nullable)
   def withdrawal = column[Date]("withdrawal", O.Nullable)
+  def status = column[MemberState]("status")
   def profession = column[String]("profession", O.Nullable)
   def employer = column[String]("employer", O.Nullable)
   def created = column[Long]("created")
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id ~ formOfAddress ~ letterSalutation ~ enlistment.? ~ withdrawal.? ~ profession.? ~ employer.? ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonAdditionalInfo.apply _, PersonAdditionalInfo.unapply _)
+  def * = id ~ formOfAddress ~ letterSalutation ~ enlistment.? ~ withdrawal.? ~ status ~ profession.? ~ employer.? ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonAdditionalInfo.apply _, PersonAdditionalInfo.unapply _)
   
-  def update(pai: PersonAdditionalInfo): Int = PersonAdditionalInfos.where(_.id === pai.id).update(pai.copy(modified = Some(System.currentTimeMillis())))
+  def withoutId = throw new UnsupportedOperationException
+  
+  override def update(pai: PersonAdditionalInfo): Int = PersonAdditionalInfos.where(_.id === pai.id).update(pai.copy(modified = Some(System.currentTimeMillis())))
+  
+  /**
+   * Retrieve all entries with the given <em>status</em>.
+   */
+  def getByStatus(status: MemberState): Validation[Throwable, List[PersonAdditionalInfo]] = db withSession {
+    try {
+      val q = for {
+          pai <- PersonAdditionalInfos
+          if pai.status === status 
+      } yield pai
+      Success(q.list)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
+  }
+  
+  /**
+   * Retrieve all entries having one of the given <em>status</em>.
+   */
+  def getByStatus(status: List[MemberState]): Validation[Throwable, List[PersonAdditionalInfo]] = db withSession {
+    try {
+      val q = for {
+          pai <- PersonAdditionalInfos
+          if pai.status inSetBind status 
+      } yield pai
+      Success(q.list)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
+  }
 }

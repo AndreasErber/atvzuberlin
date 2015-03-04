@@ -1,10 +1,6 @@
 @(p: Person, addresses: List[Address])(implicit lang: Lang, ctx: util.Ctx)
 
-    <table class="table table-striped table-hover">
-      <thead>
-        <th>@Messages("address")</th>
-        <th>@Messages("actions")</th>
-      </thead>
+    <table class="table table-hover">
       <tbody>
     @for(a <- addresses) {
       <tr>
@@ -29,18 +25,18 @@
           </address>
         </td>
         <td>@if(ctx.user.isDefined) {
-		  <a href="/p/@p.id.get/address/edit/@a.id.get" title="@Messages("address.edit")"><i class="icon-pencil"></i></a>
-		  <a href="/p/@p.id.get/address/delete/@a.id.get" title="@Messages("address.delete")"><i class="icon-trash"></i></a>
+          @if(ctx.userHasPrivilege(ctx.user.get, "edit.person.address")) {
+		  <a href="/p/@p.id.get/address/edit/@a.id.get" title="@Messages("address.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+		  }
+		  @if(ctx.userHasPrivilege(ctx.user.get, "delete.person.address")) {
+		  <a href="#" data-toggle="modal" title="@Messages("address.delete")" data-target="#delConfirm_address" onclick="delId = @a.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+		  }
 		}
 		@lastModificationIcon(a)
 		</td>
       </tr>
 	}
-	@if(ctx.user.isDefined) {
-	  <tr>
-	    <td></td>
-	    <td><a href="/p/@p.id.get/address/new" title="@Messages("address.add")"><i class="icon-plus"></i></a> ...</td>
-	  </tr>
-	}
 	  </tbody>
 	</table>
+	
+@deleteConfirmationModal("address", "/p/" + p.id.get + "/address/delete/")

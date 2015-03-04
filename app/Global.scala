@@ -14,9 +14,8 @@ import play.api._
 import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.i18n.Messages
-import accesscontrol.Roles
-import accesscontrol.Privileges
-import accesscontrol.RoleHasPrivileges
+import accesscontrol._
+import scala.concurrent.Future
 
 /**
  * @author andreas
@@ -202,10 +201,25 @@ object Global extends GlobalSettings {
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
+
+      try {
+        UserHasRoles.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+      
+      try {
+        Registrations.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
     }
   }
 
-  override def onError(request: RequestHeader, ex: Throwable) = {
-    Ok("/").flashing("error" -> ex.getMessage())
-  }
+//  override def onError(request: RequestHeader, ex: Throwable) = {
+//    Future.successful(InternalServerError(
+//      views.html.errorPage(ex)
+//    ))
+//  }
+  
 }

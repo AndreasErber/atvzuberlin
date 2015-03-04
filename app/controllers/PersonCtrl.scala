@@ -5,6 +5,7 @@ import util.CustomFormatters
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db._
+import play.api.i18n.Messages
 import play.api.Logger
 import play.api.mvc._
 import play.api.mvc.Security._
@@ -18,10 +19,16 @@ import models.AcademicTitle
 import models.PersonHasTitle
 import models.Homepage
 import models.PersonAdditionalInfo
+import models.PersonHasEmails
+import models.PersonHasEmail
+import models.PersonHasHomepage
+import models.PersonHasPhone
+import models.AcademicTitles
 
 /**
+ * Controller to handle {@link Person} related requests.
  * @author andreas
- * @version 0.2.2, 2013-04-21
+ * @version 0.2.3, 2015-01-07
  */
 object PersonCtrl extends Controller with ProvidesCtx with Security {
 
@@ -34,7 +41,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
   val personForm = Form(
     mapping(
       "id" -> optional(longNumber),
-      "lastname" -> text,
+      "lastname" -> nonEmptyText,
       "firstname" -> optional(text),
       "nickname" -> optional(text),
       "birth" -> optional(sqlDateMapping),
@@ -43,8 +50,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
-      "modifier" -> optional(text))
-      (Person.apply)(Person.unapply))
+      "modifier" -> optional(text))(Person.apply)(Person.unapply))
 
   /**
    * Display the form to create a new person.
@@ -54,14 +60,23 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       Ok(views.html.personForm(personForm))
   }
 
+  /**
+   * Delete a {@link Person} identified by <em>id</em>.
+   *
+   * This method will ensure that all associations of the {@link Person} are deleted as well. i.e., {@link Email}
+   * addresses, {@link Phone} numbers, {@link Address}es, and so on.
+   *
+   * @param id The identifier of the {@link Person} instance to be removed.
+   */
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
-      val result = Person.delete(id)
+      Logger.info(s"The removal of the person with ID $id was requested.")
+      val result = Person.deleteCascading(id)
       if (result.isSuccess) {
         Logger.logger.debug("Sucessfully deleted person with ID " + id + ".")
         Redirect(routes.PersonCtrl.list)
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.PersonCtrl.show(id))
       }
   }
@@ -75,7 +90,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       if (list.isSuccess) {
         Ok(views.html.personList(list.toOption.get.sortBy(x => (x.lastname, x.firstname))))
       } else {
-        Logger.logger.error(list.toString(), list.fail.toOption.get)
+        Logger.logger.error(list.toString(), list.toEither.left.get)
         BadRequest("When trying to load the list of persons a failure occurred.")
       }
   }
@@ -92,7 +107,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
         case _ => NotFound
       }
   }
-  
+
   /**
    * Display the details of a person.
    */
@@ -128,13 +143,12 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.PersonCtrl.show(result.toOption.get.id.get))
           } else {
-            Logger.logger.error(result.toString(), result.fail.toOption.get)
+            Logger.logger.error(result.toString(), result.toEither.left.get)
             Redirect(routes.PersonCtrl.list)
           }
 
       } getOrElse BadRequest
   }
-
 
   def updatePerson = isAuthenticated { username =>
     implicit request =>
@@ -147,9 +161,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           Logger.debug("Storing person " + person.lastname + ", " + person.firstname.getOrElse(""))
           val result = Person.saveOrUpdate(person)
           if (result.isSuccess) {
-            Redirect(routes.PersonCtrl.show(person.id.get))
+            Redirect(routes.PersonCtrl.show(result.toOption.get.id.get))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.personForm(personForm.fill(person)))
           }
         })

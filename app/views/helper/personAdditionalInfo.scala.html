@@ -8,7 +8,7 @@
 @import util.StandardUser
 @import java.text.SimpleDateFormat
   <p>
-  @if(ctx.user.isDefined && ctx.user.get.role != StandardUser) {
+  @if(ctx.user.isDefined) {
     pai.formOfAddress.toString, pai.letterSalutation.toString
   }
   @Messages("personAI.enlistment"): @pai.enlistmentFormatted(new SimpleDateFormat("dd.MM.yyyy"))<br/>

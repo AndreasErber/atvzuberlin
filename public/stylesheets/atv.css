@@ -20,15 +20,7 @@
 	padding-right: 200px;
 	text-align: right;
 }
-.wysiwyg-color-blue {
-  color: blue;
-}
-.wysiwyg-color-green {
-  color: green;
-}
-.wysiwyg-color-red {
-  color: red;
-}
-.wysiwyg-color-yellow {
-  color: yellow;
+
+textarea.form-control-wysiwyg {
+	height: 200px;
 }

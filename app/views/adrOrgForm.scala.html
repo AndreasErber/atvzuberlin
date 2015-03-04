@@ -1,3 +1,9 @@
+@**
+* Enter or modify an {@link Address} for a distinct {@link Organization} in this form.
+*
+* @author andreas
+* @version 0.0.5, 2015-01-02
+*@
 @(adrForm: Form[Address], countries: Seq[Country], oid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -5,22 +11,33 @@
 @implicitField = @{ FieldConstructor(FieldCons.f) }
 
 @main(Messages("address")) {
-    @Logger.debug("Rendering address form")
+    @Logger.debug("Rendering organization address form")
 	<h2>@Messages("address")</h2>
 	@form(routes.AddressCtrl.submitOrgAdr(oid)) {
 	  @inputHidden(adrForm("id")) 
-	  @inputText(adrForm("addon"), '_label -> Messages("address.addon"))
-	  @inputText(adrForm("street"), '_label -> Messages("address.street"))
-	  @inputText(adrForm("postbox"), '_label -> Messages("address.postbox"))
-	  @inputText(adrForm("zip"), '_label -> Messages("address.zip"))
-	  @inputText(adrForm("city"), '_label -> Messages("address.city"))
-	  @select(adrForm("country"), 
+	  <div class="form-group">
+	  @inputText(adrForm("address.addon"), '_label -> Messages("address.addon"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(adrForm("address.street"), '_label -> Messages("address.street"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(adrForm("address.postbox"), '_label -> Messages("address.postbox"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(adrForm("address.zip"), '_label -> Messages("address.zip"), 'class -> "form-control")
+	  @inputText(adrForm("address.city"), '_label -> Messages("address.city"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @select(adrForm("address.country"), 
               countries.map{c => c.id.get.toString -> c.nameDe.get},
-              '_label -> Messages("address.selCountry")
+              '_label -> Messages("address.selCountry"),
+              'class -> "form-control"
       )
+      </div>
       @createModifyFormPart(adrForm)
       @submitResetCancel()
 	}
 	
-	@Logger.debug("Done rendering address form")
+	@Logger.debug("Done rendering organization address form")
 }

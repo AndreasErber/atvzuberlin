@@ -10,16 +10,26 @@
 	<h2>@Messages("phone")</h2>
 	@form(routes.PhoneCtrl.submitOrgPhone(pid)) {
 	  @inputHidden(phoneForm("id")) 
-	  @inputText(phoneForm("areacode"), '_label -> Messages("phone.areacode"))
-	  @inputText(phoneForm("extension"), '_label -> Messages("phone.extension"))
+	  <div class="form-group">
+	  @inputText(phoneForm("areacode"), '_label -> Messages("phone.areacode"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
+	  @inputText(phoneForm("extension"), '_label -> Messages("phone.extension"), 'class -> "form-control")
+	  </div>
+	  <div class="form-group">
 	  @select(phoneForm("country"), 
               countries.map{c => c.id.get.toString -> c.phone.get.toString},
-              '_label -> Messages("phone.selCountry")
+              '_label -> Messages("phone.selCountry"),
+              'class -> "form-control"
       )
+      </div>
+      <div class="form-group">
       @select(phoneForm("kind"), 
               Landline.getPhoneTypes().map{u => u.id.toString -> Messages("phone.kind." + u.name.toLowerCase)},
-              '_label -> Messages("phone.kind")
+              '_label -> Messages("phone.kind"),
+              'class -> "form-control"
       )
+      </div>
       @createModifyFormPart(phoneForm)
       @submitResetCancel()
 	}

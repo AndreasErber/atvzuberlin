@@ -51,11 +51,6 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
   def modifier = column[String]("modifier", O.Nullable)
 
   def * = id.? ~ person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonInCharge.apply _, PersonInCharge.unapply _)
-
-  //  def withoutId = person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? <>
-  //    ({ (p: Person, c: Charge, d: Division.Division, s: Date, e: Date, cr1: Long, cr2: String, m1: Option[Long], m2: Option[String]) => PersonInCharge(None, p, c, d, s, e, cr1, cr2, m1, m2) },
-  //      { pic: PersonInCharge => Some((pic.person, pic.charge, pic.division, pic.start, pic.end, pic.created, pic.creator, pic.modified, pic.modifier)) })
-
   def withoutId = person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? returning id
 
   def insert = db withSession { (c: PersonInCharge) => withoutId.insert(c.person, c.charge, c.division, c.start, c.end, c.created, c.creator, c.modified, c.modifier) }

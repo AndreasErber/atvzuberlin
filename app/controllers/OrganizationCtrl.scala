@@ -24,7 +24,7 @@ import models.Homepage
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-13
+ * @version 0.0.3, 2015-01-03
  */
 object OrganizationCtrl extends Controller with ProvidesCtx with Security {
 
@@ -59,7 +59,7 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.OrganizationCtrl.list).flashing(("success" -> Messages("success.succeededToDeleteOrg")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.OrganizationCtrl.show(id)).flashing(("error" -> Messages("error.failedToDeleteOrg")))
       }
   }
@@ -82,7 +82,7 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
     if (result.isSuccess) {
       Ok(views.html.orgList(result.toOption.get))
     } else {
-      Logger.error(result.toString(), result.fail.toOption.get)
+      Logger.error(result.toString(), result.toEither.left.get)
       Ok(views.html.orgList(List()))
     }
   }
@@ -120,7 +120,7 @@ object OrganizationCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.OrganizationCtrl.show(result.toOption.get.id.get)).flashing(("success" -> Messages("success.succeededToStoreOrg")))
           } else {
-            Logger.error(result.toString(), result.fail.toOption.get)
+            Logger.error(result.toString(), result.toEither.left.get)
             BadRequest(views.html.orgForm(orgForm)).flashing("error" -> Messages("error.failedToStoreOrg"))
           }
         })

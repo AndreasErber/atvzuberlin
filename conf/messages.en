@@ -50,6 +50,8 @@ charge.name = Title
 charge.shortDesc = Short Description
 charge.view = Show Details
 
+contact = Contact
+
 create = Create
 delete = Delete
 reset = Reset
@@ -96,6 +98,7 @@ error.failedToDeleteSports = Failed to delete sports.
 error.failedToDeleteSportsDate = Failed to delete sports date.
 error.failedToFindEmailAddress = Could not find the email address {0} in the system.
 error.failedToFindUserByName = Failed to find a user with name {0}.
+error.failedToFindUserRoles = Failed to fina roles of user {0}.
 error.failedToIdentifyCharacter = Failed to identify single character.
 error.failedToLoadAcademicTitle = Failed to load the academic title with ID {0}.
 error.failedToLoadAddress = Failed to load address.
@@ -114,10 +117,13 @@ error.failedToLoadPersonAI = Failed to load person additional information for pe
 error.failedToLoadPersonList = Failed to load person list.
 error.failedToLoadPhoneType = Failed to load phone type with ID {0}.
 error.failedToLoadPrivacy = Failed to load privacy settings with ID {0}.
+error.failedToLoadRole = Failed to load role with ID {0}.
+error.failedToLoadRoles = Failed to load all roles.
 error.failedToLoadSportsDateList = Failed to load sports dates list.
 error.failedToLoadSportsList = Failed to load sports list.
 error.failedToLoadUpcomingEventsList = Failed to load list of upcoming events.
 error.failedToLoadUsagetype = Failed to load usage type with ID {0}.
+error.failedToLoadUserHasRoles = Failed to load roles of user {0}.
 error.failedToLoadUserRole = Failed to load user role with ID {0}.
 error.failedToParseDate = Failed to parse date. Wrong format: {0}.
 error.failedToStoreAcademicTitle = Failed to store academic title.
@@ -292,6 +298,16 @@ privacy.membersprivate = Members Private - Visible to Members of your Organizati
 privacy.memberspublic = Members Public - Visible to Members of your Umbrella Organization
 privacy.public = Public - Visible to Everyone
 
+privilege = Privilege
+privilege.add = Add
+privilege.edit = Edit
+privilege.delete = Delete
+privilege.delete.body = Do you really want to delete this privilege?
+privilege.delete.heading = Delete privilege
+privilege.description = Description
+privilege.name = Title
+privileges = Privileges
+
 program = Program
 
 registration = Registration
@@ -306,6 +322,18 @@ registration.selPerson.default = <--- Select a person --->
 registration.selRole = Select a user role.
 
 required = Required
+
+role = Role
+role.add = Add
+role.edit = Edit
+role.delete = Delete
+role.delete.body = Do you really want to delete this role?
+role.delete.heading = Delete role
+role.description = Description
+role.name = Title
+role.no.description.available = No description available.
+role.view = Role details
+roles = Roles
 
 sports = Sports
 sports.actives = Student Sports
@@ -364,8 +392,17 @@ usagetype.personal = Private
 usagetype.business = Business
 usagetype.honorary = Honorary
 
+user = User
+user.email = Email Address
 user.logged.in = Currently Logged in User
 user.log.out = Log out User
+user.no.roles.defined = There are currently no roles defined for this user.
+user.person = Person
+user.roles = Roles
+user.status = Account Status
+user.username = Username
+user.view = User Details
+users = Users
 
 weekday.Mon = Monday
 weekday.Tue = Tuesday

@@ -1,0 +1,74 @@
+@**
+* Enter or modify a {@link Privilege} in this form.
+*
+* @param privilegeForm The form data to display.
+* @author andreas
+* @version 0.0.3, 2015-01-03
+*@
+@(privilegeForm: Form[accesscontrol.Privilege])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("privilege")) {
+    @Logger.debug("Rendering privilege form")
+  <h2>@Messages("privilege")</h2>
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab">
+      <a href="#collapseDiv" data-toggle="collapse" data-parent="#accordion" aria-expanded="false" aria-controls="collapseDiv" id="heading">Erläuterung zur Syntax</a>
+    </div>
+    <div class="panel-collapse collapse in" role="tabpanel" id="collapseDiv" aria-labelledby="heading">
+    <div class="panel-body">
+    Der Titel eines Privilegs ist nach einer bestimmten Struktur anzugeben. Er beginnt mit einem der folgenden
+    Schlüsselwörter:
+    <ul>
+      <li>create - Privileg etwas neu anzulegen</li>
+      <li>delete - Privileg etwas bestehendes zu löschen</li>
+      <li>edit - Privileg etwas bestehendes zu ändern</li>
+      <li>save - Privileg etwas zu speichern</li>
+      <li>view - Privileg etwas anzusehen</li>
+    </ul>
+    Darauf folgt ein Punkt und dann die englische Bezeichnung auf welche Entität sich das Privileg bezieht, 
+    <abbr title="zum Beispiel">z.B.</abbr>:
+    <ul>
+      <li>event - Privileg gilt für Veranstaltungen</li>
+	  <li>news - Privileg gilt für Neuigkeiten</li>
+	  <li>organization - Privileg gilt für Organisationen</li>
+	  <li>person - Privileg gilt für Personen</li>
+	  <li>...</li> 
+    </ul>
+    Im Falle von Privilegien, die sich auf Organisationen oder Personen beziehen, folgt noch ein weiterer Punkt
+    und anschließend die englische Bezeichnung der zugeordneten Entität, auf die sich das Privileg bezieht,
+    <abbr title="zum Beispiel">z.B.</abbr>:
+    <ul>
+      <li>address - Privileg gilt für Adressen</li>
+      <li>email - Privileg gilt für E-Mail-Adressen</li>
+      <li>homepage - Privileg gilt für Homepages</li>
+      <li>phone - Privileg gilt für Telephonnummern</li>
+    </ul>
+    Zusammengesetzt sieht das dann beipspielsweise so aus:
+    <ul>
+      <li>create.news</li>
+      <li>edit.person.address</li>
+    </ul>
+    </div>
+    </div>
+  </div>
+  </div>
+  
+  @form(routes.PrivilegeCtrl.submit) {
+    @inputHidden(privilegeForm("id"))
+    <div class="form-group">
+    @inputText(privilegeForm("name"), '_label -> Messages("privilege.name"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+    @textarea(privilegeForm("description"), '_label -> Messages("privilege.description"), 'class -> "form-control")
+    </div>
+    @createModifyFormPart(privilegeForm)
+    @submitResetCancel()
+  
+  @Logger.debug("Done rendering privilege form")
+  }
+}

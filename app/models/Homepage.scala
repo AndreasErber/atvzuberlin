@@ -17,7 +17,7 @@ import util.UsageType
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-13
+ * @version 0.0.3, 2015-01-03
  */
 case class Homepage(override val id: Option[Long],
     val url: String,
@@ -207,7 +207,7 @@ object Homepage {
             }
           }
           Success((hp1.toOption.get, PersonHasHomepage(p.id.get, hp1.toOption.get.id.get, position, u)))
-        } else Failure(hp1.fail.toOption.get)
+        } else Failure(hp1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }
@@ -257,7 +257,7 @@ object Homepage {
             }
           }
           Success((hp1.toOption.get, OrgHasHomepage(o.id.get,hp1.toOption.get.id.get, position)))
-        } else Failure(hp1.fail.toOption.get)
+        } else Failure(hp1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
       }

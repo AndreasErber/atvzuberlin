@@ -24,7 +24,7 @@ import models.Organization
 
 /**
  * @author andreas
- * @version 0.0.1, 2013-03-19
+ * @version 0.0.2, 2014-11-30
  */
 object PhoneCtrl extends Controller with ProvidesCtx with Security {
 
@@ -86,18 +86,19 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
       if (result.isSuccess) {
         Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("success" -> Messages("success.succeededToDeletePhone")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("error" -> Messages("error.failedToDeletePhone")))
       }
   }
   
   def deletePersonPhone(pid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
+      Logger.debug(s"Request to delete association between phone with ID $id and person with ID $pid.")
       val result = Phone.deletePersonPhone(pid, id)
       if (result.isSuccess) {
         Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("success" -> Messages("success.succeededToDeletePhone")))
       } else {
-        Logger.logger.error(result.toString(), result.fail.toOption.get)
+        Logger.logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("error" -> Messages("error.failedToDeletePhone")))
       }
   }
@@ -113,7 +114,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
           Ok(views.html.phoneOrgForm(phoneOrgForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), oid))
         }
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
       }
   }
@@ -129,7 +130,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
           Ok(views.html.phoneForm(phoneForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), pid))
         }
       } else {
-        Logger.error(result.toString(), result.fail.toOption.get)
+        Logger.error(result.toString(), result.toEither.left.get)
         Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
       }
   }
@@ -138,10 +139,10 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val o = Organization.load(oid).get
       val req = Ok(views.html.phoneOrg(o, Phone.getOrgPhones(o).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -151,10 +152,10 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val p = Person.load(pid).get
       val req = Ok(views.html.phone(p, Phone.getPersonPhones(p).toOption.get))
-      if (flash.get("error").isDefined) {
-        req.flashing(("error" -> flash.get("error").get))
-      } else if (flash.get("success").isDefined) {
-        req.flashing(("success" -> flash.get("success").get))
+      if (request.flash.get("error").isDefined) {
+        req.flashing(("error" -> request.flash.get("error").get))
+      } else if (request.flash.get("success").isDefined) {
+        req.flashing(("success" -> request.flash.get("success").get))
       } else {
         req
       }
@@ -188,7 +189,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
             val formWithError = phoneOrgForm.withGlobalError(Messages("error.failedToStorePhone"))
             val countries = Country.getAll
             if (countries.isSuccess) {
-              Logger.error(result.toString(), result.fail.toOption.get)
+              Logger.error(result.toString(), result.toEither.left.get)
               BadRequest(views.html.phoneOrgForm(formWithError, countries.toOption.get, oid))
             } else {
               BadRequest(views.html.phoneOrgForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), oid))
@@ -225,7 +226,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
             val formWithError = phoneForm.withGlobalError(Messages("error.failedToStorePhone"))
             val countries = Country.getAll
             if (countries.isSuccess) {
-              Logger.error(result.toString(), result.fail.toOption.get)
+              Logger.error(result.toString(), result.toEither.left.get)
               BadRequest(views.html.phoneForm(formWithError, countries.toOption.get, pid))
             } else {
               BadRequest(views.html.phoneForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), pid))

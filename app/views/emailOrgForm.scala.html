@@ -1,3 +1,11 @@
+@**
+* Enter or modify an {@link Email} of a distinct {@link Person} in this form.
+*
+* @param emailForm A form for email editing.
+* @param oid The identifier of the {@link Organization} the {@link Email} relates to.
+* @author andreas
+* @version 0.0.3, 2015-01-02
+*@
 @(emailForm: Form[Email], oid: Long)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
@@ -10,8 +18,12 @@
     @Logger.debug("Rendering email org form")
 	<h2>@Messages("email")</h2>
 	@form(routes.EmailCtrl.submitOrgEmail(oid)) {
-	  @inputHidden(emailForm("id")) 
-	  @inputText(emailForm("address"), '_label -> Messages("email.address"))
+	  @inputHidden(emailForm("id"))
+	  <div class="form-group">
+	  @inputText(emailForm("address"), 
+	  	'_label -> Messages("email.address"),
+        'class -> "form-control")
+	  </div>
       @createModifyFormPart(emailForm)
       @submitResetCancel()
 	}

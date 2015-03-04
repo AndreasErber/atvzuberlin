@@ -1,0 +1,41 @@
+@(users: Seq[accesscontrol.User])(implicit flash: Flash, lang: Lang, ctx: util.Ctx) 
+@import helper.deleteConfirmation
+@import helper.lastModificationIcon
+@import helper.permanentError
+
+@main(Messages("users")) {
+@permanentError("Edit-Link ist in routes nicht definiert.")
+<h1>@{if(users.size == 1) Messages("user") else  Messages("users")}</h1>
+<table class="table table-striped table-hover">
+  @if(ctx.user.isDefined) {
+  <caption>
+    <span class="pull-right">
+      <a href="/user/edit" title="@Messages("user.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+    </span>
+  </caption>
+  }
+  <thead>
+    <tr>
+      <th>@Messages("user.username")</th>
+      <th>@Messages("user.person")</th>
+      <th>@Messages("actions")</th>
+    </tr>
+  </thead>
+  <tbody>
+    @users.map { u =>
+    <tr>
+      <td>@u.username</td>
+      <td>@u.person.fullname</td>
+      <td>
+        <a href="/user/@u.username" title="@Messages("user.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
+      @if(ctx.user.isDefined) { 
+        <a href="/user/edit/@u.username" title="@Messages("user.edit")"><i class="glyphicon glyphicon-pencil"></i></a> 
+        <a href="#" data-toggle="modal" title="@Messages("user.delete")" data-target="#delConfirm" onclick="delId = @u.username"><i class="glyphicon glyphicon-trash"></i></a> }
+      </td>
+    </tr>
+    } 
+  </tbody>
+</table>
+
+@deleteConfirmation("user") 
+}
