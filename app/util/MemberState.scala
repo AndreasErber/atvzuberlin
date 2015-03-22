@@ -7,7 +7,7 @@ package util
  * The states members of organizations might have.
  *
  * @author andreas
- * @version 0.0.2, 2015-01-07
+ * @version 0.0.3, 2015-03-08
  */
 sealed abstract class MemberState(val id: Int, val name: String) {
 
@@ -21,17 +21,17 @@ sealed abstract class MemberState(val id: Int, val name: String) {
 
     if (Option(id).isDefined) {
       id match {
-        case 1 => Option(Hausbewohner)
-        case 2 => Option(Fux)
-        case 3 => Option(Aktiv)
-        case 4 => Option(Inaktiv)
-        case 5 => Option(Auswaertig)
-        case 6 => Option(KV)
-        case 7 => Option(EM)
-        case 8 => Option(Ehrenhalber)
-        case 9 => Option(MitturnerAk)
-        case 10 => Option(MitturnerKV)
-        case 11 => Option(Witwe)
+        case 1 => Some(Hausbewohner)
+        case 2 => Some(Fux)
+        case 3 => Some(Aktiv)
+        case 4 => Some(Inaktiv)
+        case 5 => Some(Auswaertig)
+        case 6 => Some(KV)
+        case 7 => Some(EM)
+        case 8 => Some(Ehrenhalber)
+        case 9 => Some(MitturnerAk)
+        case 10 => Some(MitturnerKV)
+        case 11 => Some(Witwe)
         case 12 => Some(ATB)
         case 13 => Some(Korpo)
         case 14 => Some(Other)
@@ -66,6 +66,31 @@ sealed abstract class MemberState(val id: Int, val name: String) {
    */
   override def toString(): String = {
     name
+  }
+  
+   /**
+   * Redefine the inherited method to limit equality to instances of the same type.
+   *
+   * @param other The instance to compare this instance with.
+   * @return <code>true</code> if the other instance is of the same type, <code>false</code> otherwise.
+   */
+  def canEqual(other: Any) = other.isInstanceOf[MemberState]
+
+  /**
+   * Redefine the comparison function.
+   *
+   * @param other The instance to compare to this instance.
+   * @return <code>true</code> if the instance are the same or equal, <code>false</code> otherwise.
+   */
+  override def equals(other: Any): Boolean = other match {
+    case that: MemberState =>
+      if (this eq that) true
+      else {
+        (that.## == this.##) &&
+          (that canEqual this) &&
+          (this.id == that.id)
+      }
+    case _ => false
   }
 }
 

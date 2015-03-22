@@ -1,6 +1,9 @@
 package controllers
 
-import models.{ Person, Persons }
+import controllers.ext.ProvidesCtx
+import controllers.ext.Security
+import models.{ AcademicTitle, AcademicTitles, Address, Email, Homepage, Person, PersonAdditionalInfo, PersonHasEmail, PersonHasEmails, PersonHasHomepage, 
+  PersonHasPhone, PersonHasTitle, Persons, Phone }
 import util.CustomFormatters
 import play.api.data.Form
 import play.api.data.Forms._
@@ -10,20 +13,6 @@ import play.api.Logger
 import play.api.mvc._
 import play.api.mvc.Security._
 import play.api.Play.current
-import models.Email
-import controllers.ext.ProvidesCtx
-import controllers.ext.Security
-import models.Address
-import models.Phone
-import models.AcademicTitle
-import models.PersonHasTitle
-import models.Homepage
-import models.PersonAdditionalInfo
-import models.PersonHasEmails
-import models.PersonHasEmail
-import models.PersonHasHomepage
-import models.PersonHasPhone
-import models.AcademicTitles
 
 /**
  * Controller to handle {@link Person} related requests.
@@ -86,15 +75,24 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
    */
   def list = isAuthenticated { username =>
     implicit request =>
-      val list = Person.getAll
-      if (list.isSuccess) {
-        Ok(views.html.personList(list.toOption.get.sortBy(x => (x.lastname, x.firstname))))
+      val list: List[(String, List[Person])] = Nil
+
+      val persons = Person.getAll
+      if (persons.isSuccess) {
+        (Messages("persons"), persons.toOption.get.sortBy(x => (x.lastname, x.firstname))) :: list
       } else {
-        Logger.logger.error(list.toString(), list.toEither.left.get)
+        Logger.logger.error(persons.toString(), persons.toEither.left.get)
         BadRequest("When trying to load the list of persons a failure occurred.")
       }
+
+      Ok(views.html.personList(list, Messages("persons")))
   }
 
+  /**
+   * Load the person identified by <em>id</em> into the persond form for editing.
+   *
+   * @param id Identifier of the person to handle.
+   */
   def edit(id: Long) = isAuthenticated { username =>
     implicit request =>
       val p = Person.load(id)
@@ -109,7 +107,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
   }
 
   /**
-   * Display the details of a person.
+   * Display the details of a person identified by <em>id</em>.
+   *
+   * @param id Identifier of the person to display.
    */
   def show(id: Long) = isAuthenticated { username =>
     implicit request =>
@@ -135,6 +135,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       }
   }
 
+  /**
+   * Handle submitted form data.
+   */
   def submit = isAuthenticated { username =>
     implicit request =>
       personForm.bindFromRequest.value map {
@@ -150,6 +153,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       } getOrElse BadRequest
   }
 
+  /**
+   * Update person data.
+   */
   def updatePerson = isAuthenticated { username =>
     implicit request =>
       personForm.bindFromRequest.fold(

@@ -2,48 +2,71 @@
 * List persons.
 *
 * @author andreas
-* @version 0.0.5, 2013-04-14
+* @version 0.0.6, 2015-03-08
 *@
-@(persons: Seq[Person])(implicit flash: Flash, ctx: util.Ctx)
+@(persons: Seq[(String, Seq[Person])], title: String)(implicit flash: Flash, ctx: util.Ctx)
 @import helper.deleteConfirmation
 @import helper.lastModificationIcon
+@import java.lang.Integer; var i=0
 
-@main(Messages("persons")) {
-	<h1>@{if(persons.size == 1) Messages("person") else Messages("persons")}</h1>
-	<table class="table table-striped table-hover">
-	  @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.person")) {
-	  <caption>	    
-	    <span class="pull-right">
-	      <a href="/person/new" title="@Messages("person.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
-	    </span>	
-	  </caption>
-	  }
-	  <thead>
-	    <tr>
-	      <th>@Messages("person.lastname")</th>
-	      <th>@Messages("person.firstname")</th>
-	      <th>@Messages("person.nickname")</th>
-	      <th>@Messages("actions")</th>
-	    </tr>
-	  </thead>
-	  <tbody>
-	  @persons.map { p =>
-	    <tr>
-	      <td>@p.lastname</td>
-	      <td>@p.firstname.getOrElse("")</td>
-  	      <td>@p.nickname.getOrElse("")</td>
-          <td> 
-            <a href="/person/@p.id.get" title="@Messages("person.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
-          @if(ctx.user.isDefined) {
-            <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
-            <a href="#" data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="glyphicon glyphicon-trash"></i></a>
-          }
-          @lastModificationIcon(p)
-          </td>
-        </tr>
-	  }
-	  </tbody>
+@main(title) {
+	<h1>@title</h1>
+	<h2>Statistik</h2>
+	<table class="table" style="width: 30%">
+	@for((subtitle, sublist) <- persons) {
+		@{i = i + sublist.size}
+	  <tr>
+	    <td>@subtitle</td>
+	    <td>@sublist.size</td>
+   	  </tr>	
+	}
+	  <tr>
+	    <td><strong>Gesamt</strong></td>
+	    <td><strong>@i</strong></td>
+	  </tr>
 	</table>
-
+	@for((subtitle, sublist) <- persons) {
+      <h2>@subtitle</h2>
+      @if(sublist.isEmpty) {
+      <p>Derzeit keine.</p>
+      } else {
+	  <table class="table table-striped table-hover">
+@**	    @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.person")) {
+	    <caption>	    
+	      <span class="pull-right">
+	        <a href="/person/new" title="@Messages("person.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+	      </span>	
+	    </caption>
+	    } *@
+	    <thead>
+	      <tr>
+	        <th>@Messages("person.lastname")</th>
+	        <th>@Messages("person.firstname")</th>
+	        <th>@Messages("person.nickname")</th>
+	        <th>@Messages("actions")</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    @sublist.map { p =>
+	      <tr>
+	        <td>@p.lastname</td>
+	        <td>@p.firstname.getOrElse("")</td>
+  	        <td>@p.nickname.getOrElse("")</td>
+            <td> 
+              <a href="/person/@p.id.get" title="@Messages("person.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
+            @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "edit.person")) {
+              <a href="/person/edit/@p.id.get" title="@Messages("person.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+            }
+            @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "delete.person")) {
+              <a href="#" data-toggle="modal" title="@Messages("person.delete")" data-target="#delConfirm" onclick="delId = @p.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+            }
+            @lastModificationIcon(p)
+            </td>
+          </tr>
+	    }
+	    </tbody>
+	  </table>
+	  }
+    }
 @deleteConfirmation("person")
 }

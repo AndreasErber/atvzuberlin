@@ -1,0 +1,34 @@
+@**
+ * documentUpload Template File 
+ *@
+@(docForm: Form[(String, String, util.DocumentType)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper._
+@import play.api.Logger
+@import util.DocumentType
+@import util.Sonstiges
+
+@main(Messages("document")) {
+	 @Logger.debug("Rendering document upload form")
+	<h1>@Messages("document")</h1>
+	@form(routes.EventCtrl.submit) {
+	  <div class="form-group"> 
+	  @inputText(docForm("title"), '_label -> Messages("document.title"))
+	  </div>
+	  <div class="form-group">
+	  @inputText(docForm("description"), '_label -> Messages("document.description"))
+	  </div>
+	  <div class="form-group">
+	  @select(docForm("category"),
+	          Sonstiges.getDocumentTypes.map{dt => dt.id.toString -> Messages("document.category." + dt.name)},
+              '_default -> ("<-- " + Messages("document.category.select") + " -->"),
+              '_label -> Messages("document.category")
+      )
+      </div>
+      <div class="form-group">
+      @inputFile(docForm("file"))
+      </div> 
+	  @createModifyFormPart(docForm)
+      @submitResetCancel()
+	}
+	@Logger.debug("Done rendering document upload form")
+}

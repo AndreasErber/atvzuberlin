@@ -38,7 +38,18 @@ trait ProvidesCtx {
       Menu(Messages("organizations"), "/organizations", List()))
 
     val privateMenus = List(
-      Menu(Messages("persons"), "/persons", List()),
+      Menu(Messages("news"), "/newslist", List(
+          MenuItem(Messages("news.view"), "/newslist"),
+          MenuItem(Messages("news.add"), "/news/new")
+          )),
+      Menu(Messages("personalia"), "/persons", List(
+          MenuItem(Messages("aktivitas"), "/aktivitas"),
+          MenuItem(Messages("kv"), "/kv"),
+          MenuItem(Messages("mitturner"), "/mitturner"),
+          MenuItem(Messages("widows"), "/widows"),
+          MenuItem(Messages("person.others"), "/others"),
+          MenuItem(Messages("person.add"), "/person/new")
+          )),
       Menu(Messages("documents"), "/documents", List()),
       Menu(Messages("organizations"), "/organizations", List()),
       Menu(Messages("administration"), "/administration",
@@ -49,7 +60,7 @@ trait ProvidesCtx {
           MenuItem(Messages("roles"), "/roles"),
           MenuItem(Messages("privileges"), "/privileges"),
           MenuItem(Messages("sports"), "/sports/list"),
-          MenuItem(Messages("academicTitles"),"/ats"))))
+          MenuItem(Messages("academicTitles"), "/ats"))))
 
     Ctx(Header(), Some(publicMenus), Some(privateMenus))
   }

@@ -9,10 +9,16 @@
 	<h1>@Messages("news.add")</h1>
 	@form(routes.NewsCtrl.submit) {
 	  @inputHidden(newsForm("id")) 
-	  @inputText(newsForm("title"), '_label -> Messages("news.title"), 'style -> "width: 600px")
-	  @textarea(newsForm("lead"), '_label -> Messages("news.lead"), 'style -> "width: 600px; height: 50px")
+	  <div class="form-group">
+	  @inputText(newsForm("title"), '_label -> Messages("news.title"), 'class -> "form-control", 'placeholder -> Messages("news.title.placeholder"))
+	  </div>
+	  <div class="form-group">
+	  @textarea(newsForm("lead"), '_label -> Messages("news.lead"), 'class -> "form-control", 'style -> "height: 70px", 'placeholder -> Messages("news.lead.placeholder"))
+	  </div>
+	  <div class="form-group">
 	  @richTextEditor(newsForm("content"), '_label -> Messages("news.content"),
-	   'placeholder -> Messages("wysihtml5.placholder"), 'style -> "width: 600px; height: 200px")
+	   'placeholder -> Messages("wysihtml5.placeholder"), 'class -> "form-control", 'style -> "height: 200px")
+	   </div>
       @createModifyFormPart(newsForm)
       @submitResetCancel()
 	}

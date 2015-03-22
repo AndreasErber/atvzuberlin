@@ -1,25 +1,45 @@
+@**
+* Display a news list.
+*
+* @author andreas
+* @version 0.0.7, 2015-03-04
+*@
 @(news: Seq[News])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
 
 @main(Messages("news")) {
 	<h2>@{if(news.size == 1) Messages("news") else Messages("news")}</h2>
+	@if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.news")) {
+	<p class="pull-right">
+	  <a href="/news/new" title="@Messages("news.add")"><i class="glyphicon glyphicon-plus"></i></a> ...
+	</p>
+	}
+	<p>
+	Aktuelles vom ATV zu Berlin
+	</p>
+	
+	<hr/> 
 	@news.map { n =>
+	<div class="well">
 	  <p class="pull-right">
 	  @if(ctx.user.isDefined && ctx.user.get.username == n.creator) {
-        <a href="/news/edit/@n.id.get" title="@Messages("news.edit")"><i class="icon-pencil"></i></a>
-        <a data-toggle="modal" title="@Messages("news.delete")" data-target="#delConfirm" onclick="delId = @n.id.get"><i class="icon-trash"></i></a>
-        <a href="/news/new" title="@Messages("news.add")"><i class="icon-plus"></i></a> ...
+	  	@if(ctx.userHasPrivilege(ctx.user.get, "edit.news")) { 
+        <a href="/news/edit/@n.id.get" title="@Messages("news.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        }
+        @if(ctx.userHasPrivilege(ctx.user.get, "delete.news")) {
+        <a href="#" data-toggle="modal" title="@Messages("news.delete")" data-target="#delConfirm" onclick="delId = @n.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+        }
       }
 	  </p>
 	  <h3>@n.title</h3>
 	  <p class="text-left">
-        <small>@n.lastModification(new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm")) h</small>
+        <small>@Messages("news.by") <em>@n.creator</em> @Messages("news.when") @n.lastModification(new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm")) h</small>
       </p>
 	  <p>
 	    @n.lead
 	    <a href="/news/@n.id.get">@Messages("news.read.more")</a>
 	  </p>
-	  <hr />
+	</div>
 	}	
 @deleteConfirmation("news")
 }

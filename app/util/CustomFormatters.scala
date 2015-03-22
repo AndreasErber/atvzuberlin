@@ -288,7 +288,7 @@ object CustomFormatters {
   }
   
   /**
-   * Maps an {@link PersonStatus} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a {@link MemberState} instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val memberStateFormatter = new Formatter[MemberState] {
 
@@ -303,6 +303,24 @@ object CustomFormatters {
     }
 
     def unbind(key: String, ms: MemberState) = Map(key -> ms.id.toString())
+  }
+
+  /**
+   * Maps a {@link DocumentType} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   */
+  val documentTypeFormatter = new Formatter[DocumentType] {
+
+    def bind(key: String, data: Map[String, String]) = {
+      data.get(key).toRight {
+        Seq(FormError(key, Messages("error.required"), Nil))
+      }.right.flatMap { id =>
+        Exception.allCatch[DocumentType].either(Sonstiges.getDocumentType(id.toInt).get).left.map {
+          e => Seq(FormError(key, Messages("error.failed.to.load.documenttype", id), Nil))
+        }
+      }
+    }
+
+    def unbind(key: String, dt: DocumentType) = Map(key -> dt.id.toString())
   }
 
 

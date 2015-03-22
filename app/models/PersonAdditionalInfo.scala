@@ -27,24 +27,24 @@ import util.Aktiv
 
 /**
  * Additional information about a {@link Person}
- * 
+ *
  * @author andreas
- * @version 0.0.3, 2015-01-07
+ * @version 0.0.4, 2015-03-08
  */
 case class PersonAdditionalInfo(
-    private val pid: Long,
-    val formOfAddress: FormOfAddress,
-    val letterSalutation: LetterSalutation,
-    val enlistment: Option[Date] = None,
-    val withdrawal: Option[Date] = None,
-    val status: MemberState,
-    val profession: Option[String] = None,
-    val employer: Option[String] = None,
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String] = None) extends Entity(Some(pid), created, creator, modified, modifier) {
-  
+  private val pid: Long,
+  val formOfAddress: FormOfAddress,
+  val letterSalutation: LetterSalutation,
+  val enlistment: Option[Date] = None,
+  val withdrawal: Option[Date] = None,
+  val status: MemberState,
+  val profession: Option[String] = None,
+  val employer: Option[String] = None,
+  override val created: Long = System.currentTimeMillis(),
+  override val creator: String,
+  override val modified: Option[Long] = None,
+  override val modifier: Option[String] = None) extends Entity(Some(pid), created, creator, modified, modifier) {
+
   def enlistmentFormatted(df: DateFormat): String = {
     require(Option(df).isDefined)
     val cal = Calendar.getInstance()
@@ -53,7 +53,7 @@ case class PersonAdditionalInfo(
       df.format(cal.getTime())
     } else ""
   }
-  
+
   def withdrawalFormatted(df: DateFormat): String = {
     require(Option(df).isDefined)
     val cal = Calendar.getInstance()
@@ -67,7 +67,7 @@ case class PersonAdditionalInfo(
 object PersonAdditionalInfo {
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
   val tablename = "PersonAdditionalInfo"
-    
+
   /**
    * Delete the {@link PersonAdditionalInfo} identified by id.
    */
@@ -79,7 +79,7 @@ object PersonAdditionalInfo {
       case e: Throwable => Failure(e)
     }
   }
-  
+
   /**
    * Load the {@link PersonAdditionalInfo} related to the given identifier.
    */
@@ -93,7 +93,7 @@ object PersonAdditionalInfo {
   def saveOrUpdate(pai: PersonAdditionalInfo): Validation[Throwable, PersonAdditionalInfo] = {
     db withSession {
       require(Option(pai).isDefined)
-      
+
       // if an entry with that ID already exists it is an update
       if (PersonAdditionalInfo.load(pai.id.get).isDefined) {
         try {
@@ -117,18 +117,17 @@ object PersonAdditionalInfo {
       }
     }
   }
-  
-  
+
 }
 
 object PersonAdditionalInfos extends Table[PersonAdditionalInfo](PersonAdditionalInfo.tablename) with GenericDao[PersonAdditionalInfo] {
-  
+
   import scala.slick.lifted.MappedTypeMapper.base
 
   implicit val formOfAddressMapper = base[FormOfAddress, Int](foa => foa.id, id => Mr.getFormOfAddress(id).get)
   implicit val letterSalutationMapper = base[LetterSalutation, Int](ls => ls.id, id => Bbr.getLetterSalutation(id).get)
   implicit val memberStateMapper = base[MemberState, Int](ps => ps.id, id => Aktiv.getMemberState(id).get)
-  
+
   def id = column[Long]("id", O.PrimaryKey)
   def formOfAddress = column[FormOfAddress]("formOfAddress")
   def letterSalutation = column[LetterSalutation]("letterSalutation")
@@ -141,36 +140,39 @@ object PersonAdditionalInfos extends Table[PersonAdditionalInfo](PersonAdditiona
   def creator = column[String]("creator")
   def modified = column[Long]("modified", O.Nullable)
   def modifier = column[String]("modifier", O.Nullable)
+
+  def personFK = foreignKey("person_fk", id, Persons)(_.id)
+
   def * = id ~ formOfAddress ~ letterSalutation ~ enlistment.? ~ withdrawal.? ~ status ~ profession.? ~ employer.? ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonAdditionalInfo.apply _, PersonAdditionalInfo.unapply _)
-  
+
   def withoutId = throw new UnsupportedOperationException
-  
+
   override def update(pai: PersonAdditionalInfo): Int = PersonAdditionalInfos.where(_.id === pai.id).update(pai.copy(modified = Some(System.currentTimeMillis())))
-  
+
   /**
-   * Retrieve all entries with the given <em>status</em>.
+   * Retrieve all {@link Person} entries with the given <em>status</em>.
    */
-  def getByStatus(status: MemberState): Validation[Throwable, List[PersonAdditionalInfo]] = db withSession {
+  def getAllByStatus(status: MemberState): Validation[Throwable, List[Person]] = db withSession {
     try {
       val q = for {
-          pai <- PersonAdditionalInfos
-          if pai.status === status 
-      } yield pai
+        (p, pai) <- Persons innerJoin PersonAdditionalInfos on (_.id === _.id)
+        if pai.status === status
+      } yield p
       Success(q.list)
     } catch {
-      case t: Throwable => Failure(t)
+      case e: Throwable => Failure(e)
     }
   }
   
   /**
    * Retrieve all entries having one of the given <em>status</em>.
    */
-  def getByStatus(status: List[MemberState]): Validation[Throwable, List[PersonAdditionalInfo]] = db withSession {
+  def getAllByStatus(status: List[MemberState]): Validation[Throwable, List[Person]] = db withSession {
     try {
       val q = for {
-          pai <- PersonAdditionalInfos
-          if pai.status inSetBind status 
-      } yield pai
+        (p, pai) <- Persons innerJoin PersonAdditionalInfos on (_.id === _.id)
+        if pai.status inSetBind status
+      } yield p
       Success(q.list)
     } catch {
       case t: Throwable => Failure(t)

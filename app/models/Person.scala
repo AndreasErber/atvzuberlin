@@ -299,19 +299,14 @@ object Person {
    * Retrieve all {@link Person}s having the given {@link MemberState}.
    *
    * Note, the information about the {@link MemberState} of a {@link Person} is kept in the accompanying
-   * {@link PersonAdditionalInfo} instance.
+   * {@link PersonAdditionalInfos} instance. This method only wraps the identically named method in {@link PersonAdditionalInfos}.
    *
    * @param status The {@link MemberState} to filter by.
    * @returns A {@link Validation} with a {@link List} of {@link Person}s having the given status or the
    *          {@link Throwable} in case of error.
    */
   def getAllByStatus(status: MemberState): Validation[Throwable, List[Person]] = db withSession {
-    val paiVal = PersonAdditionalInfos.getByStatus(status)
-    if (paiVal.isFailure) {
-      Failure(paiVal.toEither.left.get)
-    }
-    val ids = paiVal.toOption.get.map(pai => pai.id.get)
-    this.getByIds(ids)
+    PersonAdditionalInfos.getAllByStatus(status)
   }
 
   /**
@@ -325,12 +320,7 @@ object Person {
    *          {@link Throwable} in case of error.
    */
   def getAllByStatus(status: List[MemberState]): Validation[Throwable, List[Person]] = db withSession {
-    val paiVal = PersonAdditionalInfos.getByStatus(status)
-    if (paiVal.isFailure) {
-      Failure(paiVal.toEither.left.get)
-    }
-    val ids = paiVal.toOption.get.map(pai => pai.id.get)
-    this.getByIds(ids)
+    PersonAdditionalInfos.getAllByStatus(status)
   }
 
   /**

@@ -99,6 +99,7 @@ object Users extends Table[User](User.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
+  
   implicit val emailMapper = base[Email, Long](e => e.id.get, id => Email.load(id).get)
   implicit val personMapper = base[Person, Long](p => p.id.get, id => Person.load(id).get)
 

@@ -2,7 +2,7 @@
 * Display a news item.
 *
 * @author andreas
-* @version 0.0.6, 2014-05-28
+* @version 0.0.7, 2015-03-04
 *@
 @(n: News)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
@@ -10,17 +10,21 @@
 @main(Messages("news")) {
   <div class="pull-right">
   @if(ctx.user.isDefined && ctx.user.get.username == n.creator) {
-    <a href="/news/edit/@n.id.get" title="@Messages("news.edit")"><i class="icon-pencil"></i></a>
-    <a data-toggle="modal" title="@Messages("news.delete")" data-target="#delConfirm" onclick="delId = @n.id.get"><i class="icon-trash"></i></a>
+    @if(ctx.userHasPrivilege(ctx.user.get, "edit.news")) { 
+        <a href="/news/edit/@n.id.get" title="@Messages("news.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        }
+        @if(ctx.userHasPrivilege(ctx.user.get, "delete.news")) {
+        <a href="#" data-toggle="modal" title="@Messages("news.delete")" data-target="#delConfirm" onclick="delId = @n.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+        }
   }
-	<a href="/newslist" title="@Messages("news.list")"><i class="icon-th-list"></i></a>
-  @if(ctx.user.isDefined) {
-  	<a href="/news/new" title="@Messages("news.add")"><i class="icon-plus"></i></a> ...
+	<a href="/newslist" title="@Messages("news.list")"><i class="glyphicon glyphicon-th-list"></i></a>
+  @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.news")) {
+  	<a href="/news/new" title="@Messages("news.add")"><i class="glyphicon glyphicon-plus"></i></a> ...
   }
   </div>
   <h2>@n.title</h2>
   <p class="text-right">
-    <small>@Messages("news.by") @n.creator, @{new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm").format(new java.util.Date(n.created))+ "h"}<br/>
+    <small>@Messages("news.by") <em>@n.creator</em> @{ Messages("news.when") + " " + new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm").format(new java.util.Date(n.created))+ "h"}<br/>
     @{if(n.modified.isDefined) Messages("news.modified") + " " + n.lastModification(new java.text.SimpleDateFormat("dd.MM.yyyy, HH:mm"))+ "h"}</small>
   </p>
   <p class="lead">@n.lead</p>

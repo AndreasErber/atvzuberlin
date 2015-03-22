@@ -38,6 +38,9 @@ GET   /at/edit/:id                controllers.AcademicTitleCtrl.edit(id: Long)
 POST  /at/edit                    controllers.AcademicTitleCtrl.submit
 GET   /at/:id                     controllers.AcademicTitleCtrl.show(id: Long)
 
+# Aktivitas
+GET   /aktivitas                  controllers.AktivitasCtrl.list
+
 # Charges
 GET   /charge/list                controllers.ChargeCtrl.list
 GET   /charge/new                 controllers.ChargeCtrl.create
@@ -62,6 +65,12 @@ GET   /event/delete/:id           controllers.EventCtrl.delete(id: Long)
 GET   /event/edit/:id             controllers.EventCtrl.edit(id: Long)
 POST  /event/edit                 controllers.EventCtrl.submit
 GET   /event/:id/:showEnrs        controllers.EventCtrl.show(id: Long, showEnrs: Boolean)
+
+# KV
+GET   /kv                         controllers.KvCtrl.list
+
+# Mitturner
+GET   /mitturner                  controllers.MitturnerCtrl.list
 
 # News
 GET   /newslist                   controllers.NewsCtrl.list
@@ -108,6 +117,9 @@ GET   /o/:oid/phone/delete/:id    controllers.PhoneCtrl.deleteOrgPhone(oid: Long
 GET   /o/:oid/phone/edit          controllers.PhoneCtrl.createOrgPhone(oid: Long)
 GET   /o/:oid/phone/edit/:id      controllers.PhoneCtrl.editOrgPhone(oid: Long, id: Long)
 POST  /o/:oid/phone/edit          controllers.PhoneCtrl.submitOrgPhone(oid: Long)
+
+# Other Persons
+GET   /others                     controllers.OtherPersonsCtrl.list
 
 # Person Address
 GET   /p/:pid/address/new         controllers.AddressCtrl.createPersonAdr(pid: Long)
@@ -216,6 +228,9 @@ GET   /users                      controllers.UserCtrl.list
 # User has Role
 GET   /uhr/:un                    controllers.UserHasRoleCtrl.create(un: String)
 POST  /uhr/edit                   controllers.UserHasRoleCtrl.submit
+
+# Widows
+GET   /widows                     controllers.WidowsCtrl.list
 
 # Map static resources from the /public folder to the /assets URL path
 GET   /assets/*file               controllers.Assets.at(path="/public", file)

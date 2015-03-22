@@ -38,7 +38,21 @@ addresses.of = Adressen von
 administration = Administration
 administration.overview = Übersicht
 
+aktivitas=Aktivitas
+aktivitas.aktiv=Aktiv
+aktivitas.auswaertig=Auswärtig
+aktivitas.ems=Ehrenmitglieder
+aktivitas.fuxia=Fuxia
+aktivitas.inaktiv=Inaktiv
+aktivitas.mitturner=Mitturner
+aktivitas.members=Mitglieder der Aktivitas
+
+aom=außerordentliche Mitglieder
+
 application.name = ATV zu Berlin
+
+atb=Akademischer Turnbund
+atb.abbr=ATB
 
 cancel = Abbrechen
 
@@ -125,6 +139,7 @@ error.failedToLoadAddress = Die Adresse konnte nicht geladen werden.
 error.failedToLoadChargesList = Die Liste der Ämterbeschreibungen konnte nicht geladen werden.
 error.failedToLoadCountries = Die Länderliste konnte nicht geladen werden.
 error.failedToLoadCountry = Das Land mit der ID {0} konnte nicht geladen werden.
+error.failed.to.load.documenttype=Die Dokumentenkategorien konnten nicht geladen werden.
 error.failedToLoadEmail = Die E-Mail-Adresse mit der ID {0} konnte nicht geladen werden.
 error.failedToLoadEnrollmentsForEventList = Die Liste der Anmeldungen für die Veranstaltung {0} konnte nicht geladen werden.
 error.failedToLoadEnrollmentsForPersonList = Die Liste der Anmeldungen für {0} konnte nicht geladen werden.
@@ -237,6 +252,11 @@ house = Unser Haus
 
 imprint = Impressum
 
+kv=Korporationsverband
+kv.aoms=außerordentliche Mitglieder
+kv.members=Mitglieder des Korporationsverbandes
+kv.ehrenhalber=Alte Damen und Herren ehrenhalber
+
 last.modification = Letzte Änderung
 
 link.external = Externer Link
@@ -252,15 +272,27 @@ login.successful = Anmeldung war erfolgreich.
 logout = Abmelden
 logout.successful = Abmeldung war erfolgreich.
 
+member=Mitglied
+members=Mitglieder
+
+mitturner=Mitturner
+
 news = Neuigkeiten
 news.add = Neuigkeit eingeben
 news.by = geschrieben von
 news.content = Inhalt
+news.delete=Neuigkeit löschen
+news.edit=Neuigkeit bearbeiten
 news.form = Neuigkeit hinzufügen
 news.lead = Zusammenfassung
+news.lead.placeholder=Kurze Zusammenfassung oder Einleitung zum folgenden Text ...
+news.list=Übersicht
 news.modified = zuletzt geändert am
 news.read.more = Mehr ...
 news.title = Titel
+news.title.placeholder=Schlagkräftige Überschrift ...
+news.view=Neuigkeiten ansehen
+news.when=am
 
 ok = OK
 
@@ -284,6 +316,8 @@ organization.refounded = Wiedergründung
 organization.selGender = geschlechtliche Ausrichtung
 organization.submit = Organisation eintragen
 organization.view = Details ansehen
+
+others=Andere
 
 person = Person
 persons = Personen
@@ -309,6 +343,7 @@ person.lastname = Nachname
 person.list = Personenliste
 person.new = Neue Person anlegen
 person.nickname = Biername
+person.others=Weitere Personen
 person.plural = Personen
 person.selGender = Geschlecht
 person.singular = Person
@@ -327,6 +362,8 @@ personAI.profession = Beruf
 personAI.status = Mitgliedsstatus
 personAI.withdrawal = Austritt
 personAI.withdrawal.date.format = TT.MM.JJJJ
+
+personalia=Personalia
 
 personincharge = Amtsbesetzungen
 personincharge.add = Amtszuordnung hinzufügen
@@ -497,6 +534,8 @@ weekday.Sat = Samstag
 weekday.Sun = Sonntag
 
 welcome = Willkommen beim ATV zu Berlin
+
+widows=Witwen
 
 wysihtml5.blue = blaue Schrift
 wysihtml5.bold = fett
