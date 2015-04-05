@@ -81,6 +81,13 @@ delete = Löschen
 reset = Zurücksetzen
 
 documents = Dokumente
+document = Dokument
+document.category = Kategorie
+document.category.select = Auswählen
+document.description = Beschreibung
+document.file.select = Dateiauswahl
+document.title = Titel
+document.upload = Dokument hochladen
 
 email = E-Mail
 emails = E-Mails
@@ -175,6 +182,7 @@ error.failedToStorePersonInCharge = Das Speicher der Amtszuordnung ist fehlgesch
 error.failedToStorePhone = Das Speichern der Telefonnummer ist leider fehlgeschlagen.
 error.failedToStoreSports = Das Speichern der Sportart ist leider fehlgeschlagen.
 error.failedToStoreSportsDate = Das Speichern des Sporttermins ist leider fehlgeschlagen.
+error.failed.to.store.uploaded.file = Die hochgeladene Datei konnte nicht gespeichert werden.
 error.login.failed = Anmeldung ist fehlgeschlagen. Benutzername und/oder Password sind falsch.
 error.number = Hier ist eine Zahl einzugeben.
 error.password.missing.digit = Das Passwort muss mindestens eine Zahl enthalten.

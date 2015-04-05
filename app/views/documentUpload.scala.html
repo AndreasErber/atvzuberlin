@@ -1,31 +1,40 @@
 @**
  * documentUpload Template File 
  *@
-@(docForm: Form[(String, String, util.DocumentType)])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(docForm: Form[models.to.DocumentUploadTO])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
-@import util.DocumentType
-@import util.Sonstiges
+@import util.TO
 
-@main(Messages("document")) {
+@main(Messages("document.upload")) {
 	 @Logger.debug("Rendering document upload form")
-	<h1>@Messages("document")</h1>
-	@form(routes.EventCtrl.submit) {
+	<h1>@Messages("document.upload")</h1>
+    @if(docForm.hasGlobalErrors) {
+        <div class="error">
+            <ul>
+                @docForm.globalErrors.foreach { error =>
+                  <li>error.message</li>
+                }
+            </ul>
+        </div>
+    }
+	@form(routes.DocumentCtrl.upload, 'enctype -> "multipart/form-data") {
 	  <div class="form-group"> 
-	  @inputText(docForm("title"), '_label -> Messages("document.title"))
+	  @inputText(docForm("title"), '_label -> Messages("document.title"), 'class -> "form-control")
 	  </div>
 	  <div class="form-group">
-	  @inputText(docForm("description"), '_label -> Messages("document.description"))
+	  @inputText(docForm("description"), '_label -> Messages("document.description"), 'class -> "form-control")
 	  </div>
 	  <div class="form-group">
 	  @select(docForm("category"),
-	          Sonstiges.getDocumentTypes.map{dt => dt.id.toString -> Messages("document.category." + dt.name)},
+	          TO.getDocumentTypes.map{dt => dt.id.toString -> dt.name},
               '_default -> ("<-- " + Messages("document.category.select") + " -->"),
-              '_label -> Messages("document.category")
+              '_label -> Messages("document.category"),
+              'class -> "form-control"
       )
       </div>
       <div class="form-group">
-      @inputFile(docForm("file"))
+      @inputFile(docForm("file"), '_label -> Messages("document.file.select"), 'class -> "form-control")
       </div> 
 	  @createModifyFormPart(docForm)
       @submitResetCancel()

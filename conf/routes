@@ -49,6 +49,10 @@ GET   /charge/edit/:id            controllers.ChargeCtrl.edit(id: Long)
 POST  /charge/edit                controllers.ChargeCtrl.submit
 GET   /charge/:id                 controllers.ChargeCtrl.show(id: Long)
 
+# Documents
+GET   /doc/new                    controllers.DocumentCtrl.create
+POST  /doc/edit                   controllers.DocumentCtrl.upload
+
 # Enrollments
 GET   /event/:eid/enrs/list       controllers.EnrollmentCtrl.listForEvent(eid: Long)
 GET   /event/:eid/enrs/hide       controllers.EnrollmentCtrl.listForEventHide(eid: Long)

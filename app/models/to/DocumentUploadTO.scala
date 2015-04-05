@@ -13,12 +13,10 @@ import java.io.File
  * @version 0.0.1, 2015-03-08
  */
 case class DocumentUploadTO(
-  val title: String,
-  val description: Option[String],
-  val category: DocumentType,
-  val file: File) {
+  title: String,
+  description: Option[String],
+  category: DocumentType) {
 
   require(Option(title).isDefined)
   require(Option(category).isDefined)
-  require(Option(file).isDefined)
 }
