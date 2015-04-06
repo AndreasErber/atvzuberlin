@@ -79,6 +79,11 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security with Subli
     }
   }
 
+  def overview = isAuthorized("view.documents") { username =>
+    val documents = Documents.getAll()
+
+  }
+
   private def getPath(category: String): String = {
     var path = current.configuration.getString("file.upload.folder").get
     if (!path.endsWith("/")) {

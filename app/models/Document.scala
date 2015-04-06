@@ -5,7 +5,7 @@ import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
 import db.GenericDao
-import scalaz.{ Failure, Success, Validation }
+import scalaz.{Failure, Success, Validation}
 import util.DocumentType
 import util.Sonstiges
 import util.DocumentType
@@ -18,16 +18,16 @@ import util.DocumentType
  * @version 0.0.1, 2015-03-08
  */
 case class Document(override val id: Option[Long] = None,
-  val name: String,
-  val description: Option[String],
-  val category: DocumentType = Sonstiges,
-  val url: String,
-  val encryptionKey: Option[String],
-  val fileSize: Option[Long],
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
+                    val name: String,
+                    val description: Option[String],
+                    val category: DocumentType = Sonstiges,
+                    val url: String,
+                    val encryptionKey: Option[String],
+                    val fileSize: Option[Long],
+                    override val created: Long = System.currentTimeMillis(),
+                    override val creator: String,
+                    override val modified: Option[Long] = None,
+                    override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
 
   require(Option(this.name).isDefined)
   require(Option(this.url).isDefined)
@@ -46,18 +46,28 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
   implicit val documentTypeMapper = base[DocumentType, Int](ps => ps.id, id => Sonstiges.getDocumentType(id).get)
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def name = column[String]("name")
+
   def description = column[String]("description", O.Nullable)
+
   def category = column[DocumentType]("category")
+
   def url = column[String]("url")
+
   def encryptionKey = column[String]("encryptionKey", O.Nullable)
+
   def fileSize = column[Long]("fileSize", O.Nullable)
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
 
-  def * = id.? ~ name ~ description.? ~ category ~ url ~ encryptionKey.? ~ fileSize.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Document.apply _, Document.unapply _)
+  def * = id.? ~ name ~ description.? ~ category ~ url ~ encryptionKey.? ~ fileSize.? ~ created ~ creator ~ modified.? ~ modifier.? <>(Document.apply _, Document.unapply _)
 
   def withoutId = name ~ description.? ~ category ~ url ~ encryptionKey.? ~ fileSize.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
 
@@ -69,7 +79,9 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
   /**
    * {@inheritDoc}
    */
-  override def update(doc: Document): Int = db withSession { Documents.where(_.id === doc.id).update(doc.copy(modified = Some(System.currentTimeMillis()))) }
+  override def update(doc: Document): Int = db withSession {
+    Documents.where(_.id === doc.id).update(doc.copy(modified = Some(System.currentTimeMillis())))
+  }
 
   /**
    * Save or update the specified <em>doc</em>.
@@ -98,19 +110,27 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
       }
     }
   }
-  
+
   /**
    * Retrieve all {@link Document}s of a given <em>category</em>.
-   * 
-   * @param category The {@link DocumentType} the {@link Document}s must have in order to be retrieved.
+   *
+   * @param category The { @link DocumentType} the { @link Document}s must have in order to be retrieved.
    */
   def getAllByCategory(category: DocumentType): Validation[Throwable, List[Document]] = {
     try {
-    val docs = for {
-      doc <- Documents
-      if doc.category === category
-    } yield doc
-    Success(docs.list)
+      val docs = for {
+        doc <- Documents
+        if doc.category === category
+      } yield doc
+      Success(docs.list)
+    } catch {
+      case e: Throwable => Failure(e)
+    }
+  }
+
+  def getSome(int: limit): Validation[Throwable, List[Document]] = {
+    try {
+//      Documents.
     } catch {
       case e: Throwable => Failure(e)
     }

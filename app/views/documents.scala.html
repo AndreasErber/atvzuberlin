@@ -1,0 +1,33 @@
+@**
+* Display the start page for the documents section.
+*
+* @author andreas
+* @version 0.0.1, 2015-04-05
+*@
+@(documents: Seq[Document)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@main(Messages("documents")) {
+    <h2>@Messages("documents.overview")</h2>
+
+    <h3>@Messages("documents.latest")</h3>
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>@Messages("document.name")</th>
+                <th>@Messages("document.category")</th>
+                <th>@Messages("document.file.size")</th>
+                <th>@Messages("document.file.type")</th>
+                <th>@Messages("document.download")</th>
+            </tr>
+        </thead>
+        <tbody>
+        @documents.map { d =>
+            <tr>
+                <td>@d.name</td>
+                <td>@d.category</td>
+                <td>@d.fileSize</td>
+                <td>@d.url.substring(d.url)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

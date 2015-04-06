@@ -80,14 +80,20 @@ create = Erstellen
 delete = Löschen
 reset = Zurücksetzen
 
-documents = Dokumente
 document = Dokument
 document.category = Kategorie
 document.category.select = Auswählen
 document.description = Beschreibung
+document.download = Herunterladen
 document.file.select = Dateiauswahl
+document.file.size = Dateigröße
+document.file.type = Typ
+document.name = Titel
 document.title = Titel
 document.upload = Dokument hochladen
+documents = Dokumente
+documents.latest = Neueste Dokumente
+documents.overview = Überblick Dokumente
 
 email = E-Mail
 emails = E-Mails
