@@ -4,7 +4,7 @@
 @(docForm: Form[models.to.DocumentUploadTO])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
-@import util.TO
+@import util.Agenda
 
 @main(Messages("document.upload")) {
 	 @Logger.debug("Rendering document upload form")
@@ -27,7 +27,7 @@
 	  </div>
 	  <div class="form-group">
 	  @select(docForm("category"),
-	          TO.getDocumentTypes.map{dt => dt.id.toString -> dt.name},
+	          Agenda.getDocumentTypes.map{dt => dt.id.toString -> dt.name},
               '_default -> ("<-- " + Messages("document.category.select") + " -->"),
               '_label -> Messages("document.category"),
               'class -> "form-control"

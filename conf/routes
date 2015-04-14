@@ -50,8 +50,13 @@ POST  /charge/edit                controllers.ChargeCtrl.submit
 GET   /charge/:id                 controllers.ChargeCtrl.show(id: Long)
 
 # Documents
+GET   /docs                       controllers.DocumentCtrl.overview(limit: Int ?= 10)
+GET   /docs/:category             controllers.DocumentCtrl.listByCategory(category: String, limit: Int ?= 10)
+GET   /doc/:id                    controllers.DocumentCtrl.show(id: Long)
 GET   /doc/new                    controllers.DocumentCtrl.create
 POST  /doc/edit                   controllers.DocumentCtrl.upload
+GET   /doc/download/:id           controllers.DocumentCtrl.download(id: Long)
+GET   /doc/delete/:id             controllers.DocumentCtrl.delete(id: Long)
 
 # Enrollments
 GET   /event/:eid/enrs/list       controllers.EnrollmentCtrl.listForEvent(eid: Long)

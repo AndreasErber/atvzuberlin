@@ -8,10 +8,7 @@ import models.{ AcademicTitle, Charge, Country, Email, Event, Person }
 import play.api.data.format.Formatter
 import play.api.data.FormError
 import play.api.i18n.Messages
-import play.api.Logger
 import scala.util.control.Exception
-import accesscontrol.UserHasRole
-import accesscontrol.UserHasRoles
 
 /**
  * @author andreas
@@ -314,7 +311,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[DocumentType].either(Sonstiges.getDocumentType(id.toInt).get).left.map {
+        Exception.allCatch[DocumentType].either(Miscellaneous.getDocumentType(id.toInt).get).left.map {
           e => Seq(FormError(key, Messages("error.failed.to.load.documenttype", id), Nil))
         }
       }

@@ -12,33 +12,49 @@ package util
 sealed abstract class DocumentType(val id: Int, val name: String) {
 
   /**
-   * Get a {@link DocumentType} by its identifier.
+   * Get a [[util.DocumentType]] by its identifier.
    *
-   * @param id The identifier of the {@link DocumentType} sought for.
-   * @return The {@link DocumentType} instance if one with that <em>id</em> exists.
+   * @param id The identifier of the [[util.DocumentType]] sought for.
+   * @return The [[util.DocumentType]] instance if one with that <em>id</em> exists.
    */
   def getDocumentType(id: Int): Option[DocumentType] = {
 
     if (Option(id).isDefined) {
       id match {
-        case 1 => Some(Protokoll)
-        case 2 => Some(Artikel)
-        case 3 => Some(TO)
-        case 4 => Some(Rundschreiben)
-        case 5 => Some(Satzung)
-        case 6 => Some(Formular)
-        case 7 => Some(Datenbank)
-        case 8 => Some(Sonstiges)
+        case 1 => Some(Protocol)
+        case 2 => Some(Article)
+        case 3 => Some(Agenda)
+        case 4 => Some(Circular)
+        case 5 => Some(Charter)
+        case 6 => Some(Form)
+        case 7 => Some(Database)
+        case 8 => Some(Miscellaneous)
+        case _ => None
+      }
+    } else None
+  }
+
+  def getDocumentType(docType: String): Option[DocumentType] = {
+    if (Option(docType).isDefined) {
+      docType match {
+        case "Protocol" => Some(Protocol)
+        case "Article" => Some(Article)
+        case "Agenda" => Some(Agenda)
+        case "Circular" => Some(Circular)
+        case "Charter" => Some(Charter)
+        case "Form" => Some(Form)
+        case "Database" => Some(Database)
+        case "Miscellaneous" => Some(Miscellaneous)
         case _ => None
       }
     } else None
   }
 
   /**
-   * Retrieve all existing {@link DocumentType}s.
+   * Retrieve all existing [[util.DocumentType]]s.
    */
   def getDocumentTypes(): Seq[DocumentType] = {
-    Seq(Protokoll, Artikel, TO, Rundschreiben, Satzung, Formular, Datenbank, Sonstiges)
+    Seq(Protocol, Article, Agenda, Circular, Charter, Form, Database, Miscellaneous)
   }
   
   /**
@@ -81,11 +97,11 @@ sealed abstract class DocumentType(val id: Int, val name: String) {
   }
 }
 
-case object Protokoll extends DocumentType(1, "Protokoll")
-case object Artikel extends DocumentType(2, "Artikel")
-case object TO extends DocumentType(3, "Tagesordnung")
-case object Rundschreiben extends DocumentType(4, "Rundschreiben")
-case object Satzung extends DocumentType(5, "Satzung")
-case object Formular extends DocumentType(6, "Formular")
-case object Datenbank extends DocumentType(7, "Datenbank")
-case object Sonstiges extends DocumentType(8, "Sonstiges")
+case object Protocol extends DocumentType(1, "Protocol")
+case object Article extends DocumentType(2, "Article")
+case object Agenda extends DocumentType(3, "Agenda")
+case object Circular extends DocumentType(4, "Circular")
+case object Charter extends DocumentType(5, "Charter")
+case object Form extends DocumentType(6, "Form")
+case object Database extends DocumentType(7, "Database")
+case object Miscellaneous extends DocumentType(8, "Miscellaneous")

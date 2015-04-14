@@ -83,17 +83,42 @@ reset = Zurücksetzen
 document = Dokument
 document.category = Kategorie
 document.category.select = Auswählen
+document.delete = Dokument löschen
 document.description = Beschreibung
 document.download = Herunterladen
+document.file.name = Dateiname
 document.file.select = Dateiauswahl
 document.file.size = Dateigröße
+document.file.size.unknown = unbekannt
 document.file.type = Typ
 document.name = Titel
+document.no.description.available = Keine Beschreibung verfügbar.
 document.title = Titel
 document.upload = Dokument hochladen
+document.upload.successful = Dokument wurde erfolgreich hochgeladen.
+document.view = Details zum Dokument
 documents = Dokumente
+documents.agenda = Tagesordnung
+documents.agenda.pl = Tagesordnungen
+documents.article = Artikel
+documents.article.pl = Artikel
+documents.charter = Satzung
+documents.charter.pl = Satzungen
+documents.circular = Rundschreiben
+documents.circular.pl = Rundschreiben
+documents.database = Datenbank
+documents.database.pl = Datenbank
+documents.form = Formular
+documents.form.pl = Formulare
 documents.latest = Neueste Dokumente
-documents.overview = Überblick Dokumente
+documents.miscellaneous = Sonstiges
+documents.miscellaneous.pl = Sonstige Dokumente
+documents.none.available = Es wurden keine Dokumente gefunden.
+documents.overview = Übersicht
+documents.overview.all = Übersicht Dokumente
+documents.protocol = Protokoll
+documents.protocol.pl = Protokolle
+
 
 email = E-Mail
 emails = E-Mails
@@ -127,8 +152,10 @@ enrollment.numberOfKids = Anzahl Kinder
 enrollment.person = Person
 enrollments = Anmeldungen
 
+error.document.does.not.exist = Dokument existiert nicht.
 error.failedToDeleteAddress = Die Adresse konnte leider nicht gelöscht werden.
 error.failedToDeleteCharge = Die Amtsbeschreibung konnte leider nicht gelöscht werden.
+error.failed.to.delete.document = Das Dokument konnte nicht gelöscht werden.
 error.failedToDeleteEmail = Die E-Mail-Adresse konnte leider nicht gelöscht werden.
 error.failedToDeleteEnrollment = Die Anmeldung konnte leider nicht gelöscht werden.
 error.failedToDeleteOrg = Die Organisation konnte leider nicht gelöscht werden.
@@ -493,6 +520,7 @@ submit = Speichern
 
 success.succeededToDeleteAddress = Die Adresse wurde gelöscht.
 success.succeededToDeleteCharge = Die Amtsbeschreibung wurde gelöscht.
+success.succeeded.to.delete.document = Das Dokument wurde erfolgreich gelöscht.
 success.succeededToDeleteEmail = Die E-Mail-Adresse wurde gelöscht.
 success.succeededToDeleteEnrollment = Die Anmeldung wurde gelöscht.
 success.succeededToDeleteHomepage = Die Homepage wurde gelöscht.
@@ -515,6 +543,7 @@ success.succeededToStorePersonInCharge = Die Amtszuordnung wurde gespeichert.
 success.succeededToStorePhone = Die Telefonnummer wurde gespeichert.
 success.succeededToStoreSports = Die Sportart wurde gespeichert.
 success.succeededToStoreSportsDate = Der Sporttermin wurde gespeichert.
+
 
 top.of.page = Zum Seitenanfang
 

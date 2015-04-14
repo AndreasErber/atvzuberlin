@@ -7,20 +7,17 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.Logger
 import play.api.mvc._
-import util.CustomFormatters
-import util.UsageType
 import models.{ News, NewsTable }
 import play.api.Play.current
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import play.api.i18n.Messages
-import accesscontrol.Privilege
 
 /**
  * Controller for all actions related to news.
  * 
  * @author andreas
- * @version 0.0.4, 2015-01-03
+ * @version 0.0.5, 2015-04-06
  */
 object NewsCtrl extends Controller with ProvidesCtx with Security {
 

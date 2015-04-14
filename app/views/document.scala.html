@@ -1,0 +1,63 @@
+@**
+* Display a {@link Document}.
+*
+* @param d The {@link Document} instance to display.
+*
+* @author andreas
+* @version 0.0.2, 2015-04-13
+*@
+@(d: Document)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+
+@main(Messages("document")) {
+<h2>@Messages("document.view")</h2>
+<h3>@d.name</h3>
+<table class="table">
+  <caption>
+      <span class="pull-right">
+      @if(ctx.user.isDefined) {
+      	@if(ctx.userHasPrivilege(ctx.user.get, "edit.document")) {
+        <a href="@routes.DocumentCtrl.show(d.id.get)" title="@Messages("document.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+        }
+        @if(ctx.userHasPrivilege(ctx.user.get, "delete.document")) {
+        <a data-toggle="modal" title="@Messages("document.delete")" data-target="#delConfirm" onclick="delId = @d.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+        }
+      }
+      <a href="@routes.DocumentCtrl.overview(10)" title="@Messages("document.overview")"><i class="glyphicon glyphicon-th-list"></i></a>
+      @if(ctx.user.isDefined && ctx.userHasPrivilege(ctx.user.get, "create.document")) {
+        <a href="@routes.DocumentCtrl.create" title="@Messages("document.upload")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...
+      }
+      </span>
+  </caption>
+  <tbody>
+  <tr>
+    <th>@Messages("document.name")</th>
+    <td>@d.name</td>
+  </tr>
+  <tr>
+      <th>@Messages("document.category")</th>
+      <td>@d.category</td>
+  </tr>
+  <tr>
+    <th>@Messages("document.description")</th>
+    <td>@if(d.description.isDefined) {
+      @d.description
+      } else {
+      <em>@Messages("document.no.description.available")</em>
+      }
+    </td>
+  </tr>
+  <tr>
+      <th>@Messages("document.file.name")</th>
+      <td>
+          <a href="@routes.DocumentCtrl.download(d.id.get)" title="@d.getSimpleFilename">@d.getSimpleFilename</a>
+          @if(d.fileSize.isDefined){
+            (@{d.fileSize.get / 1024} kByte)
+          }
+      </td>
+  </tr>
+  </tbody>
+</table>
+
+@deleteConfirmation("document")
+}

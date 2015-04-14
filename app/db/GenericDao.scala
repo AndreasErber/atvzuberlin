@@ -29,7 +29,7 @@ trait GenericDao[T <: Entity] {
   /**
    * Abstract method to ensure every item has an identifier column.
    *
-   * Note, since {@link Entity}s are stored here, each item automatically has an <em>id</em> column.
+   * Note, since [[models.Entity]]s are stored here, each item automatically has an <em>id</em> column.
    */
   def id: Column[Long]
 
@@ -50,7 +50,7 @@ trait GenericDao[T <: Entity] {
    * Load the instance of the type in question that is associated with the specified <em>id</em>
    *
    * @param id The identifier of the instance to get
-   * @return The instance matching the identifier or {@link None}
+   * @return The instance matching the identifier or [[scala.None]]
    */
   def get(id: Long): Option[T] = db withSession {
     Query(this).filter(_.id === id).firstOption
@@ -59,27 +59,17 @@ trait GenericDao[T <: Entity] {
   /**
    * Retrieve all items of the given tpye.
    *
-   * @return a {@link Validation} that either contains a possibly empty list of items of the given
-   *         type or the {@link Throwable} that occurred when trying to load.
+   * @return a [[scalaz.Validation]] that either contains a possibly empty list of items of the given
+   *         type or the [[scala.Throwable]] that occurred when trying to load.
    */
   def getAll(): Validation[Throwable, List[T]] = db withSession {
-    def q = Query(this).sortBy(t => t.id).list
     try {
+      def q = Query(this).sortBy(t => t.id).list
       Success(q)
     } catch {
       case e: Throwable => Failure(e)
     }
   }
-
-  /**
-   * Insert a new item into the database
-   *
-   * @param entity The item to be inserted.
-   * @return The identifier that was generated for the inserted item.
-   */
-  //  def insert(entity: T) = db withSession {
-  //    withoutId.insert(entity)
-  //  }
 
   /**
    * Update an existing item in the database
@@ -100,7 +90,7 @@ trait GenericDao[T <: Entity] {
    * @param id The identifier of the item to be removed.
    * @return The number of rows that have been affected by the operation.
    */
-  def delete(id: Long) = db withSession {
+  def delete(id: Long): Int = db withSession {
     this.where(_.id === id).delete
   }
 

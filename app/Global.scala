@@ -213,6 +213,13 @@ object Global extends GlobalSettings {
       } catch {
         case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
       }
+
+      try {
+        Documents.ddl.create
+      } catch {
+        case e: PSQLException => Logger.logger.warn("IGNORING " + e.getMessage())
+      }
+
     }
   }
 
