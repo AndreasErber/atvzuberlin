@@ -7,23 +7,14 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.Logger
 import play.api.mvc._
-import util.CustomFormatters
-import util.UsageType
-import accesscontrol.{ Privilege, Privileges }
-import play.api.Play.current
+import accesscontrol.{Privilege, Privileges, RoleHasPrivilege, RoleHasPrivileges, Roles}
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import play.api.i18n.Messages
-import models.Organization
-import accesscontrol.Privileges
-import accesscontrol.Roles
-import accesscontrol.RoleHasPrivileges
-import accesscontrol.RoleHasPrivilege
-import accesscontrol.RoleHasPrivilege
 
 /**
  * @author andreas
- * @version 0.0.3, 2015-01-04
+ * @version 0.0.4, 2015-04-17
  */
 object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
 
@@ -45,6 +36,11 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
       Ok(views.html.privilegeForm(privilegeForm))
   }
 
+  /**
+   * Delete the [[Privilege]] identified by <em>id</em>
+   * @param id The identifier of the [[Privilege]] to delete.
+   * @return
+   */
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
       val privVal = Privileges.get(id)
@@ -54,16 +50,16 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
         if (result > 0) {
           val msg = s"Sucessfully deleted privilege with ID $id."
           Logger.debug(msg)
-          Redirect(routes.PrivilegeCtrl.list).flashing("success" -> msg)
+          Redirect(routes.PrivilegeCtrl.list()).flashing("success" -> msg)
         } else {
           val msg = Messages("error.failedToDeletePrivilege")
           Logger.error(msg)
-          Redirect(routes.PrivilegeCtrl.list).flashing("error" -> msg)
+          Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> msg)
         }
       } else {
         val msg = Messages("error.privilege.does.not.exist", id)
         Logger.error(msg)
-        Redirect(routes.PrivilegeCtrl.list).flashing("error" -> msg)
+        Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> msg)
       }
   }
 
@@ -72,23 +68,30 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
    */
   def list = isAuthenticated { username =>
     implicit request =>
-      val list = Privileges.getAll
+      val list = Privileges.getAll()
       if (list.isSuccess) {
         Ok(views.html.privilegesList(list.toOption.get.sortBy(x => x.name)))
       } else {
-        Logger.logger.error(list.toString(), list.toEither.left.get)
+        Logger.logger.error(list.toString, list.toEither.left.get)
         BadRequest("When trying to load the list of privileges a failure occurred.")
       }
   }
 
+  /**
+   * Display the form with the [[Privilege]] data identified by the given <em>id</em>.
+   *
+   * @param id Identifier of the [[Privilege]] to load into the form.
+   * @return
+   */
   def edit(id: Long) = isAuthenticated { username =>
     implicit request =>
       val p = Privileges.get(id)
       p match {
         case None =>
-          Logger.logger.debug("Cannot find privilege with ID " + id + "."); NotFound
+          Logger.logger.debug("Cannot find privilege with ID " + id + ".")
+          NotFound
         case Some(pers) =>
-          Logger.logger.debug("Preparing editing of privilege with ID " + id + ".");
+          Logger.logger.debug("Preparing editing of privilege with ID " + id + ".")
           Ok(views.html.privilegeForm(privilegeForm.fill(pers)))
         case _ => NotFound
       }
@@ -114,20 +117,24 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
                 val rhp = RoleHasPrivilege(None, adminRole.get, result.toOption.get, System.currentTimeMillis(), username, None, None)
                 val rhpSaved = RoleHasPrivileges.saveOrUpdate(rhp)
                 if (rhpSaved.isFailure) {
-                  Logger.error("Failed to insert RoleHasPrivilege relation due to: " + rhpSaved.toEither.left.get.getMessage())
+                  Logger.error("Failed to insert RoleHasPrivilege relation due to: " + rhpSaved.toEither.left.get.getMessage)
                 }
               } else {
                 Logger.logger.error("Administrator role was not found. Privilege could not be added.")
               }
             }
           } else {
-            Logger.logger.error(result.toString(), result.toEither.left.get)
+            Logger.logger.error(result.toString, result.toEither.left.get)
           }
-          Redirect(routes.PrivilegeCtrl.list)
+          Redirect(routes.PrivilegeCtrl.list())
       } getOrElse BadRequest
   }
 
-  def updatePrivilege = isAuthenticated { username =>
+  /**
+   * Update a [[Privilege]].
+   * @return
+   */
+  def updatePrivilege() = isAuthenticated { username =>
     implicit request =>
       privilegeForm.bindFromRequest.fold(
         errors => {
@@ -138,9 +145,9 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
           Logger.debug("Storing privilege " + privilege.name)
           val result = Privileges.saveOrUpdate(privilege)
           if (result.isSuccess) {
-            Redirect(routes.PrivilegeCtrl.list)
+            Redirect(routes.PrivilegeCtrl.list())
           } else {
-            Logger.error(result.toString(), result.toEither.left.get)
+            Logger.error(result.toString, result.toEither.left.get)
             BadRequest(views.html.privilegeForm(privilegeForm.fill(privilege)))
           }
         })

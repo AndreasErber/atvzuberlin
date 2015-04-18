@@ -1,6 +1,5 @@
 package models
 
-import play.api.db._
 import play.api.Logger
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
@@ -13,15 +12,15 @@ import util.DocumentType
  * A document representation.
  *
  * @author andreas
- * @version 0.0.1, 2015-03-08
+ * @version 0.0.2, 2015-04-17
  */
 case class Document(override val id: Option[Long] = None,
-                    val name: String,
-                    val description: Option[String],
-                    val category: DocumentType = Miscellaneous,
-                    val url: String,
-                    val encryptionKey: Option[String],
-                    val fileSize: Option[Long],
+                    name: String,
+                    description: Option[String],
+                    category: DocumentType = Miscellaneous,
+                    url: String,
+                    encryptionKey: Option[String],
+                    fileSize: Option[Long],
                     override val created: Long = System.currentTimeMillis(),
                     override val creator: String,
                     override val modified: Option[Long] = None,
@@ -36,7 +35,7 @@ case class Document(override val id: Option[Long] = None,
 }
 
 /**
- * Data access object for {@link Document}s.
+ * Data access object for [[Document]]s.
  *
  * @author andreas
  * @version 0.0.2, 2015-04-06
@@ -81,7 +80,7 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
   }
 
   /**
-   * {@inheritDoc}
+   * @inheritdoc
    */
   override def update(doc: Document): Int = db withSession {
     Documents.where(_.id === doc.id).update(doc.copy(modified = Some(System.currentTimeMillis())))
@@ -103,28 +102,26 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
           Failure(new RuntimeException("Failed to update document " + upd))
         }
       } catch {
-        case e: Throwable => {
+        case e: Throwable =>
           Logger.error(s"Could not update document with ID '${doc.id.get}': ${e.getMessage}", e)
           Failure(e)
-        }
       }
     } else {
       try {
         val id = this.insert(doc)
         Success(doc.copy(id = Some(id)))
       } catch {
-        case e: Throwable => {
+        case e: Throwable =>
           Logger.error(s"Could not save document: ${e.getMessage}", e)
           Failure(e)
-        }
       }
     }
   }
 
   /**
-   * Retrieve all {@link Document}s of a given <em>category</em>.
+   * Retrieve all [[Document]]s of a given <em>category</em>.
    *
-   * @param category The { @link DocumentType} the { @link Document}s must have in order to be retrieved.
+   * @param category The [[DocumentType]] the [[Document]]s must have in order to be retrieved.
    */
   def getAllByCategory(category: DocumentType, limit: Int = 10): Validation[Throwable, List[Document]] = db withSession {
     try {
@@ -134,10 +131,9 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
       } yield doc
       Success(docs.take(limit).list)
     } catch {
-      case e: Throwable => {
+      case e: Throwable =>
         Logger.error(s"Could not load documents by category: ${e.getMessage}", e)
         Failure(e)
-      }
     }
   }
 
@@ -148,7 +144,7 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
    * Latest here means those entries with the lowest creation dates.
    * </p>
    * @param limit The number of entries to return at most.
-   * @return A list of the latest { @link Document}s
+   * @return A list of the latest [[Document]]s
    */
   def getLatest(limit: Int = 10): Validation[Throwable, List[Document]] = db withSession {
     try {
@@ -156,10 +152,9 @@ object Documents extends Table[Document]("Document") with GenericDao[Document] {
       val result = query.take(limit).list()
       Success(result)
     } catch {
-      case e: Throwable => {
+      case e: Throwable =>
         Logger.error(s"Could not load latest documents: ${e.getMessage}", e)
         Failure(e)
-      }
     }
   }
 }

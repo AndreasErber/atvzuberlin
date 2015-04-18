@@ -8,7 +8,7 @@ import play.api.mvc._
 import play.api.Play.current
 import java.io.{FileNotFoundException, File}
 
-import controllers.ext.{ProvidesCtx, Security, SublistRetrieverAndAdder}
+import controllers.ext.{ProvidesCtx, Security }
 import models.{Documents, Document}
 import models.to.DocumentUploadTO
 import util.{Article, CustomFormatters, DocumentType}
@@ -17,7 +17,7 @@ import util.{Article, CustomFormatters, DocumentType}
  * Controller for document handling.
  *
  * @author andreas
- * @version 0.0.2, 2015-04-03
+ * @version 0.0.5, 2015-04-14
  */
 object DocumentCtrl extends Controller with ProvidesCtx with Security {
 
@@ -42,7 +42,7 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
   }
 
   /**
-   * Delete the document identified by the goiven <em>id</em>.
+   * Delete the document identified by the given <em>id</em>.
    *
    * Note, that both the database entry as well as the physical file are deleted.
    *
@@ -169,10 +169,9 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
           Documents.saveOrUpdate(doc)
           Redirect(routes.DocumentCtrl.overview()).flashing("success" -> Messages("document.upload.successful"))
         } catch {
-          case e: FileNotFoundException => {
+          case e: FileNotFoundException =>
             Logger.error("The uploaded file could not be stored.", e)
             BadRequest(views.html.documentUpload(boundForm.withGlobalError(Messages("error.failed.to.store.uploaded.file"))))
-          }
         }
       }.getOrElse {
         Logger.error("An error occurred when trying to process the the document upload form.")
@@ -196,7 +195,7 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
   private def getPath(category: String): String = {
     var path = current.configuration.getString("file.upload.folder").get
     if (!path.endsWith("/")) {
-      path += "/";
+      path += "/"
     }
     path += category + "/"
     path

@@ -11,13 +11,14 @@ import play.api.i18n.Messages
 import scala.util.control.Exception
 
 /**
+ * Customary formatters for different data types.
  * @author andreas
- * @version 0.1.5, 2013-07-27
+ * @version 0.1.6, 2015-04-18
  */
 object CustomFormatters {
 
   /**
-   * Maps a {@link Charge} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a [[Charge]] instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val chargeFormatter = new Formatter[Charge] {
 
@@ -25,17 +26,17 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[Charge].either(Charge.load(id.toLong).get).left.map {
+        Exception.allCatch[Charge].either(Charge.load(id.toLong).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToLoadCharge", id), Nil))
         }
       }
     }
 
-    def unbind(key: String, c: Charge) = Map(key -> c.id.get.toString())
+    def unbind(key: String, c: Charge) = Map(key -> c.id.get.toString)
   }
 
   /**
-   * Turns a {@link Division} into a string and vice versa.
+   * Turns a [[Division]] into a string and vice versa.
    */
   val divisionFormatter = new Formatter[Division.Division] {
     def bind(key: String, data: Map[String, String]) = {
@@ -48,11 +49,11 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, div: Division.Division) = Map(key -> div.toString())
+    def unbind(key: String, div: Division.Division) = Map(key -> div.toString)
   }
 
   /**
-   * Maps an {@link Event} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps an [[Event]] instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val eventFormatter = new Formatter[Event] {
 
@@ -66,11 +67,12 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, e: Event) = Map(key -> e.id.get.toString())
+    def unbind(key: String, e: Event) = Map(key -> e.id.get.toString)
   }
 
   /**
-   * Maps a {@link LetterSalutation} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a [[LetterSalutation]] instance to its identifier and vice versa. The identifier is taken and returned
+   * as String.
    */
   val letterSalutationFormatter = new Formatter[LetterSalutation] {
 
@@ -84,11 +86,11 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, ls: LetterSalutation) = Map(key -> ls.id.toString())
+    def unbind(key: String, ls: LetterSalutation) = Map(key -> ls.id.toString)
   }
 
   /**
-   * Maps a {@link FormOfAddress} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a [[FormOfAddress]] instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val formOfAddressFormatter = new Formatter[FormOfAddress] {
 
@@ -102,11 +104,12 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, foa: FormOfAddress) = Map(key -> foa.id.toString())
+    def unbind(key: String, foa: FormOfAddress) = Map(key -> foa.id.toString)
   }
 
   /**
-   * Maps an {@link AcademicTitle} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps an [[AcademicTitle]] instance to its identifier and vice versa. The identifier is taken and returned as
+    * String.
    */
   val academicTitleFormatter = new Formatter[AcademicTitle] {
 
@@ -114,13 +117,13 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[AcademicTitle].either(AcademicTitle.load(id.toInt).get).left.map {
+        Exception.allCatch[AcademicTitle].either(AcademicTitle.load(id.toInt).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToLoadAcademicTitle", id), Nil))
         }
       }
     }
 
-    def unbind(key: String, at: AcademicTitle) = Map(key -> at.id.toString())
+    def unbind(key: String, at: AcademicTitle) = Map(key -> at.id.toString)
   }
 
   /**
@@ -156,7 +159,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, u: UserRole) = Map(key -> u.id.toString())
+    def unbind(key: String, u: UserRole) = Map(key -> u.id.toString)
   }
 
   /**
@@ -174,7 +177,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, u: UsageType) = Map(key -> u.id.toString())
+    def unbind(key: String, u: UsageType) = Map(key -> u.id.toString)
   }
 
   val eventTypeFormatter = new Formatter[EventType] {
@@ -189,7 +192,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, et: EventType) = Map(key -> et.id.toString())
+    def unbind(key: String, et: EventType) = Map(key -> et.id.toString)
   }
 
   /**
@@ -207,7 +210,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, p: Person) = Map(key -> p.id.get.toString())
+    def unbind(key: String, p: Person) = Map(key -> p.id.get.toString)
   }
 
   /**
@@ -238,7 +241,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, c: Country) = Map(key -> c.id.get.toString())
+    def unbind(key: String, c: Country) = Map(key -> c.id.get.toString)
   }
 
   val privacyFormatter = new Formatter[Privacy] {
@@ -252,7 +255,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, p: Privacy) = Map(key -> p.id.toString())
+    def unbind(key: String, p: Privacy) = Map(key -> p.id.toString)
   }
 
   val phoneFormatter = new Formatter[PhoneType] {
@@ -266,7 +269,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, pt: PhoneType) = Map(key -> pt.id.toString())
+    def unbind(key: String, pt: PhoneType) = Map(key -> pt.id.toString)
   }
 
   val roleFormatter = new Formatter[Role] {
@@ -281,11 +284,11 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, r: Role) = Map(key -> r.id.get.toString())
+    def unbind(key: String, r: Role) = Map(key -> r.id.get.toString)
   }
   
   /**
-   * Maps a {@link MemberState} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a [[MemberState]] instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val memberStateFormatter = new Formatter[MemberState] {
 
@@ -299,11 +302,11 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, ms: MemberState) = Map(key -> ms.id.toString())
+    def unbind(key: String, ms: MemberState) = Map(key -> ms.id.toString)
   }
 
   /**
-   * Maps a {@link DocumentType} instance to its identifier and vice versa. The identifier is taken and returned as String.
+   * Maps a [[DocumentType]] instance to its identifier and vice versa. The identifier is taken and returned as String.
    */
   val documentTypeFormatter = new Formatter[DocumentType] {
 
@@ -317,7 +320,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, dt: DocumentType) = Map(key -> dt.id.toString())
+    def unbind(key: String, dt: DocumentType) = Map(key -> dt.id.toString)
   }
 
 
@@ -335,7 +338,7 @@ object CustomFormatters {
       }
     }
 
-    def unbind(key: String, c: Char) = Map(key -> c.toString())
+    def unbind(key: String, c: Char) = Map(key -> c.toString)
   }
 
   val sqlDateFormatter = new Formatter[java.sql.Date] {
@@ -345,7 +348,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { date =>
         Exception.allCatch[java.sql.Date].either(stringToSqlDate(date)).left.map {
-          e => Seq(FormError(key, e.getMessage(), Nil))
+          e => Seq(FormError(key, e.getMessage, Nil))
         }
       }
     }
@@ -360,7 +363,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { timestamp =>
         Exception.allCatch[Timestamp].either(stringToSqlTimestamp(timestamp)).left.map {
-          e => Seq(FormError(key, e.getMessage(), Nil))
+          e => Seq(FormError(key, e.getMessage, Nil))
         }
       }
     }
@@ -375,7 +378,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { time =>
         Exception.allCatch[Time].either(stringToSqlTime(time)).left.map {
-          e => Seq(FormError(key, e.getMessage(), Nil))
+          e => Seq(FormError(key, e.getMessage, Nil))
         }
       }
     }
@@ -393,12 +396,12 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { date =>
         Exception.allCatch[Date].either(CustomFormatters.stringToDate(date)).left.map {
-          e => Seq(FormError(key, e.getMessage(), Nil))
+          e => Seq(FormError(key, e.getMessage, Nil))
         }
       }
     }
 
-    def unbind(key: String, date: Date) = Map(key -> date.getTime().toString())
+    def unbind(key: String, date: Date) = Map(key -> date.getTime.toString)
   }
 
   /**
@@ -412,12 +415,12 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { date =>
         Exception.allCatch[Date].either(CustomFormatters.stringToDateDefaultNow(date)).left.map {
-          e => Seq(FormError(key, e.getMessage(), Nil))
+          e => Seq(FormError(key, e.getMessage, Nil))
         }
       }
     }
 
-    def unbind(key: String, date: Date) = Map(key -> date.getTime().toString())
+    def unbind(key: String, date: Date) = Map(key -> date.getTime.toString)
   }
 
   /**
@@ -429,14 +432,15 @@ object CustomFormatters {
       val date = s.toLong
       val cal = Calendar.getInstance()
       cal.setTimeInMillis(date)
-      cal.getTime()
+      cal.getTime
     } catch {
       case e: Throwable => throw new RuntimeException(Messages("error.failedToParseDate", s))
     }
   }
 
   /**
-   * Helper to turn a String into a java.util.Date. If the input value is empty the current timestamp is taken as default value.
+   * Helper to turn a String into a [[Date]]. If the input value is empty the current timestamp is taken as default
+   * value.
    */
   def stringToDateDefaultNow(s: String): Date = {
 
@@ -444,7 +448,7 @@ object CustomFormatters {
       val date = if (s.length() <= 0) System.currentTimeMillis() else s.toLong
       val cal = Calendar.getInstance()
       cal.setTimeInMillis(date)
-      cal.getTime()
+      cal.getTime
     } catch {
       case e: Throwable => throw new RuntimeException(Messages("error.failedToParseDate", s))
     }
@@ -470,7 +474,7 @@ object CustomFormatters {
     }
     val cal = Calendar.getInstance()
     cal.setTime(date)
-    new java.sql.Date(cal.getTimeInMillis())
+    new java.sql.Date(cal.getTimeInMillis)
   }
 
   /**
@@ -493,7 +497,7 @@ object CustomFormatters {
     }
     val cal = Calendar.getInstance()
     cal.setTime(date)
-    new Timestamp(cal.getTimeInMillis())
+    new Timestamp(cal.getTimeInMillis)
   }
 
   /**
@@ -510,6 +514,6 @@ object CustomFormatters {
     }
     val cal = Calendar.getInstance()
     cal.setTime(date)
-    new Time(cal.getTimeInMillis())
+    new Time(cal.getTimeInMillis)
   }
 }

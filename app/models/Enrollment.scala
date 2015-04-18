@@ -4,27 +4,25 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
+import scalaz.{Failure, Success, Validation}
 
 /**
+ * Entity to describe an [[Enrollment]] to an event.
+ * 
  * @author andreas
- * @version 0.0.3, 2013-05-05
+ * @version 0.0.4, 2015-04-18
  */
 case class Enrollment(override val id: Option[Long],
-  val event: Long,
-  val person: Long,
-  val numberOfAdults: Int = 1,
-  val numberOfKids: Int = 0,
-  val confirmed: Boolean = false,
-  val cancelled: Boolean = false,
+  event: Long,
+  person: Long,
+  numberOfAdults: Int = 1,
+  numberOfKids: Int = 0,
+  confirmed: Boolean = false,
+  cancelled: Boolean = false,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -88,9 +86,9 @@ object Enrollment {
   val tablename = "Enrollment"
 
   /**
-   * Remove the {@link Enrollment} with the ID <em>id</em>.
+   * Remove the [[Enrollment]] with the ID <em>id</em>.
    *
-   * @param id The identifier of the {@link Enrollment} to be removed.
+   * @param id The identifier of the [[Enrollment]] to be removed.
    * @return <code>true</code> if the removal was successful, <code>false</code> otherwise.
    */
   def delete(id: Long): Validation[Throwable, Boolean] = db withSession {
@@ -103,10 +101,10 @@ object Enrollment {
   }
 
   /**
-   * Load the {@link Enrollment} with the ID <em>id</em>
+   * Load the [[Enrollment]] with the ID <em>id</em>
    * 
-   * @param id The identifier of the {@link Enrollment} to be loaded.
-   * @return The {@link Enrollment} corresponding to the identifier, is any, or a {@link Failure}.
+   * @param id The identifier of the [[Enrollment]] to be loaded.
+   * @return The [[Enrollment]] corresponding to the identifier, is any, or a [[Failure]].
    */
   def load(id: Long): Validation[Throwable, Option[Enrollment]] = db withSession {
     try {
@@ -117,10 +115,10 @@ object Enrollment {
   }
 
   /**
-   * Load all {@link Enrollment}s for a given {@link Event} identified by <em>eid</em>.
+   * Load all [[Enrollment]]s for a given [[Event]] identified by <em>eid</em>.
    * 
-   * @param eid The identifier of the {@link Event} to load the {@link Enrollment}s for.
-   * @return The possibly empty list of {@link Enrollment}s connected to the specified {@link Event}.
+   * @param eid The identifier of the [[Event]] to load the [[Enrollment]]s for.
+   * @return The possibly empty list of [[Enrollment]]s connected to the specified [[Event]].
    */
   def loadByEvent(eid: Long): Validation[Throwable, List[(Enrollment, Person)]] = db withSession {
     try {
@@ -135,11 +133,11 @@ object Enrollment {
   }
 
   /**
-   * Load all pending {@link Enrollment}s for a given {@link Person} identified by <em>pid</em>, i.e., all {@link Enrollment}s 
-   * to {@link Events} that have not taken place yet.
+   * Load all pending [[Enrollment]]s for a given [[Person]] identified by <em>pid</em>, i.e., all [[Enrollment]]s 
+   * to [[Event]] that have not taken place yet.
    * 
-   * @param pid The identifier of the {@link Person} to load the {@link Enrollment}s for.
-   * @return The possibly empty list of {@link Enrollment}s connected to the specified {@link Person}.
+   * @param pid The identifier of the [[Person]] to load the [[Enrollment]]s for.
+   * @return The possibly empty list of [[Enrollment]]s connected to the specified [[Person]].
    */
   def loadByPerson(pid: Long): Validation[Throwable, List[(Enrollment, Event)]] = db withSession {
     try {
@@ -154,11 +152,11 @@ object Enrollment {
   }
 
   /**
-   * Save a new {@link Enrollment} or update an existing one. The concrete action will be decided upon the 
-   * presence of an identifier of the {@link Enrollment}.
+   * Save a new [[Enrollment]] or update an existing one. The concrete action will be decided upon the 
+   * presence of an identifier of the [[Enrollment]].
    * 
-   * @param e The {@link Enrollment} to be persisted.
-   * @return The same {@link Enrollment} as specified as parameter. In case of a save action, the returned
+   * @param e The [[Enrollment]] to be persisted.
+   * @return The same [[Enrollment]] as specified as parameter. In case of a save action, the returned
    * instance will have its id field set.
    */
   def saveOrUpdate(e: Enrollment): Validation[Throwable, Enrollment] = {

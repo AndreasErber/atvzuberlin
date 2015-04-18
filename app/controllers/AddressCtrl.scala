@@ -3,25 +3,20 @@
  */
 package controllers
 
+import controllers.ext.{ProvidesCtx, Security}
+import models.{Address, Country, Organization, Person, PersonHasAddresses}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.Logger
 import play.api.mvc._
-import util.CustomFormatters
-import util.UsageType
-import models.{ Address, Addresses, Country, Organization, Person, PersonHasEmail }
-import play.api.Play.current
-import controllers.ext.ProvidesCtx
-import controllers.ext.Security
 import play.api.i18n.Messages
-import util.Privacy
-import models.PersonHasAddresses
+import util.{CustomFormatters, Privacy, UsageType}
 
 /**
- * Controller for all actions related to addresses.
- * 
+ * Controller for all actions related to [[Address]]es.
+ *
  * @author andreas
- * @version 0.0.8, 2015-01-03
+ * @version 0.0.9, 2015-04-18
  */
 object AddressCtrl extends Controller with ProvidesCtx with Security {
 
@@ -34,6 +29,9 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
   implicit val privacyFormatter = CustomFormatters.privacyFormatter
   val privacyMapping = of[Privacy]
 
+  /**
+   * Mapping from an address form to an [[Address]].
+   */
   val adrMapping = mapping(
     "id" -> optional(longNumber),
     "addon" -> optional(text),
@@ -47,228 +45,278 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
     "modified" -> optional(longNumber),
     "modifier" -> optional(text))(Address.apply)(Address.unapply)
 
+  /**
+   * An address form for a [[Person]].
+   */
   val adrPersForm = Form[(Address, UsageType, Privacy)](
     tuple(
       "address" -> adrMapping,
       "usage" -> usageMapping,
       "privacy" -> privacyMapping))
 
+  /**
+   * An address form for an [[Organization]].
+   */
   val adrOrgForm = Form[Address](adrMapping)
 
   /**
-   * Create a new {@link Address} for a {@link Person} identified by the given <em>pid</em>.
-   * 
-   * @param pid Identifier of the {@link Person} the {@link Address} relates to.
+   * Create a new [[Address]] for a [[Person]] identified by the given <em>pid</em>.
+   *
+   * @param pid Identifier of the [[Person]] the [[Address]] relates to.
+   * @return A response with HTTP status code 200 and an empty person address form. If the list of
+   *         countries cannot be loaded a redirect to display the details of the [[Person]]
+   *         identified by <em>pid</em> is returned.
    */
   def createPersonAdr(pid: Long) = isAuthorized("create.person.address") { username =>
     implicit request =>
-      val countries = Country.getAll
+      val countries = Country.getAll()
       if (countries.isSuccess) {
         Ok(views.html.adrForm(adrPersForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, countries.toOption.get, pid))
       } else {
-        Ok(views.html.adrForm(adrPersForm.withGlobalError(Messages("error.failedToLoadCountries")), List(), pid))
+        Logger.error("Failed to load the list of countries.")
+        Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.countries"))
       }
   }
 
   /**
-   * Create a new {@link Address} for an {@link Organization} identified by the given <em>oid</em>.
-   * 
-   * @param oid Identifier of the {@link Organization} the {@link Address} relates to.
+   * Create a new [[Address]] for an [[Organization]] identified by the given <em>oid</em>.
+   *
+   * @param oid Identifier of the [[Organization]] the [[Address]] relates to.
+   * @return A response with HTTP status code 200 and an empty person address form. If the list of
+   *         countries cannot be loaded a redirect to display the details of the [[Organization]]
+   *         identified by <em>oid</em> is returned.
    */
   def createOrgAdr(oid: Long) = isAuthorized("create.organization.address") { username =>
     implicit request =>
-      val countries = Country.getAll
+      val countries = Country.getAll()
       if (countries.isSuccess) {
         Ok(views.html.adrOrgForm(adrOrgForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, countries.toOption.get, oid))
       } else {
-        Ok(views.html.adrOrgForm(adrOrgForm.withGlobalError(Messages("error.failedToLoadCountries")), List(), oid))
+        Logger.error("Failed to load the list of countries.")
+        Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.countries"))
       }
   }
 
   /**
-   * Delete an address identified by <em>id</em> of an {@link Organization} identified by <em>oid</em>.
-   * 
-   * @param oid Identifier of the {@link Organization} the address relates to.
-   * @param id Identifier of the {@link Address} to delete.
+   * Delete an [[Address]] identified by <em>id</em> of an [[Organization]] identified by <em>oid</em>.
+   *
+   * @param oid Identifier of the [[Organization]] the [[Address]] relates to.
+   * @param id Identifier of the [[Address]] to delete.
+   * @return A redirect to the details of an [[Organization]] identified <em>oid</em> flashing either success or error.
    */
   def deleteOrgAdr(oid: Long, id: Long) = isAuthorized("delete.organization.address") { username =>
     implicit request =>
       val result = Address.deleteOrgAddress(id, id)
       if (result.isSuccess) {
-        Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing(("success" -> Messages("success.succeededToDeleteAddress")))
+        Logger.info(s"Successfully deleted the relation between address '$id' and person '$oid'.")
+        Redirect(routes.OrganizationCtrl.show(oid)).flashing("success" -> Messages("success.deleting.address"))
       } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing(("error" -> Messages("error.failedToDeleteAddress")))
+        Logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.deleting.address"))
       }
   }
 
   /**
-   * Delete an {@link Address} identified by <em>id</em> of an {@link Person} identified by <em>pid</em>.
-   * 
-   * @param pid Identifier of the {@link Person} the {@link Address} relates to.
-   * @param id Identifier of the {@link Address} to delete.
+   * Delete an [[Address]] identified by <em>id</em> of an [[Person]] identified by <em>pid</em>.
+   *
+   * @param pid Identifier of the [[Person]] the [[Address]] relates to.
+   * @param id Identifier of the [[Address]] to delete.
+   * @return A redirect to the details of an [[Person]] identified <em>pid</em> flashing either success or error.
    */
   def deletePersonAdr(pid: Long, id: Long) = isAuthorized("delete.person.address") { username =>
     implicit request =>
       val result = PersonHasAddresses.delete(pid, id)
       if (result.isSuccess) {
-        Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing(("success" -> Messages("success.succeededToDeleteAddress")))
+        Logger.info(s"Successfully deleted the relation between address '$id' and person '$pid'.")
+        Redirect(routes.PersonCtrl.show(pid)).flashing("success" -> Messages("success.deleting.address"))
       } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing(("error" -> Messages("error.failedToDeleteAddress")))
+        Logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.deleting.address"))
       }
   }
 
   /**
-   * Edit an {@link Address} identified by <em>id</em> of an {@link Organization} identified by <em>oid</em>
-   * 
-   *  @param oid Identifier of the {@link Organization} the {@link Address} relates to.
-   *  @param id Identifier of the {@link Address} to edit.
+   * Edit an [[Address]] identified by <em>id</em> of an [[Organization]] identified by <em>oid</em>
+   *
+   * @param oid Identifier of the [[Organization]] the [[Address]] relates to.
+   * @param id Identifier of the [[Address]] to edit.
+   * @return A response with an HTTP status code of 200 and the requested [[Address]] details in a
+   *         form. If either the [[Address]] itself or the list of [[Country]]s cannot be loaded a
+   *         redirect to display the details of the [[Organization]] is returned.
    */
   def editOrgAdr(oid: Long, id: Long) = isAuthorized("edit.organization.address") { username =>
     implicit request =>
 
       val result = Address.getOrgAddress(Organization.load(oid).get, id)
       if (result.isSuccess) {
-        val countries = Country.getAll
+        val countries = Country.getAll()
         if (countries.isSuccess) {
           Ok(views.html.adrOrgForm(adrOrgForm.fill(result.toOption.get.get), countries.toOption.get, oid))
         } else {
-          Ok(views.html.adrOrgForm(adrOrgForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), oid))
+          Logger.error("Failed to load the list of countries.")
+          Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.countries"))
         }
       } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
+        Logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization.address"))
       }
   }
 
   /**
-   * Edit an {@link Address} identified by <em>id</em> of a {@link Person} identified by <em>pid</em>
-   * 
-   *  @param pid Identifier of the {@link Person} the {@link Address} relates to.
-   *  @param id Identifier of the {@link Address} to edit.
+   * Edit an [[Address]] identified by <em>id</em> of a [[Person]] identified by <em>pid</em>
+   *
+   * @param pid Identifier of the [[Person]] the [[Address]] relates to.
+   * @param id Identifier of the [[Address]] to edit.
+   * @return A response with an HTTP status code of 200 and the requested [[Address]] details in a
+   *         form. If either the [[Address]] itself or the list of [[Country]]s cannot be loaded a
+   *         redirect to display the details of the [[Person]] is returned.
    */
   def editPersonAdr(pid: Long, id: Long) = isAuthorized("edit.person.address") { username =>
     implicit request =>
 
       val result = Address.getPersonAddress(Person.load(pid).get, id)
       if (result.isSuccess) {
-        val countries = Country.getAll
+        val countries = Country.getAll()
         if (countries.isSuccess) {
           Ok(views.html.adrForm(adrPersForm.fill(result.toOption.get.get), countries.toOption.get, pid))
         } else {
-          Ok(views.html.adrForm(adrPersForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), pid))
+          Logger.error("Failed to load the list of countries.")
+          Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.countries"))
         }
       } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
+        Logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.person.address"))
       }
   }
 
   /**
-   * Display the {@link Address}es of an {@link Organization}.
-   * 
-   * @param oid Identifier of the {@link Organization} to display the {@link Address}es for.
+   * Display the [[Address]]es of an [[Organization]].
+   *
+   * @param oid Identifier of the [[Organization]] to display the [[Address]]es for.
+   * @return A response with HTTP status code 200 having the [[Address]]es for the specific
+   *         [[Organization]] for a payload. If the [[Address]]es cannot be loaded a redirect to
+   *         the details of the [[Organization]] is returned. If the [[Organization]] cannot be
+   *         found a redirect to the list of [[Organization]]s is returned.
    */
   def showOrgAdr(oid: Long) = isAuthenticated { username =>
     implicit request =>
-      val o = Organization.load(oid).get
-      val req = Ok(views.html.adrOrg(o, Address.getOrgAddresses(o).toOption.get))
-      if (request.flash.get("error").isDefined) {
-        req.flashing(("error" -> request.flash.get("error").get))
-      } else if (request.flash.get("success").isDefined) {
-        req.flashing(("success" -> request.flash.get("success").get))
+      val o = Organization.load(oid)
+      if (o.isDefined) {
+        val orgAddresses = Address.getOrgAddresses(o.get)
+        if (orgAddresses.isSuccess) {
+          Ok(views.html.adrOrg(o.get, orgAddresses.toOption.get))
+        } else {
+          Logger.error(s"Failed to load addresses for organization '$oid")
+          Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization.addresses"))
+        }
       } else {
-        req
+        Logger.error(s"Failed to load organization '$oid'.")
+        Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
       }
   }
 
   /**
-   * Display the {@link Address}es of a {@link Person}.
-   * 
-   * @param pid Identifier of the {@link Person} to display the {@link Address}es for.
+   * Display the [[Address]]es of a [[Person]].
+   *
+   * @param pid Identifier of the [[Person]] to display the [[Address]]es for.
+   * @return A response with HTTP status code 200 having the [[Address]]es for the specific
+   *         [[Person]] for a payload. If the [[Address]]es cannot be loaded a redirect to
+   *         the details of the [[Person]] is returned. If the [[Person]] cannot be
+   *         found a redirect to the list of [[Person]]s is returned.
    */
   def showPersonAdr(pid: Long) = isAuthenticated { username =>
     implicit request =>
-      val p = Person.load(pid).get
-      val req = Ok(views.html.adr(p, Address.getPersonAddresses(p).toOption.get))
-      if (request.flash.get("error").isDefined) {
-        req.flashing(("error" -> request.flash.get("error").get))
-      } else if (request.flash.get("success").isDefined) {
-        req.flashing(("success" -> request.flash.get("success").get))
+      val p = Person.load(pid)
+      if (p.isDefined) {
+        val persAddresses = Address.getPersonAddresses(p.get)
+        if (persAddresses.isSuccess) {
+          Ok(views.html.adr(p.get, persAddresses.toOption.get))
+        } else {
+          Logger.error(s"Failed to load addresses for person '$pid'.")
+          Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.person.addresses"))
+        }
       } else {
-        req
+        Logger.error(s"Failed to load person '$pid'.")
+        Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person", pid))
       }
   }
 
   /**
-   * Store an {@link Address} of an {@link Organization}.
-   * 
-   * @param oid Identifier of the {@link Organization} to relate the {@link Address} to.
+   * Store an [[Address]] of an [[Organization]].
+   *
+   * @param oid Identifier of the [[Organization]] to relate the [[Address]] to.
+   * @return A redirect to display the [[Address]]es for the specific [[Organization]]. If storing
+   *         the address fails the details of the [[Organization]] are displayed. If form
+   *         validation fails a response with HTTP status code 400 is generated holding the form
+   *         with error information. If the [[Organization]] cannot be loaded a redirect to the list
+   *         of [[Organization]]s is returned.
    */
   def submitOrgAdr(oid: Long) = isAuthorized("save.organization.address") { username =>
     implicit request =>
       adrOrgForm.bindFromRequest.fold(
         errors => {
-          Logger.error("An error occurred when trying to process organization address form.")
-          val countries = Country.getAll
+          Logger.error(s"An error occurred when trying to process organization address form for organization '$oid'.")
+          val countries = Country.getAll()
           if (countries.isSuccess) {
             BadRequest(views.html.adrOrgForm(errors, countries.toOption.get, oid))
           } else {
-            BadRequest(views.html.adrOrgForm(errors.withError("country", Messages("error.failedToLoadCountries")), List(), oid))
+            BadRequest(views.html.adrOrgForm(errors.withError("country", Messages("error.loading.countries")), List(), oid))
           }
         },
         adr => {
-          val o = Organization.load(oid).get
-          Logger.debug("Storing address " + adr + " for organization " + o.name)
-          val result = Address.saveOrgAddress(o, adr)
-          if (result.isSuccess) {
-            Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing(("success" -> Messages("success.succeededToStoreAddress")))
-          } else {
-            val formWithError = adrOrgForm.withGlobalError(Messages("error.failedToStoreAddress"))
-            Logger.error(result.toString(), result.toEither.left.get)
-            val countries = Country.getAll
-            if (countries.isSuccess) {
-              BadRequest(views.html.adrOrgForm(formWithError, countries.toOption.get, oid))
+          val o = Organization.load(oid)
+          if (o.isDefined) {
+            Logger.debug(s"Storing address $adr for organization '${o.get.name}.")
+            val result = Address.saveOrgAddress(o.get, adr)
+            if (result.isSuccess) {
+              Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing("success" -> Messages("success.storing.organization.address"))
             } else {
-              BadRequest(views.html.adrOrgForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), oid))
+              Logger.error(result.toString, result.toEither.left.get)
+              Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.storing.organization.address"))
             }
+          } else {
+            Logger.error(s"Failed to load organization '$oid'. Cannot store address for it.")
+            Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
           }
         })
   }
 
   /**
-   * Store an {@link Address} of an {@link Person}.
-   * 
-   * @param pid Identifier of the {@link Person} to relate the {@link Address} to.
+   * Store an [[Address]] of an [[Person]].
+   *
+   * @param pid Identifier of the [[Person]] to relate the [[Address]] to.
+   * @return A redirect to display the [[Address]]es for the specific [[Person]]. If storing
+   *         the address fails the details of the [[Person]] are displayed. If form
+   *         validation fails a response with HTTP status code 400 is generated holding the form
+   *         with error information. If the [[Person]] cannot be loaded a redirect to the list
+   *         of [[Person]]s is returned.
    */
   def submitPersonAdr(pid: Long) = isAuthorized("save.person.address") { username =>
     implicit request =>
       adrPersForm.bindFromRequest.fold(
         errors => {
-          Logger.error("An error occurred when trying to process person address form.")
-          val countries = Country.getAll
+          Logger.error(s"An error occurred when trying to process person address form for person '$pid'.")
+          val countries = Country.getAll()
           if (countries.isSuccess) {
             BadRequest(views.html.adrForm(errors, countries.toOption.get, pid))
           } else {
-            BadRequest(views.html.adrForm(errors.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
+            BadRequest(views.html.adrForm(errors.withError("country", Messages("error.loading.countries")), List(), pid))
           }
         },
         adr => {
-          val p = Person.load(pid).get
-          Logger.debug("Storing address " + adr + " for person " + p.lastname + ", " + p.firstname)
-          val result = Address.savePersonAddress(p, adr)
-          if (result.isSuccess) {
-            Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing(("success" -> Messages("success.succeededToStoreAddress")))
-          } else {
-            val formWithError = adrPersForm.withGlobalError(Messages("error.failedToStoreAddress"))
-            Logger.error(result.toString(), result.toEither.left.get)
-            val countries = Country.getAll
-            if (countries.isSuccess) {
-              BadRequest(views.html.adrForm(formWithError, countries.toOption.get, pid))
+          val p = Person.load(pid)
+          if (p.isDefined) {
+            Logger.debug(s"Storing address $adr for person '${p.get.fullname}'.")
+            val result = Address.savePersonAddress(p.get, adr)
+            if (result.isSuccess) {
+              Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("success" -> Messages("success.storing.person.address"))
             } else {
-              BadRequest(views.html.adrForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
+              Logger.error(result.toString, result.toEither.left.get)
+              Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.storing.person.address"))
             }
+          } else {
+            Logger.error(s"Failed to load person '$pid'. Cannot store address for it.")
+            Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
           }
         })
   }

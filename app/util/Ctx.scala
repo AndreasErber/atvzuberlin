@@ -3,18 +3,11 @@
  */
 package util
 
-import controllers.UserCtrl
 import play.api.mvc.Request
-import accesscontrol.User
+import accesscontrol.{Role, RoleHasPrivileges, User, UserHasRoles}
 import play.api.mvc.Security
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.i18n.Messages
 import display.Header
 import display.Menu
-import accesscontrol.Privileges
-import accesscontrol.UserHasRoles
-import accesscontrol.RoleHasPrivileges
 import play.Logger
 import accesscontrol.Privilege
 
@@ -26,7 +19,7 @@ import accesscontrol.Privilege
  * @param sideMenu The side navigation of the pase.
  * @param request The current request that is handled.
  * @author andreas
- * @version 0.0.4, 2015-01-05
+ * @version 0.0.5, 2015-04-18
  */
 case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[List[Menu]])(implicit request: Request[_]) {
 
@@ -35,9 +28,9 @@ case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[Lis
   val referer = request.headers.get("referer")
 
   /**
-   * Retrieve the {@link User} instance identified by the username in the HTTP session.
+   * Retrieve the [[User]] instance identified by the username in the HTTP session.
    *
-   * @returns An optional {@link User} instance if a match is found.
+   * @return An optional [[User]] instance if a match is found.
    */
   def getUser[A](implicit request: Request[A]): Option[User] = {
     val user = request.session.get(Security.username)
@@ -60,9 +53,9 @@ case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[Lis
    * specified <em>privilege</em>. If execution of intermediate steps fails, intermediate results are empty or the
    * <em>user</em> does not have the privilege <code>false</code> will be returned.
    *
-   * @param user The {@link User} instance to check the privilege for.
+   * @param user The [[User]] instance to check the privilege for.
    * @param privilege The name of the privilege to check for.
-   * @returns <code>true</code> if the given <em>user</em> has the specified <em>privilege</em>, <code>false</code>
+   * @return <code>true</code> if the given <em>user</em> has the specified <em>privilege</em>, <code>false</code>
    *   otherwise.
    */
   def userHasPrivilege(user: User, privilege: String): Boolean = {
@@ -80,13 +73,13 @@ case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[Lis
   }
 
   /**
-   * Retrieve the {@link Privilege}s the specified <em>user</em> has.
+   * Retrieve the [[Privilege]]s the specified <em>user</em> has.
    *
-   * The method queries for the {@link Role}s the <em>user</em> has and then queries for the {@link Privilege}s
-   * associated with each {@link Role}.
+   * The method queries for the [[Role]]s the <em>user</em> has and then queries for the [[Privilege]]s
+   * associated with each [[Role]].
    *
-   * @param user The {@link User} to get the {@link Privilege}s for.
-   * @returns Either {@link Some} possibly empty {@link List} of {@link Privilege}s or {@link None} in case of an
+   * @param user The [[User]] to get the [[Privilege]]s for.
+   * @return Either [[Some]] possibly empty [[List]] of [[Privilege]]s or [[None]] in case of an
    *          error.
    */
   def getUserPrivileges(user: Option[User]): Option[List[Privilege]] = {

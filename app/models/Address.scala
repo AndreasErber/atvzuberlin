@@ -4,65 +4,75 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
-import util.UsageType
-import util.Personal
-import util.Privacy
-import util.MembersPrivate
+import scalaz.{Failure, Success, Validation}
+import util.{Privacy, UsageType}
 
 /**
  * Entity to provide a postal address.
- * 
+ *
  * @author andreas
- * @version 0.0.5, 2015-01-05
+ * @version 0.0.6, 2015-04-18
  */
 case class Address(override val id: Option[Long] = None,
-  val addon: Option[String],
-  val street: Option[String],
-  val postbox: Option[String],
-  val city: String,
-  val zip: String,
-  val country: Country,
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier)
+                   addon: Option[String],
+                   street: Option[String],
+                   postbox: Option[String],
+                   city: String,
+                   zip: String,
+                   country: Country,
+                   override val created: Long = System.currentTimeMillis(),
+                   override val creator: String,
+                   override val modified: Option[Long] = None,
+                   override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier)
 
 object Address {
 
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
   val tablename = "Address"
 
-  def getAll(): Validation[Throwable, List[Address]] = db withSession {
+  /**
+   * Retrieve all available [[Address]]es.
+   *
+   * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Address]]es.
+   */
+  def getAll: Validation[Throwable, List[Address]] = db withSession {
     try {
       Success(Query(Addresses).list)
     } catch {
       case e: Throwable => Failure(e)
     }
   }
-  
+
+  /**
+   * Retrieve the [[Address]] of a specific [[Organization]].
+   *
+   * @param o The [[Organization]] to get the [[Address]] for.
+   * @param aid Identifier of the [[Address]]
+   * @return A [[Validation]] of either a [[Throwable]] or an optional [[Address]].
+   */
   def getOrgAddress(o: Organization, aid: Long): Validation[Throwable, Option[Address]] = {
     require(o.id.isDefined)
     db withSession {
       try {
         val oha = Query(OrgHasAddresses).where(_.oid === o.id.get).where(_.aid === aid).firstOption
-        val adr = load(aid)
-        if (oha.isDefined) {
-          if (adr.isDefined) {
-            Success(Some(adr.get))
+        val adrV = load(aid)
+        if (adrV.isSuccess) {
+          if (oha.isDefined) {
+            val adrOp: Option[Address] = adrV.toOption.get
+            if (adrOp.isDefined) {
+              Success(Some(adrOp.get))
+            } else {
+              Failure(new RuntimeException("Address with ID " + aid + " not found."))
+            }
           } else {
-            Failure(new RuntimeException("Address with ID " + aid + " not found."))
+            Success(None)
           }
         } else {
-          Success(None)
+          throw adrV.toEither.left.get
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -71,9 +81,10 @@ object Address {
   }
 
   /**
-   * Get the list of Email items an Organization has.
+   * Retrieve the [[Address]]es of a specific [[Organization]].
    *
-   * Note, that the output list is sorted according to the position parameter in the relation table.
+   * @param o The [[Organization]] to get the [[Address]] for.
+   * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Address]]es.
    */
   def getOrgAddresses(o: Organization): Validation[Throwable, List[Address]] = {
     require(o.id.isDefined)
@@ -82,7 +93,7 @@ object Address {
         val result = for {
           oha <- OrgHasAddresses.sortBy(x => (x.oid, x.pos)) if oha.oid === o.id.get
           a <- Addresses if oha.aid === a.id
-        } yield (a)
+        } yield a
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -91,22 +102,32 @@ object Address {
   }
 
   /**
-   * Get the {@link Address} identified by <em>aid</em> for the {@link Person} <em>p</em> has.
+   * Get the [[Address]] identified by <em>aid</em> the [[Person]] <em>p</em> has.
+   *
+   * @param p The [[Person]] to get the [[Address]] for.
+   * @param aid Identifier of the [[Address]]
+   * @return A [[Validation]] of either a [[Throwable]] or an optional 3-tuple of [[Address]], [[UsageType]], and
+   *         [[Privacy]].
    */
   def getPersonAddress(p: Person, aid: Long): Validation[Throwable, Option[(Address, UsageType, Privacy)]] = {
     require(p.id.isDefined)
     db withSession {
       try {
         val pha = Query(PersonHasAddresses).where(_.pid === p.id.get).where(_.aid === aid).firstOption
-        val adr = load(aid)
-        if (pha.isDefined) {
-          if (adr.isDefined) {
-            Success(Some((adr.get, pha.get.usage, pha.get.privacy)))
+        val adrV = load(aid)
+        if (adrV.isSuccess) {
+          if (pha.isDefined) {
+            val adrOp = adrV.toOption.get
+            if (adrOp.isDefined) {
+              Success(Some((adrOp.get, pha.get.usage, pha.get.privacy)))
+            } else {
+              Failure(new RuntimeException("Address with ID " + aid + " not found."))
+            }
           } else {
-            Failure(new RuntimeException("Address with ID " + aid + " not found."))
+            Success(None)
           }
         } else {
-          Success(None)
+          throw adrV.toEither.left.get
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -115,9 +136,12 @@ object Address {
   }
 
   /**
-   * Get the list of Email items a Person has.
+   * Get the [[List]] of [[Address]]es a [[Person]] has.
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
+   *
+   * @param p The [[Person]] to get the [[Address]]es for.
+   * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Address]]es.
    */
   def getPersonAddresses(p: Person): Validation[Throwable, List[Address]] = {
     require(p.id.isDefined)
@@ -126,7 +150,7 @@ object Address {
         val result = for {
           pha <- PersonHasAddresses.sortBy(x => (x.pid, x.pos)) if pha.pid === p.id.get
           a <- Addresses if pha.aid === a.id
-        } yield (a)
+        } yield a
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -135,10 +159,17 @@ object Address {
   }
 
   /**
-   * Load the Address related to the given identifier.
+   * Load the [[Address]] identified by the given <em>id</em>.
+   *
+   * @param id Identifier of the [[Address]].
+   * @return A [[Validation]] of either a [[Throwable]] or an optional [[Address]].
    */
-  def load(id: Long): Option[Address] = db withSession {
-    Query(Addresses).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Address]] = db withSession {
+    try {
+      Success(Query(Addresses).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -162,10 +193,10 @@ object Address {
         val isUpdate = if (a.id.isDefined) true else false
         val result1 = Address.saveOrUpdate(a)
         if (result1.isSuccess) {
-            val l = Query(OrgHasAddresses).where(_.oid === o1.id.get).list
-            if (!isUpdate) {
-            OrgHasAddresses.insert(OrgHasAddress(o1.id.get, result1.toOption.get.id.get, l.length + 1));
-          } 
+          val l = Query(OrgHasAddresses).where(_.oid === o1.id.get).list
+          if (!isUpdate) {
+            OrgHasAddresses.insert(OrgHasAddress(o1.id.get, result1.toOption.get.id.get, l.length + 1))
+          }
           result1
         } else
           Failure(result1.toEither.left.get)
@@ -198,7 +229,7 @@ object Address {
         if (result1.isSuccess) {
           val l = Query(PersonHasAddresses).where(_.pid === p1.id.get).list
           if (!isUpdate) {
-            PersonHasAddresses.insert(PersonHasAddress(p1.id.get, result1.toOption.get.id.get, l.length + 1, t._2, t._3));
+            PersonHasAddresses.insert(PersonHasAddress(p1.id.get, result1.toOption.get.id.get, l.length + 1, t._2, t._3))
           }
           result1
         } else
@@ -210,7 +241,7 @@ object Address {
   }
 
   /**
-   * Persist a new {@link Address} instance or update an existing one.
+   * Persist a new [[Address]] instance or update an existing one.
    */
   def saveOrUpdate(a: Address): Validation[Throwable, Address] = {
     db withSession {
@@ -239,7 +270,7 @@ object Address {
       }
     }
   }
-  
+
   /**
    * Delete the address identified by id.
    */
@@ -261,7 +292,7 @@ object Address {
    * Count the number of occurrences of addresses.
    */
   def count(): Int = db withSession {
-    Addresses.count
+    Addresses.count()
   }
 }
 
@@ -269,23 +300,38 @@ object Addresses extends Table[Address](Address.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
+
   implicit val countryMapper: TypeMapper[Country] = base[Country, Int](c => c.id.get, id => Country.load(id).get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def addon = column[String]("addon", O.Nullable)
+
   def street = column[String]("street", O.Nullable)
+
   def postbox = column[String]("postbox", O.Nullable)
+
   def city = column[String]("city")
+
   def zip = column[String]("zip")
+
   def country = column[Country]("country")
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ created ~ creator ~ modified.? ~ modifier.? <> (Address.apply _, Address.unapply _)
+
+  def * = id.? ~ addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ created ~ creator ~ modified.? ~ modifier.? <>(Address.apply _, Address.unapply _)
 
   def withoutId = addon.? ~ street.? ~ postbox.? ~ city ~ zip ~ country ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (a: Address) => withoutId.insert(a.addon, a.street, a.postbox, a.city, a.zip, a.country, a.created, a.creator, a.modified, a.modifier)
+
   def update(a: Address): Int = Addresses.where(_.id === a.id).update(a.copy(modified = Some(System.currentTimeMillis())))
-  def count(): Int = Addresses.count
+
+  def count(): Int = Addresses.count()
 }

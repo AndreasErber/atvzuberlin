@@ -10,23 +10,20 @@ import scala.slick.lifted.Query
 import Database.threadLocalSession
 import scalaz.{ Failure, Success, Validation }
 import models.{ Email, Person }
-import scala.slick.lifted.MappedTypeMapper.base
-import scala.slick.lifted.TypeMapper
-import util.{ UserRole, StandardUser }
 
 /**
  * Representation of a user of the website.
  * 
  * @author andreas
- * @version 0.0.6, 2015-01-11
+ * @version 0.0.7, 2015-04-18
  */
 case class User(
-  val username: String,
-  val password: String,
-  val email: Email,
-  val person: Person,
-  val created: Long = System.currentTimeMillis(),
-  val modified: Option[Long]) {
+  username: String,
+  password: String,
+  email: Email,
+  person: Person,
+  created: Long = System.currentTimeMillis(),
+  modified: Option[Long]) {
 
   require(Option(username).isDefined)
   require(Option(password).isDefined && password.length() >= User.minimumPasswordLength)
@@ -85,7 +82,7 @@ object User {
   /**
    * Retrieve all events from the persistence store.
    */
-  def getAll(): Validation[Throwable, List[User]] = db withSession {
+  def getAll: Validation[Throwable, List[User]] = db withSession {
     try {
       Success(Query(Users).list)
     } catch {
@@ -98,9 +95,8 @@ object User {
 object Users extends Table[User](User.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
-  
-  implicit val emailMapper = base[Email, Long](e => e.id.get, id => Email.load(id).get)
+
+  implicit val emailMapper = base[Email, Long](e => e.id.get, id => Email.load(id).toOption.get.get)
   implicit val personMapper = base[Person, Long](p => p.id.get, id => Person.load(id).get)
 
   def username = column[String]("username", O.PrimaryKey)

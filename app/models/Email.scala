@@ -3,33 +3,22 @@
  */
 package models
 
-import play.api.data.validation.Constraints
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
-import util.UsageType
-import util.Personal
-import util.UsageType
-import util.Privacy
-import util.MembersPrivate
-import util.UsageType
-import util.Privacy
+import scalaz.{Failure, Success, Validation}
+import util.{Privacy, UsageType}
 
 /**
- * Representation of an email address.
+ * Representation of an [[Email]] address.
  * 
  * @author andreas
- * @version 0.0.9, 2015-01-10
+ * @version 0.0.10, 2015-04-18
  */
 case class Email(override val id: Option[Long],
-    val address: String,
+    address: String,
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
@@ -47,7 +36,7 @@ case class Email(override val id: Option[Long],
    *
    * @return The string representation of this instance.
    */
-  override def toString(): String = {
+  override def toString: String = {
 
     var result = ""
     if (id.isDefined) {
@@ -99,8 +88,12 @@ object Email {
   implicit val db = Database.forDataSource(DB.getDataSource())
   val tablename = "Email"
 
-  def load(id: Long): Option[Email] = db withSession {
-    Query(Emails).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Email]] = db withSession {
+    try {
+      Success(Query(Emails).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   private def delete(id: Long): Validation[Throwable, Boolean] = {
@@ -145,22 +138,27 @@ object Email {
   }
 
   /**
-   * Get the {@link Email} identified by <em>eid</em> for the {@link Organization} <em>o</em>.
+   * Get the [[Email]] identified by <em>eid</em> for the [[Organization]] <em>o</em>.
    */
   def getOrgEmail(o: Organization, eid: Long): Validation[Throwable, Option[(Email, OrgHasEmail)]] = {
     require(o.id.isDefined)
     db withSession {
       try {
         val ohe = Query(OrgHasEmails).where(_.oid === o.id.get).where(_.eid === eid).firstOption
-        val email = load(eid)
-        if (ohe.isDefined) {
-          if (email.isDefined) {
-            Success(Some(email.get, ohe.get))
+        val emailV = load(eid)
+        if (emailV.isSuccess) {
+          if (ohe.isDefined) {
+            val emailOp = emailV.toOption.get
+            if (emailOp.isDefined) {
+              Success(Some(emailOp.get, ohe.get))
+            } else {
+              Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+            }
           } else {
-            Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+            Success(None)
           }
         } else {
-          Success(None)
+          throw emailV.toEither.left.get
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -169,7 +167,7 @@ object Email {
   }
 
   /**
-   * Get the list of {@link Email} addresses an {@link Organization} has.
+   * Get the list of [[Email]] addresses an [[Organization]] has.
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
@@ -180,7 +178,7 @@ object Email {
         val result = for {
           ohe <- OrgHasEmails.sortBy(x => (x.oid, x.pos)) if ohe.oid === o.id.get
           e <- Emails if ohe.eid === e.id
-        } yield ((e, ohe))
+        } yield (e, ohe)
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -189,22 +187,27 @@ object Email {
   }
 
   /**
-   * Get the {@link Email} identified by <em>eid</em> for the {@link Person} <em>p</em>.
+   * Get the [[Email]] identified by <em>eid</em> for the [[Person]] <em>p</em>.
    */
   def getPersonEmail(p: Person, eid: Long): Validation[Throwable, Option[(Email, PersonHasEmail)]] = {
     require(p.id.isDefined)
     db withSession {
       try {
         val phe = Query(PersonHasEmails).where(_.pid === p.id.get).where(_.eid === eid).firstOption
-        val email = load(eid)
-        if (phe.isDefined) {
-          if (email.isDefined) {
-            Success(Some((email.get, phe.get)))
+        val emailV = load(eid)
+        if (emailV.isSuccess) {
+          if (phe.isDefined) {
+            val emailOp = emailV.toOption.get
+            if (emailOp.isDefined) {
+              Success(Some((emailOp.get, phe.get)))
+            } else {
+              Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+            }
           } else {
-            Failure(new RuntimeException("Email address with ID " + eid + " not found."))
+            Success(None)
           }
         } else {
-          Success(None)
+          throw emailV.toEither.left.get
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -221,10 +224,10 @@ object Email {
     require(p.id.isDefined)
     db withSession {
       try {
-        val result = for {
+        val result: Query[(Emails.type, PersonHasEmails.type), (Email, PersonHasEmail)] = for {
           phe <- PersonHasEmails.sortBy(x => (x.pid, x.pos)) if phe.pid === p.id.get
           e <- Emails if phe.eid === e.id
-        } yield ((e, phe))
+        } yield (e, phe)
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -233,7 +236,7 @@ object Email {
   }
 
   /**
-   * Insert the specified {@link Email} item in the database and set it into a relation to the given {@link Person}.
+   * Insert the specified [[Email]] item in the database and set it into a relation to the given [[Person]].
    *
    * If the person is not yet persisted it will be in a first step.
    */
@@ -252,7 +255,7 @@ object Email {
           if (!isUpdate) {
             val l = Query(PersonHasEmails).where(_.pid === p1.id.get).list
             position = l.length +1
-            PersonHasEmails.insert(PersonHasEmail(p1.id.get, e1.toOption.get.id.get, position));
+            PersonHasEmails.insert(PersonHasEmail(p1.id.get, e1.toOption.get.id.get, position))
           } else {
             val oldPos = Query(PersonHasEmails).where(_.pid === p1.id.get).where(_.eid === e1.toOption.get.id.get).firstOption.get.pos
             position = if (pos == 0) oldPos else pos
@@ -283,7 +286,7 @@ object Email {
   }
 
   /**
-   * Insert the specified {@link Email} item in the database and set it into a relation to the given {@link Organization}.
+   * Insert the specified [[Email]] item in the database and set it into a relation to the given [[Organization]].
    *
    * If the person is not yet persisted it will be in a first step.
    */
@@ -302,7 +305,7 @@ object Email {
           if (!isUpdate) {
             val l = Query(OrgHasEmails).where(_.oid === o1.id.get).list
             position = l.length + 1
-            OrgHasEmails.insert(OrgHasEmail(o1.id.get, e1.toOption.get.id.get, position));
+            OrgHasEmails.insert(OrgHasEmail(o1.id.get, e1.toOption.get.id.get, position))
           } else {
             val oldPos = Query(OrgHasEmails).where(_.oid === o1.id.get).where(_.eid === e1.toOption.get.id.get).firstOption.get.pos
             position = if (pos == 0) oldPos else pos

@@ -4,30 +4,26 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
+import scalaz.{Failure, Success, Validation}
 import util.Division
 
 /**
- * Class to define a charge or duty that is to be taken by a person.
+ * Class to define a [[Charge]] or duty that is to be taken by a person.
  *
  * @author andreas
- * @version 0.0.2, 2015-01-02
+ * @version 0.0.3, 2015-04-18
  */
 case class Charge(override val id: Option[Long],
-  val name: String,
-  val abbr: Option[String],
-  val division: Division.Division = Division.Aktivitas,
-  val shortDesc: Option[String],
-  val longDesc: Option[String],
-  val email: Option[String],
+  name: String,
+  abbr: Option[String],
+  division: Division.Division = Division.Aktivitas,
+  shortDesc: Option[String],
+  longDesc: Option[String],
+  email: Option[String],
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -36,12 +32,12 @@ case class Charge(override val id: Option[Long],
 }
 
 /**
- * Companion object for the {@link Charge} class.
+ * Companion object for the [[Charge]] class.
  *
  * Contains database access methods.
  *
  * @author andreas
- * @version 0.0.1, 2013-07-16
+ * @version 0.0.2, 2015-04-18
  */
 object Charge {
 
@@ -49,9 +45,11 @@ object Charge {
   val tablename = "Charge"
 
   /**
-   * Retrieve all charges from the persistence store.
+   * Retrieve all [[Charge]]s from the persistence store.
+   *
+   * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Charge]]s.
    */
-  def getAll(): Validation[Throwable, List[Charge]] = db withSession {
+  def getAll: Validation[Throwable, List[Charge]] = db withSession {
     def q = Query(Charges).sortBy(n => n.name).list
     try {
       Success(q)
@@ -60,29 +58,45 @@ object Charge {
     }
   }
 
+  /**
+   * Retrieve all [[Charge]]s for a certain [[Division]].
+   *
+   * @param div The [[Division]] to get the [[Charge]]s for.
+   * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Charge]]s.
+   */
   def getAllForDivision(div: Division.Division): Validation[Throwable, List[Charge]] = db withSession {
-    val all = this.getAll
-    if (all.isFailure) {
-      all
-    } else {
-      val list = all.toOption.get
-      Success(list.filter(_.division == div))
+    try {
+      val all = this.getAll
+      if (all.isFailure) {
+        all
+      } else {
+        val list = all.toOption.get
+        Success(list.filter(_.division == div))
+      }
+    } catch {
+      case t: Throwable => Failure(t)
     }
   }
 
   /**
-   * Load the charge related to the given identifier.
+   * Load the [[Charge]] related to the given identifier.
    *
-   * @param id The identifier of the charge in question.
+   * @param id The identifier of the [[Charge]] in question.
+   * @return A [[Validation]] of either a [[Throwable]] or an optional [[Charge]].
    */
-  def load(id: Long): Option[Charge] = db withSession {
-    Query(Charges).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Charge]] = db withSession {
+    try {
+      Success(Query(Charges).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
-   * Persist a new charge or update an existing one.
+   * Persist a new [[Charge]] or update an existing one.
    *
-   * @param c The charge that is to be persisted
+   * @param c The [[Charge]] that is to be persisted or updated
+   *          @return A [[Validation]] of either a [[Throwable]] or a [[Charge]].
    */
   def saveOrUpdate(c: Charge): Validation[Throwable, Charge] = {
     db withSession {
@@ -116,7 +130,7 @@ object Charge {
    * Delete the charge identified by id.
    *
    * @param id The identifier of the charge to be deleted.
-   * @return A {@link Validation} with either a {@link Throwable} or a {@link Boolean}. If the
+   * @return A [[Validation]] with either a [[Throwable]] or a [[Boolean]]. If the
    *         action itself was successful (could be executed without error), the Boolean indicates
    *         if the item was successfully deleted (<code>true</code>) or not (<code>false</code>).
    */
@@ -131,7 +145,7 @@ object Charge {
 }
 
 /**
- * The data access object for {@link Charge}s.
+ * The data access object for [[Charge]]s.
  *
  * @author andreas
  * @version 0.0.1, 2013-07-16

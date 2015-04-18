@@ -6,25 +6,24 @@ package models
 import util.Division
 import java.sql.Date
 import db.GenericDao
-import play.api.db._
-import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
-import scala.slick.lifted.Query
 import Database.threadLocalSession
 import scalaz.Failure
 import scalaz.Success
 import scalaz.Validation
 
 /**
- * @author aer
- * @version 0.0.1, 2013-07-27
+ * An entity providing a relation between a [[Person]] and a [[Charge]].
+ *
+ * @author andreas
+ * @version 0.0.2, 2015-04-18
  */
 case class PersonInCharge(override val id: Option[Long],
-  val person: Person,
-  val charge: Charge,
-  val division: Division.Division = Division.Aktivitas,
-  val start: Date,
-  val end: Date,
+  person: Person,
+  charge: Charge,
+  division: Division.Division = Division.Aktivitas,
+  start: Date,
+  end: Date,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -37,7 +36,8 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
   import scala.slick.lifted.TypeMapper
   implicit val divisionMapper: TypeMapper[Division.Division] = base[Division.Division, String](d => d.toString, string => Division.withName(string))
   implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).get)
-  implicit val chargeMapper: TypeMapper[Charge] = base[Charge, Long](c => c.id.get, id => Charge.load(id).get)
+  implicit val chargeMapper: TypeMapper[Charge] = base[Charge, Long](c => c.id.get, id => Charge.load(id).toOption
+    .get.get)
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def person = column[Person]("person")
@@ -57,7 +57,7 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
   override def update(c: PersonInCharge): Int = db withSession { PersonInCharges.where(_.id === c.id).update(c.copy(modified = Some(System.currentTimeMillis()))) }
 
   /**
-   * Persist a {@link PersonInCharge} item in the data store.
+   * Persist a [[PersonInCharge]] item in the data store.
    *
    * If the specified instance is new, e.g., has no identifier set, it gets inserted into the database otherwise the existing entry with the same ID gets updated.
    */

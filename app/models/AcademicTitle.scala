@@ -4,30 +4,28 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Failure
-import scalaz.Success
-import scalaz.Validation
+import scalaz.{Failure, Success, Validation}
 
 /**
+ * Entity to describe an academic title.
+ *
  * @author andreas
- * @version 0.0.5, 2015-01-03
+ * @version 0.0.6, 2015-04-18
  */
 case class AcademicTitle(
-  override val id: Option[Long] = None,
-  val abbr: String,
-  val maleForm: Option[String],
-  val femaleForm: Option[String],
-  val isPrefix: Boolean = true,
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
+                          override val id: Option[Long] = None,
+                          abbr: String,
+                          maleForm: Option[String],
+                          femaleForm: Option[String],
+                          isPrefix: Boolean = true,
+                          override val created: Long = System.currentTimeMillis(),
+                          override val creator: String,
+                          override val modified: Option[Long] = None,
+                          override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
 
   /**
    * Redefine the inherited method to limit equality to instances of the same type.
@@ -85,7 +83,7 @@ object AcademicTitle {
   }
 
   /**
-   * Get the {@link AcademicTitle} identified by <em>id</em>.
+   * Get the [[AcademicTitle]] identified by <em>id</em>.
    */
   def getAcademicTitle(id: Long): Validation[Throwable, Option[AcademicTitle]] = {
     db withSession {
@@ -103,9 +101,9 @@ object AcademicTitle {
   }
 
   /**
-   * Retrieve all {@link AcademicTitle}s from the persistence store.
+   * Retrieve all [[AcademicTitle]]s from the persistence store.
    */
-  def getAll(): Validation[Throwable, List[AcademicTitle]] = db withSession {
+  def getAll: Validation[Throwable, List[AcademicTitle]] = db withSession {
     try {
       Success(Query(AcademicTitles).list)
     } catch {
@@ -117,19 +115,29 @@ object AcademicTitle {
     require(Option(p).isDefined)
     val phts = PersonHasTitle.getAllForPerson(p)
     if (phts.isSuccess) {
-      val titles = for (pht <- phts.toOption.get) yield (AcademicTitle.load(pht.tid).get)
+      val titles = for (pht <- phts.toOption.get) yield AcademicTitle.load(pht.tid).toOption.get.get
       Success(titles)
     } else {
       Failure(phts.toEither.left.get)
     }
   }
 
-  def load(id: Long): Option[AcademicTitle] = db withSession {
-    Query(AcademicTitles).filter(_.id === id).firstOption
+  /**
+   * Load the [[AcademicTitle]] identified by the given <em>id</em>
+   *
+   * @param id Identifier of the item to retrieve.
+   * @return A [[Validation]] of either a [[Throwable]] or an optional [[AcademicTitle]].
+   */
+  def load(id: Long): Validation[Throwable, Option[AcademicTitle]] = db withSession {
+    try {
+      Success(Query(AcademicTitles).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
-   * Persist a new {@link AcademicTitle} instance or update an existing one.
+   * Persist a new [[AcademicTitle]] instance or update an existing one.
    */
   def saveOrUpdate(at: AcademicTitle): Validation[Throwable, AcademicTitle] = {
     db withSession {
@@ -163,17 +171,28 @@ object AcademicTitle {
 object AcademicTitles extends Table[AcademicTitle](AcademicTitle.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def abbr = column[String]("abbr")
+
   def maleForm = column[String]("maleForm", O.Nullable)
+
   def femaleForm = column[String]("femaleForm", O.Nullable)
+
   def isPrefix = column[Boolean]("isPrefix")
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? <> (AcademicTitle.apply _, AcademicTitle.unapply _)
+
+  def * = id.? ~ abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? <>(AcademicTitle.apply _, AcademicTitle.unapply _)
 
   def withoutId = abbr ~ maleForm.? ~ femaleForm.? ~ isPrefix ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (at: AcademicTitle) => withoutId.insert(at.abbr, at.maleForm, at.femaleForm, at.isPrefix, at.created, at.creator, at.modified, at.modifier)
+
   def update(at: AcademicTitle): Int = AcademicTitles.where(_.id === at.id).update(at.copy(modified = Some(System.currentTimeMillis())))
 }
