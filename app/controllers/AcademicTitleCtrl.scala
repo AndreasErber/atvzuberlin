@@ -18,7 +18,7 @@ import util.CustomFormatters
  * Controller to handle requests on [[AcademicTitle]]s.
  *
  * @author andreas
- * @version 0.0.8, 2015-04-18
+ * @version 0.0.9, 2015-04-19
  */
 object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
 
@@ -264,20 +264,28 @@ object AcademicTitleCtrl extends Controller with ProvidesCtx with Security {
           }
         },
         at => {
-          val p = Person.load(pid)
-          if (!p.isDefined) {
-            Logger.error(s"Failed to load person with ID $pid.")
-            Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person", pid))
-          } else {
-            Logger.debug("Storing academic title with ID $at.id for person $p.get.name.")
-            val result = PersonHasTitle.add(p.get, at)
-            // display the person in detail
-            if (result.isSuccess) {
-              Redirect(routes.PersonCtrl.show(p.get.id.get)).flashing("success" -> Messages("success.storing.academic.title"))
+          val personV = Person.load(pid)
+          if (personV.isSuccess) {
+            val personOp = personV.toOption.get
+            if (personOp.isDefined) {
+              Logger.debug(s"Storing academic title with ID ${at.id} for person ${personOp.get.name}.")
+              val result = PersonHasTitle.add(personOp.get, at)
+              // display the person in detail
+              if (result.isSuccess) {
+                Redirect(routes.PersonCtrl.show(personOp.get.id.get)).flashing("success" -> Messages("success.storing" +
+                  ".academic.title"))
+              } else {
+                Logger.error(result.toString, result.toEither.left.get)
+                Redirect(routes.PersonCtrl.show(personOp.get.id.get)).flashing("error" -> Messages("error.storing" +
+                  ".academic.title"))
+              }
             } else {
-              Logger.error(result.toString, result.toEither.left.get)
-              Redirect(routes.PersonCtrl.show(p.get.id.get)).flashing("error" -> Messages("error.storing.academic.title"))
+              Logger.error(s"Failed to load person with ID '$pid'. Does not exist.")
+              Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person", pid))
             }
+          } else {
+            Logger.error(personV.toString, personV.toEither.left.get)
+            Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
           }
         })
   }

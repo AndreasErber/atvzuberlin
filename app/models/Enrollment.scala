@@ -14,7 +14,7 @@ import scalaz.{Failure, Success, Validation}
  * Entity to describe an [[Enrollment]] to an event.
  * 
  * @author andreas
- * @version 0.0.4, 2015-04-18
+ * @version 0.0.5, 2015-04-19
  */
 case class Enrollment(override val id: Option[Long],
   event: Long,
@@ -192,8 +192,8 @@ object Enrollments extends Table[Enrollment](Enrollment.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
-  implicit val eventMapper: TypeMapper[Event] = base[Event, Long](e => e.id.get, id => Event.load(id).get)
-  implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).get)
+  implicit val eventMapper: TypeMapper[Event] = base[Event, Long](e => e.id.get, id => Event.load(id).toOption.get.get)
+  implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).toOption.get.get)
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def event = column[Long]("event")

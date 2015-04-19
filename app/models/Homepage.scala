@@ -4,36 +4,44 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
+import scalaz.{Failure, Success, Validation}
 import util.UsageType
 
 /**
+ * Entity to represent a homepage.
+ * 
  * @author andreas
- * @version 0.0.3, 2015-01-03
+ * @version 0.0.4, 2015-04-19
  */
 case class Homepage(override val id: Option[Long],
-    val url: String,
-    val descr: Option[String],
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier)
+                    url: String,
+                    descr: Option[String],
+                    override val created: Long = System.currentTimeMillis(),
+                    override val creator: String,
+                    override val modified: Option[Long] = None,
+                    override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier)
 
+/**
+ * Companion object for the [[Homepage]] case class.
+ * 
+ * @author andreas
+ * @version 0.0.4, 2015-04-19
+ */
 object Homepage {
-  
+
   implicit val db = Database.forDataSource(DB.getDataSource())
   val tablename = "Homepage"
 
-  def load(id: Long): Option[Homepage] = db withSession {
-    Query(Homepages).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Homepage]] = db withSession {
+    try {
+      Success(Query(Homepages).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   private def delete(id: Long): Validation[Throwable, Boolean] = {
@@ -69,7 +77,7 @@ object Homepage {
         val result = Query(Homepages).where(_.url === url).firstOption
         result match {
           case None => Failure(new RuntimeException("Failed to find homepage with URL " + url))
-          case _    => Success(result)
+          case _ => Success(result)
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -78,22 +86,23 @@ object Homepage {
   }
 
   /**
-   * Get the {@link Homepage} identified by <em>eid</em> for the {@link Organization} <em>o</em>.
+   * Get the [[Homepage]] identified by <em>eid</em> for the [[Organization]] <em>o</em>.
    */
   def getOrgHomepage(o: Organization, hid: Long): Validation[Throwable, Option[(Homepage, OrgHasHomepage)]] = {
     require(o.id.isDefined)
     db withSession {
       try {
         val ohh = Query(OrgHasHomepages).where(_.oid === o.id.get).where(_.hid === hid).firstOption
-        val hp = load(hid)
-        if (ohh.isDefined) {
-          if (hp.isDefined) {
-            Success(Some(hp.get, ohh.get))
-          } else {
-            Failure(new RuntimeException("Homepage with ID " + hid + " not found."))
-          }
-        } else {
-          Success(None)
+        ohh match {
+          case Some(x) => val homepageV = load(hid)
+            homepageV match {
+              case Success(homepageOp) => homepageOp match {
+                case Some(homepage) => Success(Some((homepage, ohh.get)))
+                case None => Success(None)
+              } 
+              case Failure(t) => Failure(t)
+            }
+          case None => Success(None)
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -102,7 +111,7 @@ object Homepage {
   }
 
   /**
-   * Get the list of {@link Homepage}s an {@link Organization} has.
+   * Get the list of [[Homepage]]s an [[Organization]] has.
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
@@ -113,7 +122,7 @@ object Homepage {
         val result = for {
           ohh <- OrgHasHomepages.sortBy(x => (x.oid, x.pos)) if ohh.oid === o.id.get
           h <- Homepages if ohh.hid === h.id
-        } yield ((h, ohh))
+        } yield (h, ohh)
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -122,22 +131,23 @@ object Homepage {
   }
 
   /**
-   * Get the {@link Homepage} identified by <em>eid</em> for the {@link Person} <em>p</em>.
+   * Get the [[Homepage]] identified by <em>eid</em> for the [[Person]] <em>p</em>.
    */
   def getPersonHomepage(p: Person, hid: Long): Validation[Throwable, Option[(Homepage, PersonHasHomepage)]] = {
     require(p.id.isDefined)
     db withSession {
       try {
-        val phh = Query(PersonHasHomepages).where(_.pid === p.id.get).where(_.hid === hid).firstOption
-        val hp = load(hid)
-        if (phh.isDefined) {
-          if (hp.isDefined) {
-            Success(Some((hp.get, phh.get)))
-          } else {
-            Failure(new RuntimeException("Homepage with ID " + hid + " not found."))
-          }
-        } else {
-          Success(None)
+        val phhOp = Query(PersonHasHomepages).where(_.pid === p.id.get).where(_.hid === hid).firstOption
+        phhOp match {
+          case Some(phh) => val homepageV = load(hid)
+            homepageV match {
+              case Success(homepageOp) => homepageOp match {
+                case Some(homepage) => Success(Some((homepage, phh)))
+                case None => Success(None)
+              }
+              case Failure(t) => Failure(t)
+            }
+          case None => Success(None)
         }
       } catch {
         case e: Throwable => Failure(e)
@@ -146,7 +156,7 @@ object Homepage {
   }
 
   /**
-   * Get the list of {@link Homepage} a {@link Person} has.
+   * Get the list of [[Homepage]] a [[Person]] has.
    *
    * Note, that the output list is sorted according to the position parameter in the relation table.
    */
@@ -157,7 +167,7 @@ object Homepage {
         val result = for {
           phh <- PersonHasHomepages.sortBy(x => (x.pid, x.pos)) if phh.pid === p.id.get
           hp <- Homepages if phh.hid === hp.id
-        } yield ((hp, phh))
+        } yield (hp, phh)
         Success(result.list)
       } catch {
         case e: Throwable => Failure(e)
@@ -166,7 +176,7 @@ object Homepage {
   }
 
   /**
-   * Insert the specified {@link Homepage} item in the database and set it into a relation to the given {@link Person}.
+   * Insert the specified [[Homepage]] item in the database and set it into a relation to the given [[Person]].
    *
    * If the person is not yet persisted it will be in a first step.
    */
@@ -184,8 +194,8 @@ object Homepage {
           var position = -1
           if (!isUpdate) {
             val l = Query(PersonHasHomepages).where(_.pid === p1.id.get).list
-            position = l.length +1
-            PersonHasHomepages.insert(PersonHasHomepage(p1.id.get, hp1.toOption.get.id.get, position));
+            position = l.length + 1
+            PersonHasHomepages.insert(PersonHasHomepage(p1.id.get, hp1.toOption.get.id.get, position))
           } else {
             val oldPos = Query(PersonHasHomepages).where(_.pid === p1.id.get).where(_.hid === hp1.toOption.get.id.get).firstOption.get.pos
             position = if (pos == 0) oldPos else pos
@@ -211,12 +221,11 @@ object Homepage {
       } catch {
         case e: Throwable => Failure(e)
       }
-
     }
   }
 
   /**
-   * Insert the specified {@link Homepage} item in the database and set it into a relation to the given {@link Organization}.
+   * Insert the specified [[Homepage]] item in the database and set it into a relation to the given [[Organization]].
    *
    * If the person is not yet persisted it will be in a first step.
    */
@@ -235,7 +244,7 @@ object Homepage {
           if (!isUpdate) {
             val l = Query(OrgHasHomepages).where(_.oid === o1.id.get).list
             position = l.length + 1
-            OrgHasHomepages.insert(OrgHasHomepage(o1.id.get, hp1.toOption.get.id.get, position));
+            OrgHasHomepages.insert(OrgHasHomepage(o1.id.get, hp1.toOption.get.id.get, position))
           } else {
             val oldPos = Query(OrgHasHomepages).where(_.oid === o1.id.get).where(_.hid === hp1.toOption.get.id.get).firstOption.get.pos
             position = if (pos == 0) oldPos else pos
@@ -256,7 +265,7 @@ object Homepage {
               }
             }
           }
-          Success((hp1.toOption.get, OrgHasHomepage(o.id.get,hp1.toOption.get.id.get, position)))
+          Success((hp1.toOption.get, OrgHasHomepage(o.id.get, hp1.toOption.get.id.get, position)))
         } else Failure(hp1.toEither.left.get)
       } catch {
         case e: Throwable => Failure(e)
@@ -292,15 +301,24 @@ object Homepage {
 object Homepages extends Table[Homepage](Homepage.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def url = column[String]("url")
+
   def descr = column[String]("descr", O.Nullable)
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ url ~ descr.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Homepage.apply _, Homepage.unapply _)
+
+  def * = id.? ~ url ~ descr.? ~ created ~ creator ~ modified.? ~ modifier.? <>(Homepage.apply _, Homepage.unapply _)
 
   def withoutId = url ~ descr.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (h: Homepage) => withoutId.insert(h.url, h.descr, h.created, h.creator, h.modified, h.modifier)
+
   def update(h: Homepage): Int = Homepages.where(_.id === h.id).update(h.copy(modified = Some(System.currentTimeMillis())))
 }

@@ -12,11 +12,13 @@ import play.api.mvc._
 import play.api.i18n.Messages
 import util.{CustomFormatters, Privacy, UsageType}
 
+import scalaz.{Failure, Success}
+
 /**
  * Controller for all actions related to [[Address]]es.
  *
  * @author andreas
- * @version 0.0.9, 2015-04-18
+ * @version 0.0.10, 2015-04-19
  */
 object AddressCtrl extends Controller with ProvidesCtx with Security {
 
@@ -69,7 +71,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    */
   def createPersonAdr(pid: Long) = isAuthorized("create.person.address") { username =>
     implicit request =>
-      val countries = Country.getAll()
+      val countries = Country.getAll
       if (countries.isSuccess) {
         Ok(views.html.adrForm(adrPersForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, countries.toOption.get, pid))
       } else {
@@ -88,7 +90,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    */
   def createOrgAdr(oid: Long) = isAuthorized("create.organization.address") { username =>
     implicit request =>
-      val countries = Country.getAll()
+      val countries = Country.getAll
       if (countries.isSuccess) {
         Ok(views.html.adrOrgForm(adrOrgForm.bind(Map("usage" -> "1", "privacy" -> "2")).discardingErrors, countries.toOption.get, oid))
       } else {
@@ -146,19 +148,32 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    */
   def editOrgAdr(oid: Long, id: Long) = isAuthorized("edit.organization.address") { username =>
     implicit request =>
-
-      val result = Address.getOrgAddress(Organization.load(oid).get, id)
-      if (result.isSuccess) {
-        val countries = Country.getAll()
-        if (countries.isSuccess) {
-          Ok(views.html.adrOrgForm(adrOrgForm.fill(result.toOption.get.get), countries.toOption.get, oid))
-        } else {
-          Logger.error("Failed to load the list of countries.")
-          Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.countries"))
+      val orgV = Organization.load(oid)
+      orgV match {
+        case Success(orgOp) => orgOp match {
+          case Some(org) => val adrV = Address.getOrgAddress(org, id)
+            adrV match {
+              case Success(adrOp) => adrOp match {
+                case Some(adr) => val countriesV = Country.getAll
+                  countriesV match {
+                    case Success(countries) => Ok(views.html.adrOrgForm(adrOrgForm.fill(adr), countries, oid))
+                    case Failure(t) => Logger.error(countriesV.toString, t)
+                      Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading" +
+                        ".address.countries"))
+                  }
+                case None => Logger.error(s"Failed to load address with ID '$id'. Does not exist.")
+                  Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading" +
+                    ".organization.address"))
+              }
+              case Failure(t) => Logger.error(adrV.toString, t)
+                Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading" +
+                  ".organization.address"))
+            }
+          case None => Logger.error(s"Failed to load organization with ID '$oid'. Does not exist.")
+            Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
         }
-      } else {
-        Logger.error(result.toString, result.toEither.left.get)
-        Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization.address"))
+        case Failure(t) => Logger.error(orgV.toString, t)
+          Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
       }
   }
 
@@ -167,25 +182,37 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    *
    * @param pid Identifier of the [[Person]] the [[Address]] relates to.
    * @param id Identifier of the [[Address]] to edit.
-   * @return A response with an HTTP status code of 200 and the requested [[Address]] details in a
-   *         form. If either the [[Address]] itself or the list of [[Country]]s cannot be loaded a
-   *         redirect to display the details of the [[Person]] is returned.
+   * @return A response with an HTTP status code of 200 and the requested [[Address]] details in a form. If either
+   *         the [[Address]] itself or the list of [[Country]]s cannot be loaded a redirect to display the details of
+   *         the [[Person]] is returned. If the [[Person]] cannot be loaded a redirect to display the list of
+   *         [[Person]]s is returned.
    */
   def editPersonAdr(pid: Long, id: Long) = isAuthorized("edit.person.address") { username =>
     implicit request =>
-
-      val result = Address.getPersonAddress(Person.load(pid).get, id)
-      if (result.isSuccess) {
-        val countries = Country.getAll()
-        if (countries.isSuccess) {
-          Ok(views.html.adrForm(adrPersForm.fill(result.toOption.get.get), countries.toOption.get, pid))
+      val personV = Person.load(pid)
+      if (personV.isSuccess) {
+        val personOp = personV.toOption.get
+        if (personOp.isDefined) {
+          val result = Address.getPersonAddress(personOp.get, id)
+          if (result.isSuccess) {
+            val countries = Country.getAll
+            if (countries.isSuccess) {
+              Ok(views.html.adrForm(adrPersForm.fill(result.toOption.get.get), countries.toOption.get, pid))
+            } else {
+              Logger.error("Failed to load the list of countries.")
+              Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.countries"))
+            }
+          } else {
+            Logger.error(result.toString, result.toEither.left.get)
+            Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.person.address"))
+          }
         } else {
-          Logger.error("Failed to load the list of countries.")
-          Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.countries"))
+          Logger.error(s"Failed to load person with ID '$pid'. Does not exist.")
+          Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
         }
       } else {
-        Logger.error(result.toString, result.toEither.left.get)
-        Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("error" -> Messages("error.loading.person.address"))
+        Logger.error(personV.toString, personV.toEither.left.get)
+        Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
       }
   }
 
@@ -200,18 +227,21 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    */
   def showOrgAdr(oid: Long) = isAuthenticated { username =>
     implicit request =>
-      val o = Organization.load(oid)
-      if (o.isDefined) {
-        val orgAddresses = Address.getOrgAddresses(o.get)
-        if (orgAddresses.isSuccess) {
-          Ok(views.html.adrOrg(o.get, orgAddresses.toOption.get))
-        } else {
-          Logger.error(s"Failed to load addresses for organization '$oid")
-          Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization.addresses"))
+      val orgV = Organization.load(oid)
+      orgV match {
+        case Success(orgOp) => orgOp match {
+          case Some(org) => val adrV = Address.getOrgAddresses(org)
+            adrV match {
+              case Success(adrs) => Ok(views.html.adrOrg(org, adrs))
+              case Failure(t) => Logger.error(adrV.toString, t)
+                Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization" +
+                  ".addresses"))
+            }
+          case None => Logger.error(s"Failed to load organization with ID '$oid'. Does not exist.")
+            Redirect(routes.OrganizationCtrl.list()).flashing("error"-> Messages("error.loading.organization"))
         }
-      } else {
-        Logger.error(s"Failed to load organization '$oid'.")
-        Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
+        case Failure(t) => Logger.error(orgV.toString, t)
+          Redirect(routes.OrganizationCtrl.list()).flashing("error"-> Messages("error.loading.organization"))
       }
   }
 
@@ -226,18 +256,24 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
    */
   def showPersonAdr(pid: Long) = isAuthenticated { username =>
     implicit request =>
-      val p = Person.load(pid)
-      if (p.isDefined) {
-        val persAddresses = Address.getPersonAddresses(p.get)
-        if (persAddresses.isSuccess) {
-          Ok(views.html.adr(p.get, persAddresses.toOption.get))
+      val personV = Person.load(pid)
+      if (personV.isSuccess) {
+        val personOp = personV.toOption.get
+        if (personOp.isDefined) {
+          val persAddresses = Address.getPersonAddresses(personOp.get)
+          if (persAddresses.isSuccess) {
+            Ok(views.html.adr(personOp.get, persAddresses.toOption.get))
+          } else {
+            Logger.error(s"Failed to load addresses for person '$pid'.")
+            Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.person.addresses"))
+          }
         } else {
-          Logger.error(s"Failed to load addresses for person '$pid'.")
-          Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.person.addresses"))
+          Logger.error(s"Failed to load person with ID '$pid'. Does not exist.")
+          Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person", pid))
         }
       } else {
-        Logger.error(s"Failed to load person '$pid'.")
-        Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person", pid))
+        Logger.error(personV.toString, personV.toEither.left.get)
+        Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
       }
   }
 
@@ -256,27 +292,31 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
       adrOrgForm.bindFromRequest.fold(
         errors => {
           Logger.error(s"An error occurred when trying to process organization address form for organization '$oid'.")
-          val countries = Country.getAll()
-          if (countries.isSuccess) {
-            BadRequest(views.html.adrOrgForm(errors, countries.toOption.get, oid))
-          } else {
-            BadRequest(views.html.adrOrgForm(errors.withError("country", Messages("error.loading.countries")), List(), oid))
+          val countriesV = Country.getAll
+          countriesV match {
+            case Success(countries) => BadRequest(views.html.adrOrgForm(errors, countries, oid))
+            case Failure(t) => Logger.error(countriesV.toString, t)
+              BadRequest(views.html.adrOrgForm(errors.withError("country", Messages("error.loading.countries")), Nil,
+                oid))
           }
         },
         adr => {
-          val o = Organization.load(oid)
-          if (o.isDefined) {
-            Logger.debug(s"Storing address $adr for organization '${o.get.name}.")
-            val result = Address.saveOrgAddress(o.get, adr)
-            if (result.isSuccess) {
-              Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing("success" -> Messages("success.storing.organization.address"))
-            } else {
-              Logger.error(result.toString, result.toEither.left.get)
-              Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.storing.organization.address"))
+          val orgV = Organization.load(oid)
+          orgV match {
+            case Success(orgOp) => orgOp match {
+              case Some(org) => val resultV = Address.saveOrgAddress(org, adr)
+                resultV match {
+                  case Success(_) => Redirect(routes.AddressCtrl.showOrgAdr(oid)).flashing("success" -> Messages
+                    ("success.storing.organization.address"))
+                  case Failure(t) => Logger.error(resultV.toString, t)
+                    Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.storing" +
+                      ".organization.address"))
+                }
+              case None => Logger.error(s"Failed to load organization '$oid'. Does not exist.")
+                Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
             }
-          } else {
-            Logger.error(s"Failed to load organization '$oid'. Cannot store address for it.")
-            Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
+            case Failure(t) => Logger.error(orgV.toString, t)
+              Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
           }
         })
   }
@@ -296,7 +336,7 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
       adrPersForm.bindFromRequest.fold(
         errors => {
           Logger.error(s"An error occurred when trying to process person address form for person '$pid'.")
-          val countries = Country.getAll()
+          val countries = Country.getAll
           if (countries.isSuccess) {
             BadRequest(views.html.adrForm(errors, countries.toOption.get, pid))
           } else {
@@ -304,18 +344,24 @@ object AddressCtrl extends Controller with ProvidesCtx with Security {
           }
         },
         adr => {
-          val p = Person.load(pid)
-          if (p.isDefined) {
-            Logger.debug(s"Storing address $adr for person '${p.get.fullname}'.")
-            val result = Address.savePersonAddress(p.get, adr)
-            if (result.isSuccess) {
-              Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("success" -> Messages("success.storing.person.address"))
+          val personV = Person.load(pid)
+          if (personV.isSuccess) {
+            val personOp = personV.toOption.get
+            if (personOp.isDefined) {
+              Logger.debug(s"Storing address $adr for person '${personOp.get.fullname}'.")
+              val result = Address.savePersonAddress(personOp.get, adr)
+              if (result.isSuccess) {
+                Redirect(routes.AddressCtrl.showPersonAdr(pid)).flashing("success" -> Messages("success.storing.person.address"))
+              } else {
+                Logger.error(result.toString, result.toEither.left.get)
+                Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.storing.person.address"))
+              }
             } else {
-              Logger.error(result.toString, result.toEither.left.get)
-              Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.storing.person.address"))
+              Logger.error(s"Failed to load person '$pid'. Does not exist.")
+              Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
             }
           } else {
-            Logger.error(s"Failed to load person '$pid'. Cannot store address for it.")
+            Logger.error(personV.toString, personV.toEither.left.get)
             Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
           }
         })

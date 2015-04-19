@@ -5,43 +5,39 @@ package models
 
 import java.sql.Date
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
+import scalaz.{Failure, Success, Validation}
 
 /**
  * @author andreas
- * @version 0.0.2, 2013-04-13
+ * @version 0.0.3, 2015-04-19
  */
 case class Organization(override val id: Option[Long] = None,
-    val name: String,
-    val gender: Char,
-    val founded: Option[Date],
-    val refounded: Option[Date],
-    val motto: Option[String],
-    val colors: Option[String],
-    val city: Option[String],
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
+                        name: String,
+                        gender: Char,
+                        founded: Option[Date],
+                        refounded: Option[Date],
+                        motto: Option[String],
+                        colors: Option[String],
+                        city: Option[String],
+                        override val created: Long = System.currentTimeMillis(),
+                        override val creator: String,
+                        override val modified: Option[Long] = None,
+                        override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier) {
 }
 
 object Organization {
-  
+
   val tablename = "Organization"
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
-  
-    /**
+
+  /**
    * Retrieve all organizations from the persistence store.
    */
-  def getAll(): Validation[Throwable, List[Organization]] = db withSession {
+  def getAll: Validation[Throwable, List[Organization]] = db withSession {
     try {
       Success(Query(Organizations).list)
     } catch {
@@ -52,8 +48,12 @@ object Organization {
   /**
    * Load the organization related to the given identifier.
    */
-  def load(id: Long): Option[Organization] = db withSession {
-    Query(Organizations).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Organization]] = db withSession {
+    try {
+      Success(Query(Organizations).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -103,33 +103,48 @@ object Organization {
    * Count the number of occurrences of events.
    */
   def count(): Int = db withSession {
-    Organizations.count
+    Organizations.count()
   }
 }
 
 object Organizations extends Table[Organization](Organization.tablename) {
-  
+
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
 
-  implicit val CharMapper: TypeMapper[Char] = base[Char, String](d => d.toString(), t => t(0))
-  
+  implicit val CharMapper: TypeMapper[Char] = base[Char, String](d => d.toString, t => t(0))
+
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def name = column[String]("name", O.NotNull)
+
   def gender = column[Char]("gender", O.NotNull, O.Default('m'))
+
   def founded = column[Date]("founded", O.Nullable)
+
   def refounded = column[Date]("refounded", O.Nullable)
+
   def motto = column[String]("motto", O.Nullable)
+
   def colors = column[String]("colors", O.Nullable)
+
   def city = column[String]("city", O.Nullable)
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ city.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Organization.apply _, Organization.unapply _)
-  
+
+  def * = id.? ~ name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ city.? ~ created ~ creator ~ modified.? ~ modifier.? <>(Organization.apply _, Organization.unapply _)
+
   def withoutId = name ~ gender ~ founded.? ~ refounded.? ~ motto.? ~ colors.? ~ city.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (o: Organization) => withoutId.insert(o.name, o.gender, o.founded, o.refounded, o.motto, o.colors, o.city, o.created, o.creator, o.modified, o.modifier)
+
   def update(o: Organization): Int = Organizations.where(_.id === o.id).update(o.copy(modified = Some(System.currentTimeMillis())))
-  def count(): Int = Organizations.count
+
+  def count(): Int = Organizations.count()
 }

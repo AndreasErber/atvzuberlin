@@ -13,7 +13,7 @@ import scala.util.control.Exception
 /**
  * Customary formatters for different data types.
  * @author andreas
- * @version 0.1.6, 2015-04-18
+ * @version 0.1.7, 2015-04-19
  */
 object CustomFormatters {
 
@@ -61,7 +61,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[Event].either(Event.load(id.toLong).get).left.map {
+        Exception.allCatch[Event].either(Event.load(id.toLong).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToLoadEvent", id), Nil))
         }
       }
@@ -204,7 +204,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[Person].either(Person.load(id.toLong).get).left.map {
+        Exception.allCatch[Person].either(Person.load(id.toLong).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToLoadPerson", id), Nil))
         }
       }

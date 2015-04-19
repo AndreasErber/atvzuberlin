@@ -2,8 +2,8 @@ package controllers
 
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
-import models.{ AcademicTitle, AcademicTitles, Address, Email, Homepage, Person, PersonAdditionalInfo, PersonHasEmail, PersonHasEmails, PersonHasHomepage, 
-  PersonHasPhone, PersonHasTitle, Persons, Phone }
+import models.{AcademicTitle, AcademicTitles, Address, Email, Homepage, Person, PersonAdditionalInfo, PersonHasEmail, PersonHasEmails, PersonHasHomepage,
+PersonHasPhone, PersonHasTitle, Persons, Phone}
 import util.CustomFormatters
 import play.api.data.Form
 import play.api.data.Forms._
@@ -14,8 +14,10 @@ import play.api.mvc._
 import play.api.mvc.Security._
 import play.api.Play.current
 
+import scalaz.{Failure, Success}
+
 /**
- * Controller to handle {@link Person} related requests.
+ * Controller to handle [[Person]] related requests.
  * @author andreas
  * @version 0.2.3, 2015-01-07
  */
@@ -50,12 +52,12 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
   }
 
   /**
-   * Delete a {@link Person} identified by <em>id</em>.
+   * Delete a [[Person]] identified by <em>id</em>.
    *
-   * This method will ensure that all associations of the {@link Person} are deleted as well. i.e., {@link Email}
-   * addresses, {@link Phone} numbers, {@link Address}es, and so on.
+   * This method will ensure that all associations of the [[Person]] are deleted as well. i.e., [[Email]]
+   * addresses, [[Phone]] numbers, [[Address]]es, and so on.
    *
-   * @param id The identifier of the {@link Person} instance to be removed.
+   * @param id The identifier of the [[Person]] instance to be removed.
    */
   def delete(id: Long) = isAuthenticated { username =>
     implicit request =>
@@ -63,9 +65,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       val result = Person.deleteCascading(id)
       if (result.isSuccess) {
         Logger.logger.debug("Sucessfully deleted person with ID " + id + ".")
-        Redirect(routes.PersonCtrl.list)
+        Redirect(routes.PersonCtrl.list())
       } else {
-        Logger.logger.error(result.toString(), result.toEither.left.get)
+        Logger.logger.error(result.toString, result.toEither.left.get)
         Redirect(routes.PersonCtrl.show(id))
       }
   }
@@ -95,14 +97,16 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
    */
   def edit(id: Long) = isAuthenticated { username =>
     implicit request =>
-      val p = Person.load(id)
-      p match {
-        case None =>
-          Logger.logger.debug("Cannot find person with ID " + id + "."); NotFound
-        case Some(pers) =>
-          Logger.logger.debug("Preparing editing of person with ID " + id + ".");
-          Ok(views.html.personForm(personForm.fill(pers)))
-        case _ => NotFound
+      val personV = Person.load(id)
+      personV match {
+        case Success(personOp) => personOp match {
+          case Some(person) => Logger.logger.debug(s"Preparing editing of person with ID '$id'.")
+            Ok(views.html.personForm(personForm.fill(person)))
+          case None => Logger.logger.debug("Cannot find person with ID " + id + ".")
+            Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
+        }
+        case Failure(t) => Logger.error(personV.toString, t)
+          Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
       }
   }
 
@@ -113,25 +117,50 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
    */
   def show(id: Long) = isAuthenticated { username =>
     implicit request =>
-      val p = Person.load(id)
-      p match {
-        case None =>
-          Logger.logger.debug("No person with ID " + id + " found."); NotFound
-        case Some(pers) =>
-          Logger.logger.debug("Found person with ID " + id + ".")
-          val pai = PersonAdditionalInfo.load(id)
-          val tList = AcademicTitle.getPersonTitles(pers)
-          val titles = if (tList.isSuccess) tList.toOption.get else Nil
-          val alist = Address.getPersonAddresses(pers)
-          val adrs = if (alist.isSuccess) alist.toOption.get else Nil
-          val plist = Phone.getPersonPhones(pers)
-          val phones = if (plist.isSuccess) plist.toOption.get else Nil
-          val elist = Email.getPersonEmails(pers)
-          val emails = if (elist.isSuccess) elist.toOption.get else Nil
-          val hpList = Homepage.getPersonHomepages(pers)
-          val hps = if (hpList.isSuccess) hpList.toOption.get else Nil
-          Ok(views.html.person(pers, pai, titles, adrs, phones, emails, hps))
-        case _ => NotFound
+      val personV = Person.load(id)
+      personV match {
+        case Success(p) => p match {
+          case Some(pers) =>
+            Logger.logger.debug("Found person with ID " + id + ".")
+            val pai = PersonAdditionalInfo.load(id)
+
+            val tList = AcademicTitle.getPersonTitles(pers)
+            val titles = tList match {
+              case Success(list) => list
+              case Failure(_) => Nil
+            }
+
+            val alist = Address.getPersonAddresses(pers)
+            val adrs = alist match {
+              case Success(list) => list
+              case Failure(_) => Nil
+            }
+
+            val plist = Phone.getPersonPhones(pers)
+            val phones = plist match {
+              case Success(list) => list
+              case Failure(_) => Nil
+            }
+
+            val elist = Email.getPersonEmails(pers)
+            val emails = elist match {
+              case Success(list) => list
+              case Failure(_) => Nil
+            }
+
+            val hpList = Homepage.getPersonHomepages(pers)
+            val hps = hpList match {
+              case Success(list) => list
+              case Failure(_) => Nil
+            }
+
+            Ok(views.html.person(pers, pai, titles, adrs, phones, emails, hps))
+          case None =>
+            Logger.logger.debug(s"Failed to load person with ID '$id'. Does not exist")
+            Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
+        }
+        case Failure(t) => Logger.error(personV.toString, t)
+          Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.loading.person"))
       }
   }
 
@@ -146,10 +175,9 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.PersonCtrl.show(result.toOption.get.id.get))
           } else {
-            Logger.logger.error(result.toString(), result.toEither.left.get)
-            Redirect(routes.PersonCtrl.list)
+            Logger.logger.error(result.toString, result.toEither.left.get)
+            Redirect(routes.PersonCtrl.list())
           }
-
       } getOrElse BadRequest
   }
 
@@ -169,7 +197,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
           if (result.isSuccess) {
             Redirect(routes.PersonCtrl.show(result.toOption.get.id.get))
           } else {
-            Logger.error(result.toString(), result.toEither.left.get)
+            Logger.error(result.toString, result.toEither.left.get)
             BadRequest(views.html.personForm(personForm.fill(person)))
           }
         })

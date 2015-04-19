@@ -18,7 +18,7 @@ import util.MemberState
  * Entity to describe a person.
  * 
  * @author andreas
- * @version 0.0.8, 2015-04-18
+ * @version 0.0.8, 2015-04-19
  */
 case class Person(
   override val id: Option[Long] = None,
@@ -182,10 +182,17 @@ object Person {
   }
 
   /**
-   * Load the person related to the given identifier.
+   * Load the [[Person]] related to the given <em>id</em>.
+   *
+   * @param id Identifier of the [[Person]] to load.
+   * @return A [[Validation]] of either a [[Throwable]] or an optional [[Person]]
    */
-  def load(id: Long): Option[Person] = db withSession {
-    Query(Persons).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Person]] = db withSession {
+    try {
+      Success(Query(Persons).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -288,6 +295,7 @@ object Person {
       homepage <- Homepages
       if homepage.id inSetBind phhList.map(phh => phh.hid)
     } yield homepage
+    homepageQuery.delete
 
     Query(PersonAdditionalInfos).where(_.id === id).delete
     Query(Persons).where(_.id === id).delete
@@ -321,26 +329,6 @@ object Person {
    */
   def getAllByStatus(status: List[MemberState]): Validation[Throwable, List[Person]] = db withSession {
     PersonAdditionalInfos.getAllByStatus(status)
-  }
-
-  /**
-   * Retrieve the [[Person]]s that match the identifiers in the given <em>ids</em> list.
-   *
-   * Note, this method needs to be called within an existing database session context.
-   *
-   * @param ids Identifiers of [[Person]]s
-   * @return A [[Validation]] with a [[List]] of [[Person]]s having one of the given IDs or the
-   *          [[Throwable]] in case of error.
-   */
-  private def getByIds(ids: List[Long]): Validation[Throwable, List[Person]] = {
-    try {
-      val q = for (
-        p <- Persons if p.id inSetBind ids
-      ) yield p
-      Success(q.list)
-    } catch {
-      case t: Throwable => Failure(t)
-    }
   }
 
   /**

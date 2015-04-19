@@ -7,24 +7,18 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.Logger
 import play.api.mvc._
-import util.CustomFormatters
-import util.UsageType
-import models.Email
-import play.api.Play.current
-import models.Person
-import models.PersonHasEmail
-import controllers.ext.ProvidesCtx
-import controllers.ext.Security
+import util.{CustomFormatters, PhoneType, Privacy, UsageType}
+import models.{Country, Organization, Person, Phone}
+import controllers.ext.{ProvidesCtx, Security}
 import play.api.i18n.Messages
-import util.Privacy
-import models.Phone
-import models.Country
-import util.PhoneType
-import models.Organization
+
+import scalaz.{Failure, Success}
 
 /**
+ * Entity to represent phone information.
+ *
  * @author andreas
- * @version 0.0.2, 2014-11-30
+ * @version 0.0.3, 2015-04-19
  */
 object PhoneCtrl extends Controller with ProvidesCtx with Security {
 
@@ -69,7 +63,7 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
         Ok(views.html.phoneOrgForm(phoneOrgForm.withGlobalError(Messages("error.failedToLoadCountries")), List(), oid))
       }
   }
-    
+
   def createPersonPhone(pid: Long) = isAuthenticated { username =>
     implicit request =>
       val countries = Country.getAll
@@ -84,44 +78,57 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val result = Phone.deleteOrgPhone(oid, id)
       if (result.isSuccess) {
-        Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("success" -> Messages("success.succeededToDeletePhone")))
+        Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing("success" -> Messages("success.succeededToDeletePhone"))
       } else {
-        Logger.logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("error" -> Messages("error.failedToDeletePhone")))
+        Logger.logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing("error" -> Messages("error.failedToDeletePhone"))
       }
   }
-  
+
   def deletePersonPhone(pid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
       Logger.debug(s"Request to delete association between phone with ID $id and person with ID $pid.")
       val result = Phone.deletePersonPhone(pid, id)
       if (result.isSuccess) {
-        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("success" -> Messages("success.succeededToDeletePhone")))
+        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing("success" -> Messages("success.succeededToDeletePhone"))
       } else {
-        Logger.logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("error" -> Messages("error.failedToDeletePhone")))
+        Logger.logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing("error" -> Messages("error.failedToDeletePhone"))
       }
   }
-  
+
   def editOrgPhone(oid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
-      val result = Phone.getOrgPhone(Organization.load(oid).get, id)
-      if (result.isSuccess) {
-        val countries = Country.getAll
-        if (countries.isSuccess) {
-          Ok(views.html.phoneOrgForm(phoneOrgForm.fill(result.toOption.get.get), countries.toOption.get, oid))
-        } else {
-          Ok(views.html.phoneOrgForm(phoneOrgForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), oid))
+      val orgV = Organization.load(oid)
+      orgV match {
+        case Success(orgOp) => orgOp match {
+          case Some(org) => val phoneV = Phone.getOrgPhone(org, id)
+            phoneV match {
+              case Success(phoneOp) => phoneOp match {
+                case Some(phone) => val countriesV = Country.getAll
+                  countriesV match {
+                    case Success(countries) => Ok(views.html.phoneOrgForm(phoneOrgForm.fill(phone), countries, oid))
+                    case Failure(t) => Logger.error(countriesV.toString, t)
+                      Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading" +
+                        ".phone.countries"))
+                  }
+                case None => Logger.error(s"Failed to load phone with ID '$id'. Does not exist.")
+                  Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.phone"))
+              }
+              case Failure(t) => Logger.error(phoneV.toString, t)
+                Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.phone"))
+            }
+          case None => Logger.error(s"Failed to load organization with ID '$oid'. Does not exist.")
+            Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
         }
-      } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
+        case Failure(t) => Logger.error(orgV.toString, t)
+          Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
       }
   }
 
   def editPersonPhone(pid: Long, id: Long) = isAuthenticated { username =>
     implicit request =>
-      val result = Phone.getPersonPhone(Person.load(pid).get, id)
+      val result = Phone.getPersonPhone(Person.load(pid).toOption.get.get, id)
       if (result.isSuccess) {
         val countries = Country.getAll
         if (countries.isSuccess) {
@@ -130,37 +137,44 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
           Ok(views.html.phoneForm(phoneForm.fill(result.toOption.get.get).withError("country", Messages("error.failedToLoadCountries")), List(), pid))
         }
       } else {
-        Logger.error(result.toString(), result.toEither.left.get)
-        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("error" -> Messages("error.failedToLoadAddress")))
+        Logger.error(result.toString, result.toEither.left.get)
+        Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing("error" -> Messages("error.failedToLoadAddress"))
       }
   }
 
   def showOrgPhone(oid: Long) = isAuthenticated { username =>
     implicit request =>
-      val o = Organization.load(oid).get
-      val req = Ok(views.html.phoneOrg(o, Phone.getOrgPhones(o).toOption.get))
-      if (request.flash.get("error").isDefined) {
-        req.flashing(("error" -> request.flash.get("error").get))
-      } else if (request.flash.get("success").isDefined) {
-        req.flashing(("success" -> request.flash.get("success").get))
-      } else {
-        req
+      val orgV = Organization.load(oid)
+      orgV match {
+        case Success(orgOp) => orgOp match {
+          case Some(org) => val phonesV = Phone.getOrgPhones(org)
+            phonesV match {
+              case Success(phones) => Ok(views.html.phoneOrg(org, phones))
+              case Failure(t) => Logger.error(phonesV.toString, t)
+                Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.loading.organization" +
+                  ".phones"))
+            }
+          case None => Logger.error(s"Failed to load organization with ID '$oid'. Does not exist.")
+            Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
+        }
+        case Failure(t) => Logger.error(orgV.toString, t)
+          Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
       }
   }
-    
+
   def showPersonPhone(pid: Long) = isAuthenticated { username =>
     implicit request =>
-      val p = Person.load(pid).get
+      val p = Person.load(pid).toOption.get.get
       val req = Ok(views.html.phone(p, Phone.getPersonPhones(p).toOption.get))
       if (request.flash.get("error").isDefined) {
-        req.flashing(("error" -> request.flash.get("error").get))
+        req.flashing("error" -> request.flash.get("error").get)
       } else if (request.flash.get("success").isDefined) {
-        req.flashing(("success" -> request.flash.get("success").get))
+        req.flashing("success" -> request.flash.get("success").get)
       } else {
         req
       }
   }
-  
+
   def submitOrgPhone(oid: Long) = isAuthenticated { username =>
     implicit request =>
       phoneOrgForm.bindFromRequest.fold(
@@ -180,58 +194,65 @@ object PhoneCtrl extends Controller with ProvidesCtx with Security {
           }
         },
         ph => {
-          val o = Organization.load(oid).get
-          Logger.debug("Storing phone number " + ph.country.phone + " " + ph.areacode + " " + ph.extension + " for organization " + o.name)
-          val result = Phone.saveOrgPhone(o, ph)
-          if (result.isSuccess) {
-            Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing(("success" -> Messages("success.succeededToStorePhone")))
-          } else {
-            val formWithError = phoneOrgForm.withGlobalError(Messages("error.failedToStorePhone"))
-            val countries = Country.getAll
-            if (countries.isSuccess) {
-              Logger.error(result.toString(), result.toEither.left.get)
-              BadRequest(views.html.phoneOrgForm(formWithError, countries.toOption.get, oid))
-            } else {
-              BadRequest(views.html.phoneOrgForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), oid))
+          val orgV = Organization.load(oid)
+          orgV match {
+            case Success(orgOp) => orgOp match {
+              case Some(org) => val resultV = Phone.saveOrgPhone(org, ph)
+                resultV match {
+                  case Success(result) =>
+                    Redirect(routes.PhoneCtrl.showOrgPhone(oid)).flashing("success" -> Messages("success.storing" +
+                      ".organization.phone"))
+                  case Failure(t) => Logger.error(resultV.toString, t)
+                    Redirect(routes.OrganizationCtrl.show(oid)).flashing("error" -> Messages("error.storing" +
+                      ".organization.phone"))
+                }
+              case None => Logger.error(s"Failed to load organization with ID '$oid'. Does not exist.")
+                Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading" +
+                  ".organization"))
             }
+            case Failure(t) => Logger.error(orgV.toString, t)
+              Redirect(routes.OrganizationCtrl.list()).flashing("error" -> Messages("error.loading.organization"))
           }
-        })
+        }
+
+      )
   }
 
-  def submitPersonPhone(pid: Long) = isAuthenticated { username =>
-    implicit request =>
-      phoneForm.bindFromRequest.fold(
-        errors => {
-          Logger.error("An error occurred when trying to process the phone form.")
-          for (err <- errors.errors) {
-            Logger.error(err.key + " - " + err.message)
-          }
-          for (datum <- errors.data) {
-            Logger.debug(datum._1 + " - " + datum._2)
-          }
-          val countries = Country.getAll
-          if (countries.isSuccess) {
-            BadRequest(views.html.phoneForm(errors, countries.toOption.get, pid))
-          } else {
-            BadRequest(views.html.phoneForm(errors.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
-          }
-        },
-        ph => {
-          val p = Person.load(pid).get
-          Logger.debug("Storing phone number " + ph._1.country.phone + " " + ph._1.areacode + " " + ph._1.extension + " for person " + p.lastname + ", " + p.firstname.getOrElse(""))
-          val result = Phone.savePersonPhone(p, ph._1)
-          if (result.isSuccess) {
-            Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing(("success" -> Messages("success.succeededToStorePhone")))
-          } else {
-            val formWithError = phoneForm.withGlobalError(Messages("error.failedToStorePhone"))
+  def submitPersonPhone(pid: Long) = isAuthenticated {
+    username =>
+      implicit request =>
+        phoneForm.bindFromRequest.fold(
+          errors => {
+            Logger.error("An error occurred when trying to process the phone form.")
+            for (err <- errors.errors) {
+              Logger.error(err.key + " - " + err.message)
+            }
+            for (datum <- errors.data) {
+              Logger.debug(datum._1 + " - " + datum._2)
+            }
             val countries = Country.getAll
             if (countries.isSuccess) {
-              Logger.error(result.toString(), result.toEither.left.get)
-              BadRequest(views.html.phoneForm(formWithError, countries.toOption.get, pid))
+              BadRequest(views.html.phoneForm(errors, countries.toOption.get, pid))
             } else {
-              BadRequest(views.html.phoneForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
+              BadRequest(views.html.phoneForm(errors.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
             }
-          }
-        })
+          },
+          ph => {
+            val p = Person.load(pid).toOption.get.get
+            Logger.debug("Storing phone number " + ph._1.country.phone + " " + ph._1.areacode + " " + ph._1.extension + " for person " + p.lastname + ", " + p.firstname.getOrElse(""))
+            val result = Phone.savePersonPhone(p, ph._1)
+            if (result.isSuccess) {
+              Redirect(routes.PhoneCtrl.showPersonPhone(pid)).flashing("success" -> Messages("success.succeededToStorePhone"))
+            } else {
+              val formWithError = phoneForm.withGlobalError(Messages("error.failedToStorePhone"))
+              val countries = Country.getAll
+              if (countries.isSuccess) {
+                Logger.error(result.toString, result.toEither.left.get)
+                BadRequest(views.html.phoneForm(formWithError, countries.toOption.get, pid))
+              } else {
+                BadRequest(views.html.phoneForm(formWithError.withError("country", Messages("error.failedToLoadCountries")), List(), pid))
+              }
+            }
+          })
   }
 }

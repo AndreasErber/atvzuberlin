@@ -3,46 +3,25 @@
  */
 package controllers
 
-import accesscontrol.User
-import accesscontrol.UserHasRoles
-import controllers.ext.ProvidesCtx
-import controllers.ext.Security
+import accesscontrol.{User,UserHasRoles}
+import controllers.ext.{ProvidesCtx,Security}
 import exception.PasswordException
-import java.security.MessageDigest
-import models.Email
-import models.Person
-import models.Persons
-import models.Registration
-import models.Registrations
-import play.api._
-import play.api.data._
+import models.{Email,Person,Registration}
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
 import play.api.Logger
-import play.api.mvc.Action
-import play.api.mvc.Controller
-import play.api.mvc.Flash
-import play.api.mvc.Security
+import play.api.mvc.{Action,Controller,Flash,Security}
 import play.api.Play.current
 import scala.util.Random
-import scalaz.Failure
-import scalaz.Success
-import scalaz.Validation
-import util.Business
-import util.Ctx
-import util.EncryptionUtil
-import util.Honorary
-import util.KV
-import util.Personal
-import util.UserRole
+import scalaz.{Failure,Success,Validation}
+import util.{Business,EncryptionUtil,Honorary,KV,Personal}
 
 /**
  * Controller to handle requests that pertain a user, e.g. login, logout, registration, ...
  *
  * @author andreas
- * @version 0.0.9, 2015-01-12
+ * @version 0.0.10, 2015-04-19
  */
 object UserCtrl extends Controller with ProvidesCtx with Security {
 
@@ -290,13 +269,13 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
   }
 
   /**
-   * Retrieve a suitable {@link Email} address for the given person.
+   * Retrieve a suitable [[Email]] address for the given person.
    *
    * The method will first try to return a private email address. If none is available an honorary is attempted.
    * If that fails a business email address is tried.
    *
-   * @param p The {@link Person} instance to find a suitable {@link Email} address for.
-   * @returns A {@link Validation} that holds a suitable {@link Email} address or the {@link Throwable} in case of
+   * @param p The [[Person]] instance to find a suitable [[Email]] address for.
+   * @return A [[Validation]] that holds a suitable [[Email]] address or the [[Throwable]] in case of
    *          failure.
    */
   private def provideSuitablePersonEmail(p: Person): Validation[Throwable, Email] = {
@@ -334,7 +313,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
   }
 
   /**
-   * Create a unique hash from the {@link Person}'s full name and the current time.
+   * Create a unique hash from the [[Person]]'s full name and the current time.
    */
   private def createHash(p: Person): String = {
     val rand = new Random(System.currentTimeMillis())

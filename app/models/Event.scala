@@ -3,48 +3,52 @@
  */
 package models
 
-import java.sql.Date
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
-import util.EventType
-import util.AtvEvent
+import scalaz.{Failure, Success, Validation}
+import util.{AtvEvent, EventType}
 import java.sql.Timestamp
 
 /**
+ * Entity to represent events.
+ *
  * @author andreas
- * @version 0.0.2, 2013-03-10
+ * @version 0.0.3, 2015-04-19
  */
 case class Event(override val id: Option[Long] = None,
-    val title: String,
-    val description: Option[String],
-    val start: Timestamp,
-    val end: Option[Timestamp],
-    val location: Option[String],
-    val url: Option[String],
-    val priority: Int = 2,
-    val typus: EventType,
+    title: String,
+    description: Option[String],
+    start: Timestamp,
+    end: Option[Timestamp],
+    location: Option[String],
+    url: Option[String],
+    priority: Int = 2,
+    typus: EventType,
     override val created: Long = System.currentTimeMillis(),
     override val creator: String,
     override val modified: Option[Long] = None,
     override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier)
 
+/**
+ * Companion object of the [[Event]] case class.
+ *
+ * @author andreas
+ * @version 0.0.3, 2015-04-19
+ */
 object Event {
 
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
   val tablename = "Event"
     
   /**
-   * Retrieve all events from the persistence store.
+   * Retrieve all [[Event]]s from the persistence store.
+   *
+   * @return A [[Validation]] with either a [[Throwable]] or a [[List]] of [[Event]]s.
    */
-  def getAll(): Validation[Throwable, List[Event]] = db withSession {
+  def getAll: Validation[Throwable, List[Event]] = db withSession {
     try {
       Success(Query(Events).list)
     } catch {
@@ -52,6 +56,12 @@ object Event {
     }
   }
 
+  /**
+   * Retrieve all future [[Event]]s.
+   *
+   * @param today The latest allowed point in time for an [[Event]] to be included in the result.
+   * @return A [[Validation]] with either a [[Throwable]] or a [[List]] of [[Event]]s.
+   */
   def getAllUpcoming(today: Timestamp): Validation[Throwable, List[Event]] = db withSession {
     try {
       Success(Query(Events).where(_.start >= today).list)
@@ -61,14 +71,24 @@ object Event {
   }
 
   /**
-   * Load the event related to the given identifier.
+   * Load the [[Event]] related to the given identifier.
+   *
+   * @param id The identifier of the [[Event]].
+   * @return A [[Validation]] with either a [[Throwable]] or an optional [[Event]].
    */
-  def load(id: Long): Option[Event] = db withSession {
-    Query(Events).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Event]] = db withSession {
+    try {
+      Success(Query(Events).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
-   * Persist a new event instance or update an existing one.
+   * Persist a new [[Event]] or update an existing one.
+   *
+   * @param e The [[Event]] to handle.
+   * @return A [[Validation]] with either a [[Throwable]] or an [[Event]].
    */
   def saveOrUpdate(e: Event): Validation[Throwable, Event] = {
     db withSession {
@@ -99,7 +119,10 @@ object Event {
   }
 
   /**
-   * Delete the event identified by id.
+   * Delete the [[Event]] identified by <em>id</em>.
+   *
+   * @param id Identifier of the [[Event]].
+   * @return A [[Validation]] of either a [[Throwable]] or a [[Boolean]] indicating the success of the operation.
    */
   def delete(id: Long): Validation[Throwable, Boolean] = db withSession {
     try {
@@ -111,13 +134,18 @@ object Event {
   }
 
   /**
-   * Count the number of occurrences of events.
+   * Count the number of [[Event]]s.
+   *
+   * @return The number of [[Event]]s currently stored in the persistence store.
    */
   def count(): Int = db withSession {
-    Events.count
+    Events.count()
   }
 }
 
+/**
+ * Data Access Object for [[Event]]s.
+ */
 object Events extends Table[Event](Event.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
@@ -143,5 +171,5 @@ object Events extends Table[Event](Event.tablename) {
   def withoutId = title ~ description.? ~ start ~ end.? ~ location.? ~ url.? ~ priority ~ typus ~ created ~ creator ~ modified.? ~ modifier.? returning id
   def insert = (e: Event) => withoutId.insert(e.title, e.description, e.start, e.end, e.location, e.url, e.priority, e.typus, e.created, e.creator, e.modified, e.modifier)
   def update(e: Event): Int = Events.where(_.id === e.id).update(e.copy(modified = Some(System.currentTimeMillis())))
-  def count(): Int = Events.count
+  def count(): Int = Events.count()
 }

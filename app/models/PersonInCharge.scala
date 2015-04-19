@@ -16,7 +16,7 @@ import scalaz.Validation
  * An entity providing a relation between a [[Person]] and a [[Charge]].
  *
  * @author andreas
- * @version 0.0.2, 2015-04-18
+ * @version 0.0.3, 2015-04-19
  */
 case class PersonInCharge(override val id: Option[Long],
   person: Person,
@@ -34,8 +34,10 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
 
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
-  implicit val divisionMapper: TypeMapper[Division.Division] = base[Division.Division, String](d => d.toString, string => Division.withName(string))
-  implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).get)
+  implicit val divisionMapper: TypeMapper[Division.Division] = base[Division.Division, String](d => d.toString,
+    string => Division.withName(string))
+  implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).toOption.get
+    .get)
   implicit val chargeMapper: TypeMapper[Charge] = base[Charge, Long](c => c.id.get, id => Charge.load(id).toOption
     .get.get)
 

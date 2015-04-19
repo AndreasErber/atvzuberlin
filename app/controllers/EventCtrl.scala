@@ -82,15 +82,21 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
    */
   def edit(id: Long) = isAuthorized("edit.event") { username =>
     implicit request =>
-      val e = Event.load(id)
-      e match {
-        case None =>
-          Logger.debug(s"Cannot find event with ID $id.")
-          Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
-        case Some(ev) =>
-          Logger.debug(s"Preparing editing of event with ID $id.")
-          Ok(views.html.eventForm(eventForm.fill(ev)))
-        case _ => NotFound
+      val eventV = Event.load(id)
+      if (eventV.isSuccess) {
+        val eventOp = eventV.toOption.get
+        eventOp match {
+          case None =>
+            Logger.debug(s"Cannot find event with ID $id.")
+            Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
+          case Some(ev) =>
+            Logger.debug(s"Preparing editing of event with ID $id.")
+            Ok(views.html.eventForm(eventForm.fill(ev)))
+          case _ => NotFound
+        }
+      } else {
+        Logger.error(eventV.toString, eventV.toEither.left.get)
+        Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
       }
   }
 
@@ -120,22 +126,28 @@ object EventCtrl extends Controller with ProvidesCtx with Security {
    *         <em>id</em>. In case of error a redirect to the list of [[Event]]s is returned.
    */
   def show(id: Long, showEnrollments: Boolean = false) = Action { implicit request =>
-    val e = Event.load(id)
-    e match {
-      case None =>
-        Logger.debug(s"No event with ID $id found.")
-        Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
-      case Some(ev) =>
-        Logger.debug(s"Found event with ID $id.")
-        val participants = Enrollment.loadByEvent(id)
-        var req = Ok(views.html.event(ev, Nil, None, None))
-        if (participants.isSuccess) {
-          req = Ok(views.html.event(ev, participants.toOption.get, None, None, showEnrollments))
-        } else {
-          Logger.error(s"Failed to load enrollments for event $id.")
-        }
-        req
-      case _ => NotFound
+    val eventV = Event.load(id)
+    if (eventV.isSuccess) {
+      val eventOp = eventV.toOption.get
+      eventOp match {
+        case None =>
+          Logger.debug(s"No event with ID $id found.")
+          Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
+        case Some(ev) =>
+          Logger.debug(s"Found event with ID $id.")
+          val participants = Enrollment.loadByEvent(id)
+          var req = Ok(views.html.event(ev, Nil, None, None))
+          if (participants.isSuccess) {
+            req = Ok(views.html.event(ev, participants.toOption.get, None, None, showEnrollments))
+          } else {
+            Logger.error(s"Failed to load enrollments for event '$id'.")
+          }
+          req
+        case _ => NotFound
+      }
+    } else {
+      Logger.error(eventV.toString, eventV.toEither.left.get)
+      Redirect(routes.EventCtrl.listUpcoming()).flashing("error" -> Messages("error.loading.event"))
     }
   }
 

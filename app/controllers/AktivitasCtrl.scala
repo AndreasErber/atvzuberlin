@@ -11,7 +11,7 @@ import util.{Aktiv, Inaktiv, Auswaertig, Fux, EM, MitturnerAk}
  * Controller to handle requests for an organizational unit.
  *
  * @author andreas
- * @version 0.0.2, 2015-04-18
+ * @version 0.0.3, 2015-04-19
  */
 object AktivitasCtrl extends Controller with ProvidesCtx with Security with SublistRetrieverAndAdder {
 
@@ -20,7 +20,7 @@ object AktivitasCtrl extends Controller with ProvidesCtx with Security with Subl
    *
    * @return A response with HTTP status code 200 and a list of a list of [[Person]]s
    */
-  def list = isAuthenticated { username =>
+  def list = isAuthorized("view.person") { username =>
     implicit request =>
       Logger.debug(s"Displaying the list of actives.")
 
