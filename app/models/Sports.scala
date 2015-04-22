@@ -4,34 +4,34 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
 import scalaz.Validation
 import scalaz.Failure
 import scalaz.Success
 
 /**
+ * Entity to represent a sports.
+ *
  * @author andreas
- * @version 0.0.2, 2014-11-30
+ * @version 0.0.3, 2015-04-20
  */
 case class Sports(override val id: Option[Long],
-  val title: String,
-  val description: Option[String],
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
+                  title: String,
+                  description: Option[String],
+                  override val created: Long = System.currentTimeMillis(),
+                  override val creator: String,
+                  override val modified: Option[Long] = None,
+                  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
 
   /**
    * Redefine the string representation of this class.
    *
    * @return The string representation of this instance.
    */
-  override def toString(): String = {
+  override def toString: String = {
 
     var result = ""
     if (id.isDefined) {
@@ -88,7 +88,7 @@ object Sports {
   /**
    * Retrieve all sports from the persistence store.
    */
-  def getAll(): Validation[Throwable, List[Sports]] = db withSession {
+  def getAll: Validation[Throwable, List[Sports]] = db withSession {
     def q = Query(Sportss).sortBy(n => n.title).list
     try {
       Success(q)
@@ -100,8 +100,12 @@ object Sports {
   /**
    * Load the sports related to the given identifier.
    */
-  def load(id: Long): Option[Sports] = db withSession {
-    Query(Sportss).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[Sports]] = db withSession {
+    try {
+      Success(Query(Sportss).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -146,7 +150,6 @@ object Sports {
       case e: Throwable => Failure(e)
     }
   }
-
 }
 
 /**
@@ -156,15 +159,24 @@ object Sports {
 object Sportss extends Table[Sports](Sports.tablename) {
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def title = column[String]("title")
+
   def description = column[String]("description", O.Nullable, O.DBType("text"))
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ title ~ description.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Sports.apply _, Sports.unapply _)
+
+  def * = id.? ~ title ~ description.? ~ created ~ creator ~ modified.? ~ modifier.? <>(Sports.apply _, Sports.unapply _)
 
   def withoutId = title ~ description.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (s: Sports) => withoutId.insert(s.title, s.description, s.created, s.creator, s.modified, s.modifier)
+
   def update(s: Sports): Int = Sportss.where(_.id === s.id).update(s.copy(modified = Some(System.currentTimeMillis())))
 }

@@ -5,20 +5,20 @@ package accesscontrol
 
 import db.GenericDao
 import models.Entity
-import play.api.db._
-import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import scala.slick.lifted.Query
 import Database.threadLocalSession
 import scalaz.{ Failure, Success, Validation }
 
 /**
+ * Entity to represent a privilege.
+ *
  * @author andreas
- * @version 0.0.1, 2014-05-29
+ * @version 0.0.2, 2015-04-20
  */
 case class Privilege(override val id: Option[Long] = None,
-  val name: String,
-  val description: Option[String] = None,
+  name: String,
+  description: Option[String] = None,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -70,7 +70,7 @@ object Privileges extends Table[Privilege]("Privilege") with GenericDao[Privileg
   /**
    * Find a privilege by its full name.
    * 
-   * @param name The full name of the {@link Privilege} to return.
+   * @param name The full name of the [[Privilege]] to return.
    */
   def findByName(name: String): Option[Privilege] = db withSession {
     if (Option(name).isDefined) {
@@ -86,7 +86,7 @@ object Privileges extends Table[Privilege]("Privilege") with GenericDao[Privileg
    */
   def getSome(ids: List[Long]): Validation[Throwable, List[Privilege]] = db withSession  {
     if (ids.isEmpty) {
-      return Success(Nil);
+      return Success(Nil)
     }
     
     try {

@@ -2,17 +2,13 @@ package controllers
 
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
-import models.{AcademicTitle, AcademicTitles, Address, Email, Homepage, Person, PersonAdditionalInfo, PersonHasEmail, PersonHasEmails, PersonHasHomepage,
-PersonHasPhone, PersonHasTitle, Persons, Phone}
+import models.{AcademicTitle, Address, Email, Homepage, Person, PersonAdditionalInfo, Phone}
 import util.CustomFormatters
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db._
 import play.api.i18n.Messages
 import play.api.Logger
 import play.api.mvc._
-import play.api.mvc.Security._
-import play.api.Play.current
 
 import scalaz.{Failure, Success}
 
@@ -83,7 +79,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
       if (persons.isSuccess) {
         (Messages("persons"), persons.toOption.get.sortBy(x => (x.lastname, x.firstname))) :: list
       } else {
-        Logger.logger.error(persons.toString(), persons.toEither.left.get)
+        Logger.logger.error(persons.toString, persons.toEither.left.get)
         BadRequest("When trying to load the list of persons a failure occurred.")
       }
 
@@ -122,7 +118,11 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
         case Success(p) => p match {
           case Some(pers) =>
             Logger.logger.debug("Found person with ID " + id + ".")
-            val pai = PersonAdditionalInfo.load(id)
+            val paiV = PersonAdditionalInfo.load(id)
+            val pai = paiV match {
+              case Success(paiOp) => paiOp
+              case Failure(_) => None
+            }
 
             val tList = AcademicTitle.getPersonTitles(pers)
             val titles = tList match {
@@ -184,7 +184,7 @@ object PersonCtrl extends Controller with ProvidesCtx with Security {
   /**
    * Update person data.
    */
-  def updatePerson = isAuthenticated { username =>
+  def updatePerson() = isAuthenticated { username =>
     implicit request =>
       personForm.bindFromRequest.fold(
         errors => {

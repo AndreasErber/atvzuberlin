@@ -3,24 +3,22 @@
  */
 package controllers
 
-import util.CustomFormatters
+import util.{CustomFormatters, MemberState}
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.db._
 import play.api.Logger
 import play.api.mvc._
-import play.api.mvc.Security._
-import play.api.Play.current
-import models.Email
-import controllers.ext.{ ProvidesCtx, Security }
-import util.{ FormOfAddress, LetterSalutation }
+import controllers.ext.{ProvidesCtx, Security}
+import util.{FormOfAddress, LetterSalutation}
 import models.PersonAdditionalInfo
 import play.api.i18n.Messages
-import util.MemberState
+import scalaz.{Failure, Success, Validation}
 
 /**
+ * Controller to handle requests for additional person information.
+ *
  * @author andreas
- * @version 0.0.2, 2015-01-03
+ * @version 0.0.3, 2015-04-20
  */
 object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Security {
 
@@ -48,38 +46,60 @@ object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Securit
       "creator" -> text,
       "modified" -> optional(longNumber),
       "modifier" -> optional(text))(PersonAdditionalInfo.apply)(PersonAdditionalInfo.unapply))
-      
+
+  /**
+   * Display an empty form.
+   *
+   * @param pid Identifier of the person involved.
+   * @return
+   */
   def create(pid: Long) = isAuthenticated { username =>
     implicit request =>
       Ok(views.html.personAdditionalForm(paiForm.bind(Map("id" -> pid.toString))))
   }
-  
+
+  /**
+   * Display a pre-filled form.
+   *
+   * @param pid Identifier of the person.
+   * @return
+   */
   def edit(pid: Long) = isAuthenticated { username =>
     implicit request =>
-      val pai = PersonAdditionalInfo.load(pid)
-      pai match {
-        case None =>
-          Logger.debug("Cannot find person additional info with ID " + pid + ".")
-          Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.failedToLoadPersonAI", pid))
-        case Some(persAI) =>
-          Logger.debug("Preparing editing of person additional info with ID " + pid + ".");
-          Ok(views.html.personAdditionalForm(paiForm.fill(persAI)))
-        case _ => Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.failedToLoadPersonAI", pid))
+      val paiV = PersonAdditionalInfo.load(pid)
+      paiV match {
+        case Success(paiOp) => paiOp match {
+          case Some(pai) =>
+            Ok(views.html.personAdditionalForm(paiForm.fill(pai)))
+          case None =>
+            Logger.debug(s"Failed to load person additional info with ID '$pid'. Does not exist.")
+            Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.personAI"))
+        }
+        case Failure(t) => Logger.error(paiV.toString, t)
+          Redirect(routes.PersonCtrl.show(pid)).flashing("error" -> Messages("error.loading.personAI"))
       }
   }
-  
+
+  /**
+   * Handle submitted form data.
+   *
+   * @return
+   */
   def submit = isAuthenticated { username =>
     implicit request =>
-      paiForm.bindFromRequest.value map {
-        p =>
-          val result = PersonAdditionalInfo.saveOrUpdate(p)
-          if (result.isSuccess) {
-            Redirect(routes.PersonCtrl.show(result.toOption.get.id.get)).flashing("success" -> Messages("success.succeededToStorePersonAI", result.toOption.get.id.get))
-          } else {
-            Logger.logger.error(result.toString(), result.toEither.left.get)
-            Redirect(routes.PersonCtrl.list).flashing("error" -> Messages("error.failedToStorePersonAI", paiForm.data.get("id").get))
+      paiForm.bindFromRequest.fold(
+        errors => {
+          Logger.error("An error occurred when trying to process the personal additional information form.")
+          BadRequest(views.html.personAdditionalForm(errors))
+        },
+        p => {
+          val resultV = PersonAdditionalInfo.saveOrUpdate(p)
+          resultV match {
+            case Success(result) => Redirect(routes.PersonCtrl.show(result.id.get)).flashing("success" -> Messages
+              ("error.storing.personAI"))
+            case Failure(t) => Logger.error(resultV.toString, t)
+              Redirect(routes.PersonCtrl.list()).flashing("error" -> Messages("error.storing.personAI"))
           }
-
-      } getOrElse BadRequest
+        })
   }
 }

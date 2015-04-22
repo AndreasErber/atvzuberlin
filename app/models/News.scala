@@ -4,34 +4,32 @@
 package models
 
 import play.api.db._
-import play.api.Logger
 import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
 import Database.threadLocalSession
-import scala.slick.lifted.Parameters
 import scala.slick.lifted.Query
-import scalaz.Validation
-import scalaz.Failure
-import scalaz.Success
+import scalaz.{Failure, Success, Validation}
 
 /**
+ * Entity to represent a news item.
+ *
  * @author andreas
- * @version 0.0.1, 2013-03-16
+ * @version 0.0.2, 2015-04-20
  */
-case class News(override val id: Option[Long] = None, 
-    val title: String,
-    val lead: Option[String],
-    val content: Option[String],
-    override val created: Long = System.currentTimeMillis(),
-    override val creator: String,
-    override val modified: Option[Long] = None,
-    override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier)
+case class News(override val id: Option[Long] = None,
+                title: String,
+                lead: Option[String],
+                content: Option[String],
+                override val created: Long = System.currentTimeMillis(),
+                override val creator: String,
+                override val modified: Option[Long] = None,
+                override val modifier: Option[String] = None) extends Entity(id, created, creator, modified, modifier)
 
 object News {
-  
+
   implicit lazy val db = Database.forDataSource(DB.getDataSource())
   val tablename = "News"
-    
+
   /**
    * Retrieve all news items from the persistence store.
    */
@@ -43,12 +41,16 @@ object News {
       case e: Throwable => Failure(e)
     }
   }
-  
+
   /**
    * Load the news item related to the given identifier.
    */
-  def load(id: Long): Option[News] = db withSession {
-    Query(NewsTable).filter(_.id === id).firstOption
+  def load(id: Long): Validation[Throwable, Option[News]] = db withSession {
+    try {
+      Success(Query(NewsTable).filter(_.id === id).firstOption)
+    } catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -103,19 +105,30 @@ object News {
 }
 
 object NewsTable extends Table[News](News.tablename) {
-  
+
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def title = column[String]("title")
+
   def lead = column[String]("lead", O.Nullable)
+
   def content = column[String]("content", O.Nullable, O.DBType("text"))
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ title ~ lead.? ~ content.? ~ created ~ creator ~ modified.? ~ modifier.? <> (News.apply _, News.unapply _)
-  
+
+  def * = id.? ~ title ~ lead.? ~ content.? ~ created ~ creator ~ modified.? ~ modifier.? <>(News.apply _, News.unapply _)
+
   def withoutId = title ~ lead.? ~ content.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
   def insert = (n: News) => withoutId.insert(n.title, n.lead, n.content, n.created, n.creator, n.modified, n.modifier)
+
   def update(n: News): Int = NewsTable.where(_.id === n.id).update(n.copy(modified = Some(System.currentTimeMillis())))
+
   def count(): Int = NewsTable.count
 }

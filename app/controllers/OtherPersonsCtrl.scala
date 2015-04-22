@@ -1,16 +1,16 @@
 package controllers
 
-import controllers.ext.ProvidesCtx
-import controllers.ext.Security
-import controllers.ext.SublistRetrieverAndAdder
-import models.{ Person, Persons }
+import controllers.ext.{ ProvidesCtx, Security, SublistRetrieverAndAdder}
+import models.Person
 import play.api.i18n.Messages
-import play.api.Logger
 import play.api.mvc._
-import play.api.mvc.Security._
-import play.api.Play.current
 import util.{ ATB, Other }
 
+/**
+ * Controller to handle requests to display [[Person]]s not assigned to another organizational unit.
+ *
+ * @version 0.0.2, 2015-04-20
+ */
 object OtherPersonsCtrl extends Controller with ProvidesCtx with Security with SublistRetrieverAndAdder {
 
   /**
@@ -19,7 +19,6 @@ object OtherPersonsCtrl extends Controller with ProvidesCtx with Security with S
   def list = isAuthenticated { username =>
     implicit request =>
       var list: List[(String, List[Person])] = Nil
-
       list = this.getAndAddListOfMembersByStatus(list, "person.others", Other)
       list = this.getAndAddListOfMembersByStatus(list, "atb", ATB)
       

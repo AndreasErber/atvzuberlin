@@ -1,0 +1,60 @@
+@(management: Map[String, Person])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+
+@main(Messages("imprint")) {
+<h2>@Messages("imprint")</h2>
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>@Messages("imprint.title")</th>
+        <th>@Messages("imprint.content")</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Vereinsregistereintrag</td>
+        <td>Korporationsverband des <abbr title="Akademischen Turnvereins">ATV</abbr> zu Berlin</td>
+    </tr>
+    <tr>
+        <td>Vereinsregisternummer</td>
+        <td>9 VR 1045 Nz<br/>
+            Amtsgericht Charlottenburg
+        </td>
+    </tr>
+    <tr>
+        <td>Vereinsheim</td>
+        <td>
+            <address>
+                Onkel-Tom-<abbr title="Straße">Str.</abbr> 52<br/>
+                14169 Berlin
+            </address>
+        </td>
+    </tr>
+    <tr>
+        <td>Telefon</td>
+        <td>030 8134952</td>
+    </tr>
+    <tr>
+        <td>Geschäftszeiten</td>
+        <td>nach Vereinbarung</td>
+    </tr>
+    </tbody>
+</table>
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th colspan="2">Vertretungsberechtigter Vorstand</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Vorsitz</td>
+        <td>@{if(management.get("Vorsitz").isDefined) management.get("Vorsitz").get.name else "N.N."}</td>
+    </tr>
+    <tr>
+        <td><abbr title="stellvertretender">stellv.</abbr> Vorsitz</td>
+        <td>@{if(management.get("stellvertretender Vorsitz").isDefined) management.get("Vorsitz").get.name else "N.N."}</td>
+    </tr>
+    </tbody>
+</table>
+}

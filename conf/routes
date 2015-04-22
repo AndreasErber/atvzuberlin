@@ -75,6 +75,8 @@ GET   /event/edit/:id             controllers.EventCtrl.edit(id: Long)
 POST  /event/edit                 controllers.EventCtrl.submit
 GET   /event/:id/:showEnrs        controllers.EventCtrl.show(id: Long, showEnrs: Boolean)
 
+GET   /imprint                    controllers.ImprintCtrl.show
+
 # KV
 GET   /kv                         controllers.KvCtrl.list
 

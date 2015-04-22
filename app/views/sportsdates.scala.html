@@ -1,22 +1,33 @@
-@(sportsDates: Seq[SportsDate])(implicit flash: Flash, ctx: util.Ctx)
+@(sportsDates: Map[String, List[(String, SportsDate)]])(implicit flash: Flash, ctx: util.Ctx)
+@import java.sql.Time
+@import java.text.SimpleDateFormat
+
+@formatTime(time: Time) = {
+  @{new SimpleDateFormat("HH:mm'h'").format(time)}
+}
 
 @main(Messages("welcome")) {
 
-  <h2>Sporttermine</h2>
+
+  <h2>@Messages("sports.dates")</h2>
   @if(!sportsDates.isEmpty) {
-    @sportsDates.groupBy(s => s.sports).map{ elem =>
-    <h3>@Sports.load(elem._1).get.title</h3>
-      @elem._2.map{ sd =>
-      <p class="aktuell-content">@Messages("weekday." + sd.weekday.getOrElse("")).toLowerCase()s, @sd.start </br>
-        <div class="vcard">
-          <div class="adr">
-            <p class="n">@sd.locationName.getOrElse("")</p>
-            <p class="str">@sd.locationStreet.getOrElse("")</p>
-            <span class="postal-code">@sd.locationZip.getOrElse("")</span> <span class="locality">@sd.locationCity.getOrElse("")</span>
-          </div>
+    @sportsDates.map{ elem =>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3>@elem._1</h3>
+      </div>
+      <div class="panel-body">
+        @elem._2.map{ sd =>
+        <div>@Messages("weekday." + sd._2.weekday.getOrElse("")).toLowerCase()s, @formatTime(sd._2.start.get)<br/>
+          <address>
+            <strong>@sd._2.locationName.getOrElse("")</strong><br/>
+            @sd._2.locationStreet.getOrElse("")<br/>
+            @sd._2.locationZip.getOrElse("") @sd._2.locationCity.getOrElse("")
+          </address>
         </div>
-      </p>
       }
+      </div>
+    </div>
     }
   }
 

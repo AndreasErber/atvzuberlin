@@ -9,14 +9,15 @@ import play.api.i18n.Messages
 import play.api.Logger
 import play.api.mvc._
 import models.News
-import controllers.ext.{ProvidesCtx,Security}
+import controllers.ext.{ProvidesCtx, Security}
 
+import scalaz.{Failure, Success}
 
 /**
  * Controller for all actions related to [[News]].
- * 
+ *
  * @author andreas
- * @version 0.0.6, 2015-04-17
+ * @version 0.0.7, 2015-04-20
  */
 object NewsCtrl extends Controller with ProvidesCtx with Security {
 
@@ -46,7 +47,7 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
 
   /**
    * Delete the [[News]] item with the given <em>id</em>.
-   * 
+   *
    * @param id Identifier of the [[News]] item to be deleted.
    * @return A redirect to display the list of [[News]] items flashing either success or error of the action undertaken.
    */
@@ -54,7 +55,7 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
     implicit request =>
       val result = News.delete(id)
       if (result.isSuccess) {
-        Logger.debug(s"Successfully deleted news with ID $id.")
+        Logger.debug(s"Successfully deleted news with ID '$id'.")
         Redirect(routes.NewsCtrl.list()).flashing("success" -> Messages("success.deleting.news"))
       } else {
         Logger.error(result.toString, result.toEither.left.get)
@@ -64,7 +65,7 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
 
   /**
    * Edit the [[News]] item with the given <em>id</em>.
-   * 
+   *
    * @param id Identifier of the news item to be edited.
    * @return In case of successfully finding a [[News]] item matching the <em>id</em> a response with
    *         status code 200 and the details of the retrieved [[News]] item for a payload. In case of
@@ -72,15 +73,17 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
    */
   def edit(id: Long) = isAuthorized("edit.news") { username =>
     implicit request =>
-      val n = News.load(id)
-      n match {
-        case None =>
-          Logger.logger.debug(s"Cannot find news item with ID $id.")
-          Redirect(routes.NewsCtrl.list()).flashing("error" -> Messages("error.finding.news"))
-        case Some(news) =>
-          Logger.logger.debug(s"Preparing editing of news item with ID $id.")
-          Ok(views.html.newsForm(newsForm.fill(news)))
-        case _ => NotFound
+      val newsV = News.load(id)
+      newsV match {
+        case Success(n) =>
+          n match {
+            case Some(news) =>
+              Ok(views.html.newsForm(newsForm.fill(news)))
+            case None => Logger.error(s"Cannot find news item with ID '$id'. Does not exist.")
+              Redirect(routes.NewsCtrl.list()).flashing("error" -> Messages("error.loading.news"))
+          }
+        case Failure(t) => Logger.error(newsV.toString, t)
+          Redirect(routes.NewsCtrl.list()).flashing("error" -> Messages("error.loading.news"))
       }
   }
 
@@ -96,7 +99,7 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
 
   /**
    * Retrieve the specified <em>limit</em> number of [[News]] items and display them.
-   * 
+   *
    * @param limit The number of [[News]] items to retrieve.
    * @return A response with an HTTP status of 200 and a list of up to <em>limit</em> [[News]]
    *         items. In case of error, a response with an HTTP status code of 400 is returned.
@@ -114,21 +117,21 @@ object NewsCtrl extends Controller with ProvidesCtx with Security {
 
   /**
    * Select a single [[News]] item with the given <em>id</em> for display.
-   * 
+   *
    * @param id The identifier of the [[News]] item to be fetched.
    * @return A response with HTTP status code 200 and a payload of the [[News]] item. In the case
    *         of error, a redirect to the list of [[News]] items is returned.
    */
   def show(id: Long) = Action { implicit request =>
-    val e = News.load(id)
-    e match {
-      case None =>
-        Logger.debug(s"No news item with ID $id found.")
+    val newsV = News.load(id)
+    newsV match {
+      case Success(newsOp) => newsOp match {
+        case Some(news) => Ok(views.html.news(news))
+        case None => Logger.error(s"Failed to load news item with ID '$id'. Does not exist.")
+          Redirect(routes.NewsCtrl.list()).flashing("error" -> Messages("error.loading.news"))
+      }
+      case Failure(t) => Logger.error(newsV.toString, t)
         Redirect(routes.NewsCtrl.list()).flashing("error" -> Messages("error.loading.news"))
-      case Some(ev) =>
-        Logger.debug(s"Found news item with ID $id.")
-        Ok(views.html.news(ev))
-      case _ => NotFound
     }
   }
 
