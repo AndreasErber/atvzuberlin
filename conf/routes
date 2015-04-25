@@ -80,6 +80,9 @@ GET   /imprint                    controllers.ImprintCtrl.show
 # KV
 GET   /kv                         controllers.KvCtrl.list
 
+# Management
+GET   /management                 controllers.ManagementCtrl.display
+
 # Mitturner
 GET   /mitturner                  controllers.MitturnerCtrl.list
 
@@ -187,7 +190,7 @@ GET   /pic/atv/new                controllers.ChargeCtrl.createPiC(div = "ATV")
 GET   /pic/eg/new                 controllers.ChargeCtrl.createPiC(div = "Ehrengericht")
 GET   /pic/hb/new                 controllers.ChargeCtrl.createPiC(div = "Handball")
 GET   /pic/fb/new                 controllers.ChargeCtrl.createPiC(div = "Faustball")
-GET   /pic/edit/:picid            controllers.ChargeCtrl.edit(picid: Long)
+GET   /pic/edit/:picid            controllers.ChargeCtrl.editPiC(picid: Long)
 GET   /pic/ac/list                controllers.ChargeCtrl.listPiC(div = "Aktivitas")
 GET   /pic/kv/list                controllers.ChargeCtrl.listPiC(div = "Korporationsverband")
 GET   /pic/atv/list               controllers.ChargeCtrl.listPiC(div = "ATV")

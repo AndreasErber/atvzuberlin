@@ -16,8 +16,8 @@ import scalaz.Success
 /**
  * Generic access to the data source.
  *
- * @author aer
- * @version 0.0.2, 2013-07-28
+ * @author andreas
+ * @version 0.0.4, 2015-04-25
  */
 trait GenericDao[T <: Entity] {
 
@@ -52,8 +52,13 @@ trait GenericDao[T <: Entity] {
    * @param id The identifier of the instance to get
    * @return The instance matching the identifier or [[scala.None]]
    */
-  def get(id: Long): Option[T] = db withSession {
-    Query(this).filter(_.id === id).firstOption
+  def get(id: Long): Validation[Throwable, Option[T]] = db withSession {
+    try {
+      Success(Query(this).filter(_.id === id).firstOption)
+    }
+    catch {
+      case t: Throwable => Failure(t)
+    }
   }
 
   /**
@@ -62,7 +67,7 @@ trait GenericDao[T <: Entity] {
    * @return a [[scalaz.Validation]] that either contains a possibly empty list of items of the given
    *         type or the [[scala.Throwable]] that occurred when trying to load.
    */
-  def getAll(): Validation[Throwable, List[T]] = db withSession {
+  def getAll: Validation[Throwable, List[T]] = db withSession {
     try {
       def q = Query(this).sortBy(t => t.id).list
       Success(q)
@@ -81,7 +86,7 @@ trait GenericDao[T <: Entity] {
    * @return The number of rows that were affected by the operation.
    */
   protected def update(entity: T) = db withSession {
-    this.where(_.id === entity.id).update(entity)
+    Query(this).filter(_.id === entity.id).update(entity)
   }
 
   /**
@@ -91,7 +96,7 @@ trait GenericDao[T <: Entity] {
    * @return The number of rows that have been affected by the operation.
    */
   def delete(id: Long): Int = db withSession {
-    this.where(_.id === id).delete
+    Query(this).filter(_.id === id).delete
   }
 
   /**
@@ -100,6 +105,6 @@ trait GenericDao[T <: Entity] {
    * @return The number of items currently persisted in the database.
    */
   def count = db withSession {
-    Query(this.length).first
+    Query(this).countDistinct
   }
 }

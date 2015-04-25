@@ -15,20 +15,22 @@ import util.Division
  * Class to define a [[Charge]] or duty that is to be taken by a person.
  *
  * @author andreas
- * @version 0.0.3, 2015-04-18
+ * @version 0.0.4, 2015-04-24
  */
 case class Charge(override val id: Option[Long],
-  name: String,
-  abbr: Option[String],
-  division: Division.Division = Division.Aktivitas,
-  shortDesc: Option[String],
-  longDesc: Option[String],
-  email: Option[String],
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
-
+                  nameMale: String,
+                  nameFemale: String,
+                  abbr: Option[String],
+                  division: Division.Division = Division.Aktivitas,
+                  position: Int,
+                  shortDesc: Option[String],
+                  longDesc: Option[String],
+                  emailMale: Option[String],
+                  emailFemale: Option[String],
+                  override val created: Long = System.currentTimeMillis(),
+                  override val creator: String,
+                  override val modified: Option[Long] = None,
+                  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
 }
 
 /**
@@ -50,7 +52,7 @@ object Charge {
    * @return A [[Validation]] of either a [[Throwable]] or a [[List]] of [[Charge]]s.
    */
   def getAll: Validation[Throwable, List[Charge]] = db withSession {
-    def q = Query(Charges).sortBy(n => n.name).list
+    def q = Query(Charges).sortBy(n => n.nameMale).list
     try {
       Success(q)
     } catch {
@@ -96,7 +98,7 @@ object Charge {
    * Persist a new [[Charge]] or update an existing one.
    *
    * @param c The [[Charge]] that is to be persisted or updated
-   *          @return A [[Validation]] of either a [[Throwable]] or a [[Charge]].
+   * @return A [[Validation]] of either a [[Throwable]] or a [[Charge]].
    */
   def saveOrUpdate(c: Charge): Validation[Throwable, Charge] = {
     db withSession {
@@ -154,22 +156,45 @@ object Charges extends Table[Charge](Charge.tablename) {
 
   import scala.slick.lifted.MappedTypeMapper.base
   import scala.slick.lifted.TypeMapper
+
   implicit val divisionMapper: TypeMapper[Division.Division] = base[Division.Division, String](d => d.toString, string => Division.withName(string))
 
   def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-  def name = column[String]("name")
-  def abbr = column[String]("abbr", O.Nullable)
-  def division = column[Division.Division]("division")
-  def shortDesc = column[String]("shortDesc", O.Nullable)
-  def longDesc = column[String]("longDesc", O.Nullable, O.DBType("text"))
-  def email = column[String]("email", O.Nullable)
-  def created = column[Long]("created")
-  def creator = column[String]("creator")
-  def modified = column[Long]("modified", O.Nullable)
-  def modifier = column[String]("modifier", O.Nullable)
-  def * = id.? ~ name ~ abbr.? ~ division ~ shortDesc.? ~ longDesc.? ~ email.? ~ created ~ creator ~ modified.? ~ modifier.? <> (Charge.apply _, Charge.unapply _)
 
-  def withoutId = name ~ abbr.? ~ division ~ shortDesc.? ~ longDesc.? ~ email.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
-  def insert = (c: Charge) => withoutId.insert(c.name, c.abbr, c.division, c.shortDesc, c.longDesc, c.email, c.created, c.creator, c.modified, c.modifier)
+  def nameMale = column[String]("nameMale")
+
+  def nameFemale = column[String]("nameFemale")
+
+  def abbr = column[String]("abbr", O.Nullable)
+
+  def division = column[Division.Division]("division")
+
+  def position = column[Int]("position")
+
+  def shortDesc = column[String]("shortDesc", O.Nullable)
+
+  def longDesc = column[String]("longDesc", O.Nullable, O.DBType("text"))
+
+  def emailMale = column[String]("emailMale", O.Nullable)
+
+  def emailFemale = column[String]("emailFemale", O.Nullable)
+
+  def created = column[Long]("created")
+
+  def creator = column[String]("creator")
+
+  def modified = column[Long]("modified", O.Nullable)
+
+  def modifier = column[String]("modifier", O.Nullable)
+
+  def * = id.? ~ nameMale ~ nameFemale ~ abbr.? ~ division ~ position ~ shortDesc.? ~ longDesc.? ~ emailMale.? ~
+    emailFemale.? ~ created ~ creator ~ modified.? ~ modifier.? <>(Charge.apply _, Charge.unapply _)
+
+  def withoutId = nameMale ~ nameFemale ~ abbr.? ~ division ~ position ~ shortDesc.? ~ longDesc.? ~ emailMale.? ~
+    emailFemale.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
+  def insert = (c: Charge) => withoutId.insert(c.nameMale, c.nameFemale, c.abbr, c.division, c.position, c.shortDesc, c
+    .longDesc, c.emailMale, c.emailFemale, c.created, c.creator, c.modified, c.modifier)
+
   def update(c: Charge): Int = Charges.where(_.id === c.id).update(c.copy(modified = Some(System.currentTimeMillis())))
 }

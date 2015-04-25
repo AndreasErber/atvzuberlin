@@ -14,11 +14,13 @@ import util.{CustomFormatters, Division}
 import models.{Charge, Person, PersonInCharge, PersonInCharges}
 import java.sql.Date
 
+import scalaz.{Success, Failure}
+
 /**
  * Controller to handle requests on [[Charge]]s.
  *
  * @author andreas
- * @version 0.0.4, 2015-04-18
+ * @version 0.0.6, 2015-04-25
  */
 object ChargeCtrl extends Controller with ProvidesCtx with Security {
 
@@ -40,12 +42,15 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
   val chargeForm = Form[Charge](
     mapping(
       "id" -> optional(longNumber),
-      "name" -> nonEmptyText,
+      "nameMale" -> nonEmptyText,
+      "nameFemale" -> nonEmptyText,
       "abbr" -> optional(text),
       "division" -> divisionMapping,
+      "position" -> number,
       "shortDesc" -> optional(text),
       "longDesc" -> optional(text),
-      "email" -> optional(email),
+      "emailMale" -> optional(email),
+      "emailFemale" -> optional(email),
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
@@ -59,9 +64,8 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
       "id" -> optional(longNumber),
       "person" -> personMapping,
       "charge" -> chargeMapping,
-      "division" -> divisionMapping,
       "start" -> dateMapping,
-      "end" -> dateMapping,
+      "end" -> optional(dateMapping),
       "created" -> longNumber,
       "creator" -> text,
       "modified" -> optional(longNumber),
@@ -83,7 +87,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    * @param id The identifier of the [[Charge]] to be deleted.
    * @return A redirect to the list of [[Charge]]s flashing either success or failure.
    */
-  def delete (id: Long) = isAuthorized("delete.charge") { username =>
+  def delete(id: Long) = isAuthorized("delete.charge") { username =>
     implicit request =>
       val result = Charge.delete(id)
       if (result.isSuccess) {
@@ -103,7 +107,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    *         specific data for a payload. In case the [[Charge]] cannot be loaded a redirect
    *         to the list of [[Charge]]s is returned.
    */
-  def edit (id: Long) = isAuthorized("edit.charge") { username =>
+  def edit(id: Long) = isAuthorized("edit.charge") { username =>
     implicit request =>
       val chargeV = Charge.load(id)
       if (chargeV.isSuccess) {
@@ -130,14 +134,15 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    *         If the list of [[Charge]]s cannot be loaded a response with an HTTP status code 400
    *         and an error message is returned.
    */
-  def list () = Action { implicit request =>
-    val result = Charge.getAll
-    if (result.isSuccess) {
-      Ok(views.html.chargesList(result.toOption.get))
-    } else {
-      Logger.error(result.toString, result.toEither.left.get)
-      BadRequest(Messages("error.loading.charges"))
-    }
+  def list() = isAuthorized("view.charge") { username =>
+    implicit request =>
+      val resultV = Charge.getAll
+      resultV match {
+        case Success(result) =>
+          Ok(views.html.chargesList(result))
+        case Failure(t) => Logger.error(resultV.toString, t)
+          Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
+      }
   }
 
   /**
@@ -147,23 +152,21 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    * @return A response with HTTP status code 200 holding the details of the specific [[Charge]].
    *         If the [[Charge]] cannot be loaded a redirect to the list of [[Charge]]s is returned.
    */
-  def show (id: Long) = Action { implicit request =>
-    val chargeV = Charge.load(id)
-    if (chargeV.isSuccess) {
-      val chargeOp: Option[Charge] = chargeV.toOption.get
-      chargeOp match {
-        case None =>
-          Logger.debug(s"No charge with ID '$id' found.")
+  def show(id: Long) = isAuthorized("view.charge") { username =>
+    implicit request =>
+      val chargeV = Charge.load(id)
+      chargeV match {
+        case Success(chargeOp) => chargeOp match {
+          case Some(charge) =>
+            Logger.debug(s"Found charge with ID '$id'.")
+            Ok(views.html.charge(charge))
+          case None =>
+            Logger.debug(s"No charge with ID '$id' found. Does not exist")
+            Redirect(routes.ChargeCtrl.list()).flashing("error" -> Messages("error.loading.charge"))
+        }
+        case Failure(t) => Logger.error(chargeV.toString, t)
           Redirect(routes.ChargeCtrl.list()).flashing("error" -> Messages("error.loading.charge"))
-        case Some(charge) =>
-          Logger.debug(s"Found charge with ID '$id'.")
-          Ok(views.html.charge(charge))
-        case _ => NotFound
       }
-    } else {
-      Logger.error(chargeV.toString, chargeV.toEither.left.get)
-      Redirect(routes.ChargeCtrl.list()).flashing("error" -> Messages("error.loading.charge"))
-    }
   }
 
   /**
@@ -199,13 +202,13 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    *         or the [[Charge]] list cannot be loaded a redirect to the administration overview
    *         page is returend.
    */
-  def createPiC (div: String) = isAuthorized("create.person.in.charge") { username =>
+  def createPiC(div: String) = isAuthorized("create.person.in.charge") { username =>
     implicit request =>
       val persons = Person.getAll
       if (persons.isSuccess) {
         val charges = Charge.getAllForDivision(Division.withName(div))
         if (charges.isSuccess) {
-          Ok(views.html.personInChargeForm(piCForm, persons.toOption.get, charges.toOption.get, div))
+          Ok(views.html.personInChargeForm(piCForm, persons.toOption.get, charges.toOption.get))
         } else {
           Logger.error("Failed to load list of charges.")
           Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
@@ -222,7 +225,7 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    * @param id The identifier of the [[PersonInCharge]] to be deleted.
    * @return A redirect to the [[Charge]] list flashing either success or error.
    */
-  def deletePiC (id: Long) = isAuthenticated { username =>
+  def deletePiC(id: Long) = isAuthorized("delete.person.in.charge") { username =>
     implicit request =>
       val result = PersonInCharges.delete(id)
       if (result > 0) {
@@ -242,30 +245,30 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    *         [[PersonInCharge]] cannot be found, the list of [[Person]]s or [[Charge]]s cannot be loaded then a
    *         redirect to the administration overview page is returned.
    */
-  def editPiC (id: Long) = isAuthenticated { username =>
+  def editPiC(id: Long) = isAuthorized("edit.person.in.charge") { username =>
     implicit request =>
-      val pic = PersonInCharges.get(id)
-      pic match {
-        case None =>
-          Logger.debug(s"Cannot find person in charge with ID '$id'.")
-          Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.person.in.charge"))
-        case Some(personInCharge) =>
-          Logger.logger.debug(s"Preparing editing of person in charge with ID '$id'.")
-          val persons = Person.getAll
-          if (persons.isSuccess) {
-            val charges = Charge.getAllForDivision(personInCharge.division)
-            if (charges.isSuccess) {
-              Ok(views.html.personInChargeForm(piCForm.fill(personInCharge), persons.toOption.get, charges.toOption.get, pic.get.division.toString))
-            } else {
-              Logger.error("Failed to load list of charges.")
-              Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
+      val picV = PersonInCharges.get(id)
+      picV match {
+        case Success(picOp) => picOp match {
+          case Some(pic) => Logger.debug(s"Preparing editing of person in charge with ID '$id'.")
+            val personsV = Person.getAll
+            personsV match {
+              case Success(persons) => val chargesV = Charge.getAll
+                chargesV match {
+                  case Success(charges) =>
+                    Ok(views.html.personInChargeForm(piCForm.fill(pic), personsV.toOption.get, chargesV.toOption.get))
+                  case Failure(t) => Logger.error(chargesV.toString, t)
+                    Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
+                }
+              case Failure(t) => Logger.error(personsV.toString, t)
+                Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.persons"))
             }
-          } else {
-            Logger.error("Failed to load list of persons.")
-            Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.persons"))
-          }
-
-        case _ => NotFound
+          case None =>
+            Logger.debug(s"Cannot find person in charge with ID '$id'.")
+            Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.person.in.charge"))
+        }
+        case Failure(t) => Logger.error(picV.toString, t)
+          Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.person.in.charge"))
       }
   }
 
@@ -276,13 +279,13 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
    * @return A response with HTTP status code 200 holding all the [[PersonInCharge]] entries for the given division.
    *         In case of error a redirect to the administration overview page is returned.
    */
-  def listPiC (div: String) = Action { implicit request =>
-    val result = PersonInCharges.getAll()
-    if (result.isSuccess) {
-      Ok(views.html.personInChargeList(result.toOption.get))
-    } else {
-      Logger.error(result.toString, result.toEither.left.get)
-      Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.person.in.charges"))
+  def listPiC(div: String) = isAuthorized("view.person.in.charge") { username =>
+  implicit request =>
+    val picV = PersonInCharges.getAllCurrentByDivision(div)
+    picV match {
+      case Success(pics) => Ok(views.html.personInChargeList(pics.sortBy(_.charge.position), div))
+      case Failure(t) => Logger.error(picV.toString, t)
+        Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.person.in.charges"))
     }
   }
 
@@ -298,10 +301,10 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
           Logger.error("An error occurred when trying to process the PersonInCharge form.")
           val persons = Person.getAll
           if (persons.isSuccess) {
-            val div = Division.withName(errors.data.get("division").get)
-            val charges = Charge.getAllForDivision(div)
+            //            val div = Division.withName(errors.data.get("division").get)
+            val charges = Charge.getAll
             if (charges.isSuccess) {
-              BadRequest(views.html.personInChargeForm(errors, persons.toOption.get, charges.toOption.get, div.toString))
+              BadRequest(views.html.personInChargeForm(errors, persons.toOption.get, charges.toOption.get))
             } else {
               Logger.error("Failed to load the list of charges.")
               Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
@@ -315,16 +318,16 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
           Logger.debug(s"Storing person in charge $pic.")
           val result = PersonInCharges.saveOrUpdate(pic)
           if (result.isSuccess) {
-            Redirect(routes.ChargeCtrl.listPiC(pic.division.toString)).flashing("success" -> Messages("success" +
+            Redirect(routes.ChargeCtrl.listPiC(pic.charge.division.toString)).flashing("success" -> Messages("success" +
               ".storing.person.in.charge"))
           } else {
             Logger.error(result.toString, result.toEither.left.get)
             val persons = Person.getAll
             if (persons.isSuccess) {
-              val charges = Charge.getAllForDivision(pic.division)
+              val charges = Charge.getAllForDivision(pic.charge.division)
               if (charges.isSuccess) {
-                BadRequest(views.html.personInChargeForm(piCForm, persons.toOption.get, charges.toOption.get,
-                  pic.division.toString)).flashing("error" -> Messages("error.storing.person.in.charge"))
+                BadRequest(views.html.personInChargeForm(piCForm, persons.toOption.get, charges.toOption.get)).
+                  flashing("error" -> Messages("error.storing.person.in.charge"))
               } else {
                 Logger.error("Failed to load the list of charges.")
                 Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.charges"))
@@ -333,7 +336,6 @@ object ChargeCtrl extends Controller with ProvidesCtx with Security {
               Logger.error("Failed to load the list of persons.")
               Redirect(routes.Application.administration()).flashing("error" -> Messages("error.loading.persons"))
             }
-
           }
         })
   }

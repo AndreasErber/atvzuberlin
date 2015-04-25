@@ -12,9 +12,13 @@ import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import play.api.i18n.Messages
 
+import scalaz.{Failure, Success}
+
 /**
+ * Controller to handle requests for [[Privilege]]s.
+ *
  * @author andreas
- * @version 0.0.4, 2015-04-17
+ * @version 0.0.6, 2015-04-25
  */
 object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
 
@@ -31,44 +35,47 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
   /**
    * Display the form to create a new privilege.
    */
-  def create = isAuthenticated { username =>
+  def create = isAuthorized("create.privilege") { username =>
     implicit request =>
       Ok(views.html.privilegeForm(privilegeForm))
   }
 
   /**
    * Delete the [[Privilege]] identified by <em>id</em>
+   *
    * @param id The identifier of the [[Privilege]] to delete.
    * @return
    */
-  def delete(id: Long) = isAuthenticated { username =>
+  def delete(id: Long) = isAuthorized("delete.privilege") { username =>
     implicit request =>
-      val privVal = Privileges.get(id)
-      if (privVal.isDefined) {
-        RoleHasPrivileges.deleteByPrivilege(privVal.get)
-        val result = Privileges.delete(id)
-        if (result > 0) {
-          val msg = s"Sucessfully deleted privilege with ID $id."
-          Logger.debug(msg)
-          Redirect(routes.PrivilegeCtrl.list()).flashing("success" -> msg)
-        } else {
-          val msg = Messages("error.failedToDeletePrivilege")
-          Logger.error(msg)
-          Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> msg)
+      val privV = Privileges.get(id)
+      privV match {
+        case Success(privOp) => privOp match {
+          case Some(priv) => RoleHasPrivileges.deleteByPrivilege(priv)
+            val result = Privileges.delete(id)
+            if (result > 0) {
+              val msg = s"Sucessfully deleted privilege with ID $id."
+              Logger.debug(msg)
+              Redirect(routes.PrivilegeCtrl.list()).flashing("success" -> msg)
+            } else {
+              val msg = Messages("error.failedToDeletePrivilege")
+              Logger.error(msg)
+              Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> msg)
+            }
+          case None => Logger.error(s"Failed to load privilege with ID '$id'. Does not exist.")
+            Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.privilege.does.not.exist", id))
         }
-      } else {
-        val msg = Messages("error.privilege.does.not.exist", id)
-        Logger.error(msg)
-        Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> msg)
+        case Failure(t) => Logger.error(privV.toString, t)
+          Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.loading.privilege"))
       }
   }
 
   /**
    * Provide a list of all available person items.
    */
-  def list = isAuthenticated { username =>
+  def list = isAuthorized("view.privilege") { username =>
     implicit request =>
-      val list = Privileges.getAll()
+      val list = Privileges.getAll
       if (list.isSuccess) {
         Ok(views.html.privilegesList(list.toOption.get.sortBy(x => x.name)))
       } else {
@@ -83,24 +90,24 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
    * @param id Identifier of the [[Privilege]] to load into the form.
    * @return
    */
-  def edit(id: Long) = isAuthenticated { username =>
+  def edit(id: Long) = isAuthorized("edit.privilege") { username =>
     implicit request =>
-      val p = Privileges.get(id)
-      p match {
-        case None =>
-          Logger.logger.debug("Cannot find privilege with ID " + id + ".")
-          NotFound
-        case Some(pers) =>
-          Logger.logger.debug("Preparing editing of privilege with ID " + id + ".")
-          Ok(views.html.privilegeForm(privilegeForm.fill(pers)))
-        case _ => NotFound
+      val privV = Privileges.get(id)
+      privV match {
+        case Success(privOp) => privOp match {
+          case Some(priv) => Ok(views.html.privilegeForm(privilegeForm.fill(priv)))
+          case None => Logger.error(s"Failed to load privilege with ID '$id'. Does not exist.")
+            Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.loading.privilege"))
+        }
+        case Failure(t) => Logger.error(privV.toString, t)
+          Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.loading.privilege"))
       }
   }
 
   /**
    * Receive and handle a new or modified privilege.
    */
-  def submit = isAuthenticated { username =>
+  def submit() = isAuthorized("save.privilege") { username =>
     implicit request =>
       privilegeForm.bindFromRequest.value map {
         p =>
@@ -134,7 +141,7 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
    * Update a [[Privilege]].
    * @return
    */
-  def updatePrivilege() = isAuthenticated { username =>
+  def updatePrivilege() = isAuthorized("save.privilege") { username =>
     implicit request =>
       privilegeForm.bindFromRequest.fold(
         errors => {
@@ -143,11 +150,10 @@ object PrivilegeCtrl extends Controller with ProvidesCtx with Security {
         },
         privilege => {
           Logger.debug("Storing privilege " + privilege.name)
-          val result = Privileges.saveOrUpdate(privilege)
-          if (result.isSuccess) {
-            Redirect(routes.PrivilegeCtrl.list())
-          } else {
-            Logger.error(result.toString, result.toEither.left.get)
+          val resultV = Privileges.saveOrUpdate(privilege)
+          resultV match {
+            case Success(result) =>  Redirect(routes.PrivilegeCtrl.list())
+            case Failure(t) => Logger.error(resultV.toString, t)
             BadRequest(views.html.privilegeForm(privilegeForm.fill(privilege)))
           }
         })

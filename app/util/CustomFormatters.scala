@@ -264,7 +264,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
         Exception.allCatch[PhoneType].either(Landline.getPhoneType(id.toInt).get).left.map {
-          e => Seq(FormError(key, Messages("error.failedToLoadPhoneType", id), Nil))
+          e => Seq(FormError(key, Messages("error.loading.phone.type", id), Nil))
         }
       }
     }
@@ -278,8 +278,8 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { id =>
-        Exception.allCatch[Role].either(Roles.get(id.toLong).get).left.map {
-          e => Seq(FormError(key, Messages("error.failedToLoadRole", id), Nil))
+        Exception.allCatch[Role].either(Roles.get(id.toLong).toOption.get.get).left.map {
+          e => Seq(FormError(key, Messages("error.loading.role", id), Nil))
         }
       }
     }
@@ -333,7 +333,7 @@ object CustomFormatters {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { char =>
         Exception.allCatch[Char].either(char.charAt(0)).left.map {
-          e => Seq(FormError(key, Messages("error.failedToIdentifyCharacter"), Nil))
+          e => Seq(FormError(key, Messages("error.identifying.character"), Nil))
         }
       }
     }

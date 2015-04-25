@@ -4,24 +4,22 @@
 package accesscontrol
 
 import db.GenericDao
-import play.api.db._
-import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
-import scala.slick.lifted.{ Query, TypeMapper }
-import scala.slick.lifted.MappedTypeMapper.base
+import scala.slick.lifted.Query
 import Database.threadLocalSession
 import scalaz.{ Failure, Success, Validation }
 import models.Entity
-import scala.collection.immutable.Nil
 import play.Logger
 
 /**
- * @author aer
- * @version 0.0.1, 2015-01-03
+ * Entity representing the relationship between a [[User]] and a [[Role]].
+ *
+ * @author andreas
+ * @version 0.0.2, 2015-04-25
  */
 case class UserHasRole(override val id: Option[Long],
-  val user: User,
-  val role: Role,
+  user: User,
+  role: Role,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -31,10 +29,9 @@ case class UserHasRole(override val id: Option[Long],
 object UserHasRoles extends Table[UserHasRole]("UserHasRole") with GenericDao[UserHasRole] {
 
   import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
 
   implicit val userMapper = base[User, String](_.username, username => User.findByName(username).toOption.get)
-  implicit val roleMapper = base[Role, Long](_.id.get, id => Roles.get(id).get)
+  implicit val roleMapper = base[Role, Long](_.id.get, id => Roles.get(id).toOption.get.get)
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def user = column[User]("user")

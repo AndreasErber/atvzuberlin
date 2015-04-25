@@ -3,7 +3,7 @@
 *
 * @param chargeForm The form data to display.
 * @author andreas
-* @version 0.0.2, 2015-01-03
+* @version 0.0.3, 2015-04-24
 *@
 @(chargeForm: Form[Charge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
@@ -14,12 +14,15 @@
 
 @main(Messages("charge")) {
     @Logger.debug("Rendering charge form")
-    <h1>@Messages("charge.add")</h1>
+    <h1>@Messages("charge")</h1>
 	@form(routes.ChargeCtrl.submit) {
 	  @inputHidden(chargeForm("id"))
 	  <div class="form-group">
-	  @inputText(chargeForm("name"), '_label -> Messages("charge.name"), 'class -> "form-control")
+	  @inputText(chargeForm("nameMale"), '_label -> Messages("charge.name.male"), 'class -> "form-control")
 	  </div>
+      <div class="form-group">
+      @inputText(chargeForm("nameFemale"), '_label -> Messages("charge.name.female"), 'class -> "form-control")
+      </div>
       <div class="form-group">
       @inputText(chargeForm("abbr"), '_label -> Messages("charge.abbr"), 'class -> "form-control")
       </div>
@@ -31,6 +34,9 @@
       )
       </div>
       <div class="form-group">
+      @inputText(chargeForm("position"), '_label -> Messages("charge.position"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
 	  @textarea(chargeForm("shortDesc"), '_label -> Messages("charge.shortDesc"), 'class -> "form-control")
 	  </div>
 	  <div class="form-group">
@@ -40,11 +46,13 @@
 	    'class -> "form-control form-control-wysiwyg")
 	  </div>
 	  <div class="form-group">
-      @inputText(chargeForm("email"), '_label -> Messages("charge.email"), 'class -> "form-control")
+      @inputText(chargeForm("emailMale"), '_label -> Messages("charge.email.male"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+      @inputText(chargeForm("emailFemale"), '_label -> Messages("charge.email.female"), 'class -> "form-control")
       </div>
       @createModifyFormPart(chargeForm)
       @submitResetCancel()
-    
 	}
 	
 	@Logger.debug("Done rendering charge form")

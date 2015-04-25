@@ -64,9 +64,14 @@ charge.delete = Amtsbeschreibung löschen
 charge.division = Abteilung
 charge.edit = Amtsbeschreibung ändern
 charge.email = Amts-E-Mail-Adresse
+charge.email.male = Amts-E-Mail-Adresse, männliche Form
+charge.email.female = Amts-E-Mail-Adresse, weibliche Form
 charge.list = Liste der Amtsbeschreibungen
 charge.longDesc = ausführliche Amtsbeschreibung
-charge.name = Bezeichnung
+charge.name = Amtsbezeichnung
+charge.name.male = männliche Bezeichnung
+charge.name.female = weibliche Bezeichnung
+charge.position = Ordnungszahl
 charge.shortDesc = öffentliche Kurzbeschreibung
 charge.view = Detailansicht anzeigen
 
@@ -357,6 +362,8 @@ login.successful = Anmeldung war erfolgreich.
 logout = Abmelden
 logout.successful = Abmeldung war erfolgreich.
 
+management = Vorstand
+
 member=Mitglied
 members=Mitglieder
 
@@ -425,6 +432,7 @@ person.gender.f = weiblich
 person.gender.m = männlich
 person.lastname = Nachname
 person.list = Personenliste
+person.name = Name
 person.new = Neue Person anlegen
 person.nickname = Biername
 person.others=Weitere Personen
@@ -449,7 +457,8 @@ personAI.withdrawal.date.format = TT.MM.JJJJ
 
 personalia=Personalia
 
-personincharge = Amtsbesetzungen
+personincharge = Amtsbesetzung
+personincharges = Amtsbesetzungen
 personincharge.add = Amtszuordnung hinzufügen
 personincharge.charge = Amt
 personincharge.charge.email = Amtsbezogene E-Mail-Adresse

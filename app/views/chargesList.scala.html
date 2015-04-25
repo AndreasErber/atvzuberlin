@@ -1,41 +1,15 @@
 @(charges: Seq[Charge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.chargesDivisionTable
 @import helper.deleteConfirmation
 @import helper.lastModificationIcon
+@import util.Division._
 
 @main(Messages("charge")) {
-	<h2>@{if(charges.size == 1) Messages("charge") else Messages("charge")}</h2>
-	<table class="table table-striped table-hover">
-    <thead>
-      <tr>
-        <th>@Messages("charge.name")</th>
-        <th>@Messages("charge.abbr")</th>
-        <th>@Messages("charge.division")</th>
-        <th>@Messages("charge.email")</th>
-      </tr>
-    </thead>
-    <tbody>
-    @charges.map { c =>
-      <tr>
-        <td>@c.name</td>
-        <td>@c.abbr.getOrElse("")</td>
-        <td>@c.division.toString</td>
-          <td> 
-            <a href="/charge/@c.id.get" title="@Messages("charge.view")"><i class="glyphicon glyphicon-eye-open"></i></a>
-          @if(ctx.user.isDefined) {
-            <a href="/charge/edit/@c.id.get" title="@Messages("charge.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
-            <a href="#" data-toggle="modal" title="@Messages("charge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="glyphicon glyphicon-trash"></i></a>
-          }
-          @lastModificationIcon(c)
-          </td>
-        </tr>
-    }
-    @if(ctx.user.isDefined) {
-      <tr>
-        <td colspan="3"></td>
-        <td><a href="/charge/new" title="@Messages("charge.add")"><i class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
-      </tr>
-    }
-    </tbody>
-  </table>	
+	@chargesDivisionTable(charges.filter(_.division.eq(Aktivitas)).sortBy(_.position), Aktivitas.toString)
+    @chargesDivisionTable(charges.filter(_.division.eq(Korporationsverband)).sortBy(_.position), Korporationsverband.toString)
+    @chargesDivisionTable(charges.filter(_.division.eq(ATV)).sortBy(_.position), ATV.toString)
+    @chargesDivisionTable(charges.filter(_.division.eq(Handball)).sortBy(_.position), Handball.toString)
+    @chargesDivisionTable(charges.filter(_.division.eq(Faustball)).sortBy(_.position), Faustball.toString)
+    @chargesDivisionTable(charges.filter(_.division.eq(Ehrengericht)).sortBy(_.position), Ehrengericht.toString)
 @deleteConfirmation("charge")
 }

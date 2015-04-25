@@ -11,11 +11,13 @@ import play.api.Logger
 import play.api.mvc._
 import controllers.ext.{ProvidesCtx, Security}
 
+import scalaz.{Failure, Success}
+
 /**
  * Controller to handle requests dealing with [[Role]]s.
  *
  * @author andreas
- * @version 0.0.3, 2015-04-17
+ * @version 0.0.5, 2015-04-25
  */
 object RoleCtrl extends Controller with ProvidesCtx with Security {
 
@@ -37,7 +39,7 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    *
    * @return A response with HTTP status code 200 and an empty [[Role]] form for a payload.
    */
-  def create = isAuthenticated { username =>
+  def create() = isAuthorized("create.role") { username =>
     implicit request =>
       Ok(views.html.roleForm(roleForm))
   }
@@ -48,7 +50,7 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    * @param id The identifier of the [[Role]] to delete.
    * @return A redirect to display the list of [[Role]]s flashing either success or error on the action executed.
    */
-  def delete(id: Long) = isAuthenticated { username =>
+  def delete(id: Long) = isAuthorized("delete.role") { username =>
     implicit request =>
       val result = Roles.delete(id)
       if (result > 0) {
@@ -68,17 +70,17 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    *         status code 200 and the details of the retrieved [[Role]] for a payload. In case of
    *         error a redirect to the list of [[Role]]s is returned flashing an error message.
    */
-  def edit(id: Long) = isAuthenticated { username =>
+  def edit(id: Long) = isAuthorized("edit.role") { username =>
     implicit request =>
-      val p = Roles.get(id)
-      p match {
-        case None =>
-          Logger.debug(s"Cannot find role with ID $id.")
-          Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.finding.role"))
-        case Some(pers) =>
-          Logger.debug(s"Preparing editing of role with ID $id.")
-          Ok(views.html.roleForm(roleForm.fill(pers)))
-        case _ => NotFound
+      val roleV = Roles.get(id)
+      roleV match {
+        case Success(roleOp) => roleOp match {
+          case Some(pers) => Ok(views.html.roleForm(roleForm.fill(pers)))
+          case None => Logger.error(s"Failed to load role with ID '$id'. Does not exist.")
+            Redirect(routes.PrivilegeCtrl.list()).flashing("error" -> Messages("error.finding.role"))
+        }
+        case Failure(t) => Logger.error(roleV.toString, t)
+          Redirect(routes.RoleCtrl.list()).flashing("error" -> Messages("error.loading.role"))
       }
   }
 
@@ -88,9 +90,9 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    * @return A response with HTTP status code 200 and the list of [[Role]]s for a payload. In case
    *         of error, a response with status code 400.
    */
-  def list = isAuthenticated { username =>
+  def list = isAuthorized("view.role") { username =>
     implicit request =>
-      val list = Roles.getAll()
+      val list = Roles.getAll
       if (list.isSuccess) {
         Ok(views.html.rolesList(list.toOption.get.sortBy(x => x.name)))
       } else {
@@ -106,29 +108,23 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    * @return An HTTP response with status code 200 and the details of the [[Role]] found by the
    *         <em>id</em>. In case of error a redirect to the list of [[Role]]s is returned.
    */
-  def show(id: Long) = isAuthenticated { username =>
+  def show(id: Long) = isAuthorized("view.role") { username =>
     implicit request =>
-      val roleVal = Roles.get(id)
-      roleVal match {
-        case None =>
-          Logger.debug(s"No role with ID $id found.")
-          Redirect(routes.RoleCtrl.list()).flashing("error" -> Messages("error.loading.role"))
-        case Some(role) =>
-          Logger.debug(s"Found role with ID $id: '${role.name}'. Getting its privileges ...")
-          val rhpVal = RoleHasPrivileges.getSome(List(role))
-          var privs: List[Privilege] = Nil
-          if (rhpVal.isSuccess) {
-            val rhpOp = rhpVal.toOption
-            if (rhpOp.isDefined) {
-              privs = rhpOp.get.map(rhp => rhp.privilege)
-            } else {
-              Logger.error(s"No privileges found for role ${role.name}")
+      val roleV = Roles.get(id)
+      roleV match {
+        case Success(roleOp) => roleOp match {
+          case Some(role) => val rhpsV = RoleHasPrivileges.getSome(List(role))
+            var privs: List[Privilege] = Nil
+            rhpsV match {
+              case Success(rhps) => privs = rhps.map(_.privilege)
+              case Failure(t) => Logger.error(rhpsV.toString, t)
             }
-          } else {
-            Logger.error(s"Failed to retrieve RoleHasPrivileges for role ${role.name}: " + rhpVal.toEither.left.get.getMessage)
-          }
-          Ok(views.html.role(role, privs.sortBy(priv => priv.name)))
-        case _ => NotFound
+            Ok(views.html.role(role, privs.sortBy(_.name)))
+          case None => Logger.error(s"Failed to load role with ID '$id'. Does not exist.")
+            Redirect(routes.RoleCtrl.list()).flashing("error" -> Messages("error.loading.role"))
+        }
+        case Failure(t) => Logger.error(roleV.toString, t)
+          Redirect(routes.RoleCtrl.list()).flashing("error" -> Messages("error.loading.role"))
       }
   }
 
@@ -138,7 +134,7 @@ object RoleCtrl extends Controller with ProvidesCtx with Security {
    * @return A redirect to display the details of the newly created [[Role]], in case of error a
    *         [[BadRequest]] displaying the error.
    */
-  def submit = isAuthenticated { username =>
+  def submit() = isAuthorized("save.role") { username =>
     implicit request =>
       roleForm.bindFromRequest.fold(
         errors => {

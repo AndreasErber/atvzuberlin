@@ -1,4 +1,4 @@
-@(theForm: Form[PersonInCharge], persons: Seq[Person], charges: Seq[Charge], div: String)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@(theForm: Form[PersonInCharge], persons: Seq[Person], charges: Seq[Charge])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper._
 @import play.api.Logger
 
@@ -24,12 +24,11 @@
       </div>
       <div class="form-group">
       @select(theForm("charge"), 
-              charges.map{c => c.id.get.toString -> c.name.toString},
+              charges.map{c => c.id.get.toString -> (c.nameMale.toString + "/" + c.nameFemale.toString)},
               '_label -> Messages("personincharge.charge"),
               'class -> "form-control"
       )
       </div>
-	  @inputHidden(theForm("division"), '_value -> div)
 	  <div class="form-group">
 	  @inputText(theForm("start"), '_label -> Messages("personincharge.start"), 'class -> "form-control")
 	  </div>

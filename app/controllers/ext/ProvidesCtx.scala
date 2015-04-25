@@ -5,7 +5,7 @@ package controllers.ext
 
 import controllers.routes
 import play.api.mvc.Request
-import util.{ Article, Agenda, Charter, Circular, Ctx, Database, Form, Miscellaneous, Protocol }
+import util._
 import display.Header
 import display.Menu
 import play.api.i18n.Messages
@@ -14,7 +14,7 @@ import display.MenuItem
 
 /**
  * @author andreas
- * @version 0.0.6, 2015-04-06
+ * @version 0.0.7, 2015-04-25
  */
 trait ProvidesCtx {
 
@@ -29,7 +29,9 @@ trait ProvidesCtx {
         List(
           MenuItem(Messages("about"), routes.Application.about().toString()),
           MenuItem(Messages("house"), routes.Application.house().toString()),
-          MenuItem(Messages("history"), routes.Application.history().toString()))),
+          MenuItem(Messages("history"), routes.Application.history().toString()),
+          MenuItem(Messages("management"), routes.ManagementCtrl.display().toString())
+        )),
       Menu(Messages("program"), routes.EventCtrl.listUpcoming().toString(), List()),
       Menu(Messages("sports"), routes.SportCtrl.listSports().toString(),
         List(
@@ -39,17 +41,25 @@ trait ProvidesCtx {
 
     val privateMenus = List(
       Menu(Messages("news"), routes.NewsCtrl.list().toString(), List(
-          MenuItem(Messages("news.view"), routes.NewsCtrl.list().toString()),
-          MenuItem(Messages("news.add"), routes.NewsCtrl.create().toString())
-          )),
+        MenuItem(Messages("news.view"), routes.NewsCtrl.list().toString()),
+        MenuItem(Messages("news.add"), routes.NewsCtrl.create().toString())
+      )),
       Menu(Messages("personalia"), routes.PersonCtrl.list().toString(), List(
-          MenuItem(Messages("aktivitas"), routes.AktivitasCtrl.list().toString()),
-          MenuItem(Messages("kv"), routes.KvCtrl.list().toString()),
-          MenuItem(Messages("mitturner"), routes.MitturnerCtrl.list().toString()),
-          MenuItem(Messages("widows"), routes.WidowsCtrl.list().toString()),
-          MenuItem(Messages("person.others"), routes.OtherPersonsCtrl.list().toString()),
-          MenuItem(Messages("person.add"), routes.PersonCtrl.create().toString())
-          )),
+        MenuItem(Messages("aktivitas"), routes.AktivitasCtrl.list().toString()),
+        MenuItem(Messages("kv"), routes.KvCtrl.list().toString()),
+        MenuItem(Messages("mitturner"), routes.MitturnerCtrl.list().toString()),
+        MenuItem(Messages("widows"), routes.WidowsCtrl.list().toString()),
+        MenuItem(Messages("person.others"), routes.OtherPersonsCtrl.list().toString()),
+        MenuItem(Messages("person.add"), routes.PersonCtrl.create().toString())
+      )),
+      Menu(Messages("personincharges"), "#", List(
+        MenuItem(Messages("personincharge.list.ac"), routes.ChargeCtrl.listPiC("Aktivitas").toString()),
+        MenuItem(Messages("personincharge.list.kv"), routes.ChargeCtrl.listPiC("Korporationsverband").toString()),
+        MenuItem(Messages("personincharge.list.atv"), routes.ChargeCtrl.listPiC("ATV").toString()),
+        MenuItem(Messages("personincharge.list.fb"), routes.ChargeCtrl.listPiC("Faustball").toString()),
+        MenuItem(Messages("personincharge.list.hb"), routes.ChargeCtrl.listPiC("Handball").toString()),
+        MenuItem(Messages("personincharge.list.eg"), routes.ChargeCtrl.listPiC("Ehrengericht").toString())
+      )),
       Menu(Messages("documents"), routes.DocumentCtrl.overview().toString(), List(
         MenuItem(Messages("documents.overview.all"), routes.DocumentCtrl.overview().toString()),
         MenuItem(Messages("documents.protocol.pl"), routes.DocumentCtrl.listByCategory(Protocol.name).toString()),

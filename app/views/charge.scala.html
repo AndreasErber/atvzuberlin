@@ -2,7 +2,7 @@
 * Display the details of a {@link Charge}.
 *
 * @author andreas
-* @version 0.0.2, 2015-01-02
+* @version 0.0.3, 2015-04-24
 *@
 @(c: Charge)(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
 @import helper.deleteConfirmation
@@ -10,17 +10,19 @@
 @main(Messages("charge")) {
   <div class="pull-right">
   @if(ctx.user.isDefined && ctx.user.get.username == c.creator) {
-    <a href="/charge/edit/@c.id.get" title="@Messages("charge.edit")"><i class="glyphicon glyphicon-pencil"></i></a>
+    <a href="@routes.ChargeCtrl.edit(c.id.get)" title="@Messages("charge.edit")"><i
+          class="glyphicon glyphicon-pencil"></i></a>
     <a data-toggle="modal" title="@Messages("charge.delete")" data-target="#delConfirm" onclick="delId = @c.id.get"><i class="glyphicon glyphicon-trash"></i></a>
   }
-	<a href="/charge/list" title="@Messages("charge.list")"><i class="glyphicon glyphicon-th-list"></i></a>
+	<a href="@routes.ChargeCtrl.list" title="@Messages("charge.list")"><i class="glyphicon glyphicon-th-list"></i></a>
   @if(ctx.user.isDefined) {
-  	<a href="/charge/new" title="@Messages("charge.add")"><i class="glyphicon glyphicon-plus"></i></a> ...
+  	<a href="@routes.ChargeCtrl.create" title="@Messages("charge.add")"><i class="glyphicon glyphicon-plus"></i></a> ...
   }
   </div>
-  <h2>@c.name</h2>
-  <p>@c.abbr.getOrElse("") @c.division.toString</p>
-  <p>@c.email.getOrElse("")</p>
+  <h2>@c.nameMale / @c.nameFemale</h2>
+  <p>@c.abbr.getOrElse("")</p>
+  <p>@c.division.toString, @{c.position}. Position</p>
+  <p>@c.emailMale.getOrElse("") / @c.emailFemale.getOrElse("")</p>
   <p class="lead">@c.shortDesc.getOrElse("")</p>
   <p>@Html(c.longDesc.getOrElse(""))</p>
 @deleteConfirmation("charge")

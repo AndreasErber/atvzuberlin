@@ -3,10 +3,14 @@
  */
 package models
 
+import java.util.Calendar
+
 import util.Division
 import java.sql.Date
 import db.GenericDao
 import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.jdbc.GetResult
+import scala.slick.jdbc.StaticQuery.interpolation
 import Database.threadLocalSession
 import scalaz.Failure
 import scalaz.Success
@@ -16,47 +20,60 @@ import scalaz.Validation
  * An entity providing a relation between a [[Person]] and a [[Charge]].
  *
  * @author andreas
- * @version 0.0.3, 2015-04-19
+ * @version 0.0.4, 2015-04-24
  */
 case class PersonInCharge(override val id: Option[Long],
-  person: Person,
-  charge: Charge,
-  division: Division.Division = Division.Aktivitas,
-  start: Date,
-  end: Date,
-  override val created: Long = System.currentTimeMillis(),
-  override val creator: String,
-  override val modified: Option[Long] = None,
-  override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
+                          person: Person,
+                          charge: Charge,
+                          start: Date,
+                          end: Option[Date],
+                          override val created: Long = System.currentTimeMillis(),
+                          override val creator: String,
+                          override val modified: Option[Long] = None,
+                          override val modifier: Option[String]) extends Entity(id, created, creator, modified, modifier) {
 }
 
 object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with GenericDao[PersonInCharge] {
 
   import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
-  implicit val divisionMapper: TypeMapper[Division.Division] = base[Division.Division, String](d => d.toString,
-    string => Division.withName(string))
-  implicit val personMapper: TypeMapper[Person] = base[Person, Long](p => p.id.get, id => Person.load(id).toOption.get
-    .get)
-  implicit val chargeMapper: TypeMapper[Charge] = base[Charge, Long](c => c.id.get, id => Charge.load(id).toOption
-    .get.get)
+
+  implicit val divisionMapper = base[Division.Division, String](d => d.toString, string => Division.withName(string))
+  implicit val personMapper = base[Person, Long](p => p.id.get, id => Person.load(id).toOption.get.get)
+  implicit val chargeMapper = base[Charge, Long](c => c.id.get, id => Charge.load(id).toOption.get.get)
+
+//  implicit val getPersonInChargeResult = GetResult(r => PersonInCharge(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r
+//    .<<, r.<<))
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
   def person = column[Person]("person")
+
   def charge = column[Charge]("charge")
+
   def division = column[Division.Division]("division")
+
   def start = column[Date]("start")
-  def end = column[Date]("end")
+
+  def end = column[Date]("end", O.Nullable)
+
   def created = column[Long]("created")
+
   def creator = column[String]("creator")
+
   def modified = column[Long]("modified", O.Nullable)
+
   def modifier = column[String]("modifier", O.Nullable)
 
-  def * = id.? ~ person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? <> (PersonInCharge.apply _, PersonInCharge.unapply _)
-  def withoutId = person ~ charge ~ division ~ start ~ end ~ created ~ creator ~ modified.? ~ modifier.? returning id
+  def * = id.? ~ person ~ charge ~ start ~ end.? ~ created ~ creator ~ modified.? ~ modifier.? <>(PersonInCharge.apply
+    _, PersonInCharge.unapply _)
 
-  def insert = db withSession { (c: PersonInCharge) => withoutId.insert(c.person, c.charge, c.division, c.start, c.end, c.created, c.creator, c.modified, c.modifier) }
-  override def update(c: PersonInCharge): Int = db withSession { PersonInCharges.where(_.id === c.id).update(c.copy(modified = Some(System.currentTimeMillis()))) }
+  def withoutId = person ~ charge ~ start ~ end.? ~ created ~ creator ~ modified.? ~ modifier.? returning id
+
+  def insert = db withSession { (c: PersonInCharge) => withoutId.insert(c.person, c.charge, c.start, c.end, c.created, c.creator, c.modified, c.modifier) }
+
+  override def update(c: PersonInCharge): Int = db withSession {
+    PersonInCharges.where(_.id === c.id).update(c.copy(modified = Some(System.currentTimeMillis())))
+  }
 
   /**
    * Persist a [[PersonInCharge]] item in the data store.
@@ -83,6 +100,55 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
       } catch {
         case e: Throwable => Failure(e)
       }
+    }
+  }
+
+  /**
+   * Retrieve all [[PersonInCharge]] items for the given <em>division</em>.
+   *
+   * @param division The division to get all [[PersonInCharge]] items for.
+   * @return The corresponding [[List]] of [[PersonInCharge]] items.
+   */
+  def getAllByDivision(division: String) : Validation[Throwable, List[PersonInCharge]] = db withSession {
+    try {
+      val query = for {
+         pic <- PersonInCharges
+         c <- Charges
+         if pic.charge.asColumnOf[Long] === c.id
+         if c.division.asColumnOf[String] === division
+       } yield pic
+      Success(query.list())
+    }
+    catch {
+      case t: Throwable => Failure(t)
+    }
+  }
+
+  def getAllCurrent: Validation[Throwable, List[PersonInCharge]] = db withSession {
+    val cal = Calendar.getInstance()
+    try {
+      val query = Query(this).filter(pic => pic.end.isNull || (pic.end >= new Date(cal.getTimeInMillis)))
+      Success(query.list())
+    }
+    catch {
+      case t: Throwable => Failure(t)
+    }
+  }
+
+  def getAllCurrentByDivision(division: String): Validation[Throwable, List[PersonInCharge]] = db withSession {
+    val cal = Calendar.getInstance()
+    try {
+      val query = for {
+        pic <- PersonInCharges
+        c <- Charges
+        if pic.end.isNull || pic.end >= new Date(cal.getTimeInMillis)
+        if pic.charge.asColumnOf[Long] === c.id
+        if c.division.asColumnOf[String] === division
+      } yield pic
+      Success(query.list())
+    }
+    catch {
+      case t: Throwable => Failure(t)
     }
   }
 }

@@ -4,25 +4,21 @@
 package accesscontrol
 
 import db.GenericDao
-import play.api.db._
-import play.api.Play.current
 import scala.slick.driver.PostgresDriver.simple._
-import scala.slick.lifted.{ Query, TypeMapper }
-import scala.slick.lifted.MappedTypeMapper.base
 import Database.threadLocalSession
 import scalaz.{ Failure, Success, Validation }
 import models.Entity
 import play.Logger
 
 /**
- * Relation between a {@link Role} and the {@link Privilege}s it is assigned to.
+ * Relation between a [[Role]] and the [[Privilege]]s it is assigned to.
  * 
  * @author andreas
- * @version 0.0.3, 2015-01-04
+ * @version 0.0.4, 2015-04-25
  */
 case class RoleHasPrivilege(override val id: Option[Long],
-  val role: Role,
-  val privilege: Privilege,
+  role: Role,
+  privilege: Privilege,
   override val created: Long = System.currentTimeMillis(),
   override val creator: String,
   override val modified: Option[Long] = None,
@@ -32,9 +28,9 @@ case class RoleHasPrivilege(override val id: Option[Long],
 object RoleHasPrivileges extends Table[RoleHasPrivilege]("RoleHasPrivilege") with GenericDao[RoleHasPrivilege] {
 
   import scala.slick.lifted.MappedTypeMapper.base
-  import scala.slick.lifted.TypeMapper
-  implicit val roleMapper = base[Role, Long](r => r.id.get, id => Roles.get(id).get)
-  implicit val privilegeMapper = base[Privilege, Long](p => p.id.get, id => Privileges.get(id).get)
+
+  implicit val roleMapper = base[Role, Long](r => r.id.get, id => Roles.get(id).toOption.get.get)
+  implicit val privilegeMapper = base[Privilege, Long](p => p.id.get, id => Privileges.get(id).toOption.get.get)
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def role = column[Role]("role")
@@ -59,7 +55,7 @@ object RoleHasPrivileges extends Table[RoleHasPrivilege]("RoleHasPrivilege") wit
    * Save or update the given relation <em>rhp</em>.
    *
    * @param rhp The relation to update.
-   * @return a {@link Validation} that either indicates success or failure of the operation.
+   * @return a [[Validation]] that either indicates success or failure of the operation.
    */
   def saveOrUpdate(rhp: RoleHasPrivilege): Validation[Throwable, RoleHasPrivilege] = db withSession {
     if (rhp.id.isDefined) {
@@ -94,13 +90,13 @@ object RoleHasPrivileges extends Table[RoleHasPrivilege]("RoleHasPrivilege") wit
   /**
    * Retrieve the relations for the given <em>roles</em>.
    * 
-   * @param roles A list of {@link Role}s to retrieve the corresponding relations for.
-   * @return a {@link Validation} that either indicates success or failure of the operation.
+   * @param roles A list of [[Role]]s to retrieve the corresponding relations for.
+   * @return a [[Validation]] that either indicates success or failure of the operation.
    */
   def getSome(roles: List[Role]): Validation[Throwable, List[RoleHasPrivilege]] = db withSession {
     if (roles.isEmpty) {
       Logger.info("Getting privileges for roles: No roles provided.")
-      return Success(Nil);
+      return Success(Nil)
     }
     
     Logger.debug("Getting privileges for roles: " + roles.map(r => r.name).mkString(","))

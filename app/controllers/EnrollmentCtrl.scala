@@ -11,7 +11,6 @@ import play.api.mvc._
 import controllers.ext.ProvidesCtx
 import controllers.ext.Security
 import models.{Enrollment, Event, Person}
-import java.sql.Timestamp
 
 import scalaz.{Failure, Success}
 
@@ -19,7 +18,7 @@ import scalaz.{Failure, Success}
  * Controller to handle [[Enrollment]]s to [[Event]]s.
  *
  * @author andreas
- * @version 0.0.4, 2015-04-19
+ * @version 0.0.5, 2015-04-25
  */
 object EnrollmentCtrl extends Controller with ProvidesCtx with Security {
 

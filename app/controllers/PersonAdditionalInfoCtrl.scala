@@ -12,13 +12,13 @@ import controllers.ext.{ProvidesCtx, Security}
 import util.{FormOfAddress, LetterSalutation}
 import models.PersonAdditionalInfo
 import play.api.i18n.Messages
-import scalaz.{Failure, Success, Validation}
+import scalaz.{Failure, Success}
 
 /**
  * Controller to handle requests for additional person information.
  *
  * @author andreas
- * @version 0.0.3, 2015-04-20
+ * @version 0.0.4, 2015-04-25
  */
 object PersonAdditionalInfoCtrl extends Controller with ProvidesCtx with Security {
 

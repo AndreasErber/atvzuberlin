@@ -1,0 +1,68 @@
+@**
+* Display the management of the club.
+*
+* @author andreas
+* @version 0.0.1, 2015-04-24
+*@
+@(charges: Map[PersonInCharge, List[AcademicTitle]])(implicit flash: Flash, lang: Lang, ctx: util.Ctx)
+@import helper.deleteConfirmation
+@import helper.lastModificationIcon
+@import util.Division.Aktivitas
+@import util.Division.Korporationsverband
+
+@main(Messages("management")) {
+<h2>@Messages("management")</h2>
+<h3>@Messages("personincharge.list.ac")</h3>
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>@Messages("personincharge.charge")</th>
+        <th>@Messages("academicTitle")</th>
+        <th>@Messages("person.name")</th>
+        <th>@Messages("person.nickname")</th>
+    </tr>
+    </thead>
+    <tbody>
+    @charges.filter(p => p._1.charge.division.eq(Aktivitas)).map { c =>
+    <tr>
+        <td>@{if(c._1.person.gender.equals('m')) c._1.charge.nameMale else c._1.charge.nameFemale}</td>
+        <td>
+            @c._2.map { at =>
+            <abbr title="@{if(c._1.person.gender.equals('m')) at.maleForm else at.femaleForm}">@at.abbr</abbr>
+            }
+        </td>
+        <td>@c._1.person.name</td>
+        <td>@c._1.person.nickname</td>
+    </tr>
+    }
+    </tbody>
+</table>
+
+<h3>@Messages("personincharge.list.kv")</h3>
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>@Messages("personincharge.charge")</th>
+        <th>@Messages("academicTitle")</th>
+        <th>@Messages("person.name")</th>
+        <th>@Messages("person.nickname")</th>
+    </tr>
+    </thead>
+    <tbody>
+    @charges.filter(p => p._1.charge.division.eq(Korporationsverband)).map { c =>
+    <tr>
+        <td>@{if(c._1.person.gender.equals('m')) c._1.charge.nameMale else c._1.charge.nameFemale}</td>
+        <td>
+            @c._2.map { at =>
+            <abbr title="@{if(c._1.person.gender.equals('m')) at.maleForm else at.femaleForm}">@at.abbr</abbr>
+        }
+        </td>
+        <td>@c._1.person.name</td>
+        <td>@c._1.person.nickname</td>
+    </tr>
+    }
+    </tbody>
+</table>
+
+@deleteConfirmation("charge")
+}

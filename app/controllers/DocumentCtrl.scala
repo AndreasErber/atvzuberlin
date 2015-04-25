@@ -8,16 +8,18 @@ import play.api.mvc._
 import play.api.Play.current
 import java.io.{FileNotFoundException, File}
 
-import controllers.ext.{ProvidesCtx, Security }
+import controllers.ext.{ProvidesCtx, Security}
 import models.{Documents, Document}
 import models.to.DocumentUploadTO
 import util.{Article, CustomFormatters, DocumentType}
+
+import scalaz.{Failure, Success}
 
 /**
  * Controller for document handling.
  *
  * @author andreas
- * @version 0.0.5, 2015-04-14
+ * @version 0.0.6, 2015-04-25
  */
 object DocumentCtrl extends Controller with ProvidesCtx with Security {
 
@@ -50,23 +52,27 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
    * @return
    */
   def delete(id: Long) = isAuthorized("delete.document") { username =>
-  implicit request =>
-    require(Option(id).isDefined)
-    val redirect = Redirect(routes.DocumentCtrl.overview())
-    val doc = Documents.get(id)
-    if (doc.isDefined) {
-      this.deleteFile(doc.get.url)
-      val count = Documents.delete(id)
-      if (count > 0) {
-        redirect.flashing("success" -> Messages("success.succeeded.to.delete.document"))
-      } else {
-        redirect.flashing("error" -> Messages("error.failed.to.delete.document"))
+    implicit request =>
+      require(Option(id).isDefined)
+      val redirect = Redirect(routes.DocumentCtrl.overview())
+      val docV = Documents.get(id)
+      docV match {
+        case Success(docOp) =>
+          docOp match {
+            case Some(doc) =>
+              this.deleteFile(doc.url)
+              val count = Documents.delete(id)
+              if (count > 0) {
+                redirect.flashing("success" -> Messages("success.succeeded.to.delete.document"))
+              } else {
+                redirect.flashing("error" -> Messages("error.failed.to.delete.document"))
+              }
+            case None => Logger.error(s"Failed to delete document with ID '$id'. Does not exist.")
+              redirect.flashing("error" -> Messages("error.document.does.not.exist"))
+          }
+        case Failure(t) => Logger.error(docV.toString, t)
+          redirect.flashing("error" -> Messages("error.loading.document"))
       }
-    } else {
-      redirect.flashing("error" -> Messages("error.document.does.not.exist"))
-    }
-
-
   }
 
   /**
@@ -76,14 +82,18 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
    */
   def download(id: Long) = isAuthorized("download.document") { username =>
     implicit request =>
-    require(Option(id).isDefined)
-    val doc = Documents.get(id)
-    if (doc.isDefined) {
-      Ok.sendFile(new File(doc.get.url))
-    } else {
-      Logger.error(s"User '$username' tried to download non-existing document with ID '$id'")
-      NotFound
-    }
+      require(Option(id).isDefined)
+      val docV = Documents.get(id)
+      docV match {
+        case Success(docOp) => docOp match {
+          case Some(doc) =>
+            Ok.sendFile(new File(doc.url))
+          case None => Logger.error(s"Failed to load document with ID '$id'. Does not exist.")
+            Redirect(routes.DocumentCtrl.overview()).flashing("error" -> Messages("error.loading.document"))
+        }
+        case Failure(t) => Logger.error(docV.toString, t)
+          Redirect(routes.DocumentCtrl.overview()).flashing("error" -> Messages("error.loading.document"))
+      }
   }
 
   /**
@@ -91,15 +101,15 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
    *
    * @return
    */
-  def overview(limit: Int = 10) = isAuthorized("view.documents") {  username =>
+  def overview(limit: Int = 10) = isAuthorized("view.documents") { username =>
     implicit request =>
-    val documents = Documents.getLatest(10)
-    if (documents.isSuccess) {
-      Ok(views.html.documents(documents.toOption.get, None))
-    } else {
-      Logger.error("Failed to load latest documents.")
-      Ok(views.html.documents(List(), None))
-    }
+      val documents = Documents.getLatest(10)
+      if (documents.isSuccess) {
+        Ok(views.html.documents(documents.toOption.get, None))
+      } else {
+        Logger.error("Failed to load latest documents.")
+        Ok(views.html.documents(List(), None))
+      }
   }
 
   /**
@@ -134,13 +144,17 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
    */
   def show(id: Long) = isAuthorized("view.documents") { username =>
     implicit request =>
-    val doc = Documents.get(id)
-    if (doc.isDefined) {
-      Ok(views.html.document(doc.get))
-    } else {
-      Logger.error(s"Document with ID '$id' could not be found.")
-      NotFound
-    }
+      val docV = Documents.get(id)
+      docV match {
+        case Success(docOp) => docOp match {
+          case Some(doc) =>
+            Ok(views.html.document(doc))
+          case None => Logger.error(s"Failed to load document with ID '$id'. Does not exist.")
+            Redirect(routes.DocumentCtrl.overview()).flashing("error" -> Messages("error.loading.document"))
+          }
+        case Failure(t) => Logger.error(docV.toString, t)
+          Redirect(routes.DocumentCtrl.overview()).flashing("error" -> Messages("error.loading.document"))
+      }
   }
 
   /**
@@ -165,7 +179,7 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
           val file = new File(filename)
           f.ref.moveTo(file, replace = true)
 
-          val doc = Document(None, docTO.title, docTO.description, docTO.category, filename, None, Some(file.length()), creator="")
+          val doc = Document(None, docTO.title, docTO.description, docTO.category, filename, None, Some(file.length()), creator = "")
           Documents.saveOrUpdate(doc)
           Redirect(routes.DocumentCtrl.overview()).flashing("success" -> Messages("document.upload.successful"))
         } catch {
@@ -186,7 +200,7 @@ object DocumentCtrl extends Controller with ProvidesCtx with Security {
    * Create the path for a document to be stored.
    *
    * <p>
-   *   The base part of the path is defined in the configuration value <em>file.upload.folder</em>.
+   * The base part of the path is defined in the configuration value <em>file.upload.folder</em>.
    * </p>
    *
    * @param category The category is the last part of the path.

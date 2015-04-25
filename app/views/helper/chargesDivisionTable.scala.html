@@ -1,0 +1,46 @@
+@* Table for division specific charges template file *@
+@(charges: Seq[Charge], division: String)(implicit lang: Lang, ctx: util.Ctx)
+@import helper._
+
+<h2>@Messages("charge") @division</h2>
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>@Messages("charge.name")</th>
+        <th>@Messages("charge.abbr")</th>
+        <th>@Messages("charge.email")</th>
+        <th>@Messages("actions")</th>
+    </tr>
+    </thead>
+    <tbody>
+    @charges.map { c =>
+    <tr>
+        <td>@c.nameMale /<br/>
+            @c.nameFemale
+        </td>
+        <td>@c.abbr.getOrElse("")</td>
+        <td>@c.emailMale /<br/>
+            @c.emailFemale
+        </td>
+        <td>
+            <a href="@routes.ChargeCtrl.show(c.id.get)" title="@Messages("charge.view")"><i
+                class="glyphicon glyphicon-eye-open"></i></a>
+            @if(ctx.user.isDefined) {
+            <a href="@routes.ChargeCtrl.edit(c.id.get)" title="@Messages("charge.edit")"><i
+                class="glyphicon glyphicon-pencil"></i></a>
+            <a href="#" data-toggle="modal" title="@Messages("charge.delete")" data-target="#delConfirm"
+            onclick="delId = @c.id.get"><i class="glyphicon glyphicon-trash"></i></a>
+            }
+            @lastModificationIcon(c)
+        </td>
+    </tr>
+    }
+    @if(ctx.user.isDefined) {
+    <tr>
+        <td colspan="3"></td>
+        <td><a href="@routes.ChargeCtrl.create" title="@Messages("charge.add")"><i
+                class="glyphicon glyphicon-plus-sign"></i></a> ...</td>
+    </tr>
+    }
+    </tbody>
+</table>
