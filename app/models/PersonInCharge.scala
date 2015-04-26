@@ -151,4 +151,24 @@ object PersonInCharges extends Table[PersonInCharge]("PersonInCharge") with Gene
       case t: Throwable => Failure(t)
     }
   }
+
+  def getPersonOfCharge(charge: Charge): Validation[Throwable, Option[Person]] = db withSession {
+    val cal = Calendar.getInstance()
+    try {
+      val query = for {
+        pic <- PersonInCharges
+        c <- Charges
+        if pic.end.isNull || pic.end >= new Date(cal.getTimeInMillis)
+        if pic.charge.asColumnOf[Long] === charge.id
+      } yield pic
+      val picOp = query.firstOption
+      picOp match {
+        case Some(pic) => Success(Some(pic.person))
+        case None => Success(None)
+      }
+    }
+    catch {
+      case t: Throwable => Failure(t)
+    }
+  }
 }

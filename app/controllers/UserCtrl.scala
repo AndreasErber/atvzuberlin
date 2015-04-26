@@ -21,7 +21,7 @@ import util.{Business,EncryptionUtil,Honorary,KV,Personal}
  * Controller to handle requests that pertain a user, e.g. login, logout, registration, ...
  *
  * @author andreas
- * @version 0.0.10, 2015-04-19
+ * @version 0.0.11, 2015-04-26
  */
 object UserCtrl extends Controller with ProvidesCtx with Security {
 
@@ -66,12 +66,12 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     Der Webmaster
     """
 
-  def displayLoginForm() = Action { implicit request =>
+  def displayLoginForm = Action { implicit request =>
     Logger.debug("Display login form")
     Ok(views.html.login(loginForm, None))
   }
 
-  def index() = Action { implicit request =>
+  def index = Action { implicit request =>
     Ok(views.html.index("Des is die Messetsch!"))
   }
 
@@ -121,7 +121,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     }
     val personList = personListVal.getOrElse(Nil)
     var personListFiltered = List[Person]()
-    val userListVal = User.getAll;
+    val userListVal = User.getAll
     if (userListVal.isSuccess) {
       // remove the persons that are already registered from the offered list
       personListFiltered = personList diff userListVal.toOption.get.map(u => u.person)
@@ -146,45 +146,37 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
         val username = tuple._2
         val pw1 = tuple._3
         val pw2 = tuple._4
-        val registrationVal = Registration.getByUsername(username)
-        if (registrationVal.isFailure) {
-          Logger.error(s"Failed to find matching registration for username '${username}': " + registrationVal.toEither.left.get.getMessage())
-          Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error.registration.for.username.not.found"))
-        } else {
-          Logger.debug(s"Found matching registration for username $username")
-          val personVal = Person.getByNickname(username)
-          if (personVal.isFailure) {
-            Logger.error(s"Failed to find matching person for username '$username': " + registrationVal.toEither.left.get.getMessage())
-            Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error.registration.person.not.found"))
-          } else {
-            Logger.debug(s"Found matching person for username '$username'")
-            val person = personVal.toOption.get
-            val registration = registrationVal.toOption.get
-
-            val passwordVal = this.validateAndEncryptPassword(pw1, pw2);
-            if (passwordVal.isFailure) {
-              val errMsg = passwordVal.toEither.left.get.getMessage()
-              Logger.error(s"Password validation failed for user '$username': " + errMsg)
-              Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> errMsg)
-            } else {
-              Logger.debug("Password validation was successful.")
-              val u = User(username, passwordVal.toOption.get, registration.email, person, System.currentTimeMillis(), None)
-              val result = User.insert(u)
-              if (result.isSuccess) {
-                Logger.debug(s"Registration of user '$username' was successful.")
-                val delRegVal = Registration.delete(registration.id.get)
-                if (delRegVal.isFailure) {
-                  Logger.error(s"Deletion of registration with ID ${registration.id.get} failed: " + delRegVal.toEither.left.get.getMessage())
-                } else {
-                  Logger.debug(s"Deletion of registration with ID ${registration.id.get} was successful.")
+        val registrationV = Registration.getByUsername(username)
+        registrationV match {
+          case Success(registration) => val personV = Person.getByNickname(username)
+            personV match {
+              case Success(person) => val passwordV = this.validateAndEncryptPassword(pw1, pw2)
+                passwordV match {
+                  case Success(password) => val u = User(username, password, registration.email, person, System.currentTimeMillis(), None)
+                    val resultV = User.insert(u)
+                    resultV match {
+                      case Success(result) => Logger.debug(s"Registration of user '$username' was successful.")
+                        val delRegV = Registration.delete(registration.id.get)
+                        delRegV match {
+                          case Success(delReg) => Logger.debug(s"Deletion of registration with ID '${registration.id
+                            .get}' was successful.")
+                          case Failure(t) => Logger.error(s"Deletion of registration with ID '${registration.id
+                            .get}'.", t)
+                        }
+                        Redirect(routes.UserCtrl.index).flashing("success" -> Messages("success.registrationSuccessful"))
+                      case Failure(t) => Logger.error(s"Registration of user ${u.username} failed!", t)
+                        Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error" +
+                          ".registering.user"))
+                    }
+                  case Failure(t) => Logger.error(passwordV.toString, t)
+                    Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error" +
+                      ".validating.password"))
                 }
-                Redirect(routes.UserCtrl.index).flashing("success" -> Messages("success.registrationSuccessful"))
-              } else {
-                Logger.error(s"Registration of user ${u.username} failed!", result.toEither.left.get)
-                Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error.registrationFailed"))
-              }
+              case Failure(t) => Logger.error(s"Failed to find person with nickname '$username'.", t)
+                Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error.registration.person.not.found"))
             }
-          }
+          case Failure(t) => Logger.error(s"Failed to find registration for username '${username}'.", t)
+            Redirect(routes.UserCtrl.registrationConfirmation(link)).flashing("error" -> Messages("error.registration.for.username.not.found"))
         }
       })
   }
@@ -235,34 +227,34 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
         BadRequest(views.html.registrationForm(formWithErrors, Person.getAll.toOption.getOrElse(Nil)))
       },
       nickname => {
-        val existingUserVal = User.findByName(nickname)
-        if (existingUserVal.isSuccess && existingUserVal.toOption.isDefined) {
-          Logger.error(s"Registration of user $nickname failed: Username is already in use.")
-          Redirect(routes.UserCtrl.showUsernameSelectionForm()).flashing("error" -> Messages("error.username.already.registered"))
-        } else {
-
-          val personVal = Person.getByNickname(nickname)
-          if (personVal.isFailure) {
-            Logger.error(s"Failed to find person with nickname '$nickname': " + personVal.toEither.left.get.getMessage())
-            Redirect(routes.UserCtrl.showUsernameSelectionForm()).flashing("error" -> Messages("error.username.unknown"))
-          } else {
-
-            Logger.logger.debug(s"Found matching person for nickname '$nickname': ")
-            val p = personVal.toOption.get
-            val eMailVal = this.provideSuitablePersonEmail(p)
-            if (eMailVal.isFailure) {
-              Logger.logger.error(s"Failed to find email addresses for person with nickname '$nickname': " + eMailVal.toEither.left.get.getMessage())
-              Redirect(routes.UserCtrl.showUsernameSelectionForm).flashing("error" -> Messages("error.registration.no.email"))
-            } else {
-              val email = eMailVal.toOption.get
-              val hash = this.createHash(p)
-              val reg = Registration(None, p.nickname.get, hash, email, System.currentTimeMillis() + 172800, System.currentTimeMillis(), p.nickname.get, None, None)
-              val result = Registration.insert(reg)
-
-              this.sendMail(p, email, hash)
-              Redirect("/").flashing("success" -> Messages("registration.email.sent.successfully"))
-            }
+        val existingUserV = User.findByName(nickname)
+        existingUserV match {
+          case Success(existingUserOp) => existingUserOp match {
+            case Some(existingUser) => Logger.error(s"Registration of user $nickname failed: Username is already in use.")
+              Redirect(routes.UserCtrl.showUsernameSelectionForm()).flashing("error" -> Messages("error.username.already.registered"))
+            case None => val personV = Person.getByNickname(nickname)
+              personV match {
+                case Success(person) => val emailV = this.provideSuitablePersonEmail(person)
+                  emailV match {
+                    case Success(email) => val hash = this.createHash(person)
+                      val reg = Registration(None, person.nickname.get, hash, email, System.currentTimeMillis() + 172800, System.currentTimeMillis(), person.nickname.get, None, None)
+                      val result = Registration.insert(reg)
+                      if (result > 0) {
+                        this.sendMail(person, email, hash)
+                        Redirect(routes.UserCtrl.index()).flashing("success" -> Messages("registration.email.sent.successfully"))
+                      } else {
+                        Redirect(routes.UserCtrl.index()).flashing("error" -> Messages("error.inserting.user"))
+                      }
+                    case Failure(t) => Logger.error(s"Failed to find email addresses for person with nickname " +
+                      s"'$nickname'.",t)
+                      Redirect(routes.UserCtrl.showUsernameSelectionForm).flashing("error" -> Messages("error.registration.no.email"))
+                  }
+                case Failure(t) => Logger.error(s"Failed to find person with nickname '$nickname'.", t)
+                  Redirect(routes.UserCtrl.showUsernameSelectionForm()).flashing("error" -> Messages("error.username.unknown"))
+              }
           }
+          case Failure(t) => Logger.error(existingUserV.toString, t)
+            Redirect(routes.UserCtrl.index()).flashing("error" -> Messages("error.loading.user"))
         }
       })
 
@@ -304,7 +296,7 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
     Logger.error(s"Found no honorary email address for person '${p.fullname}'")
 
     val personBusinessEmails = personEmails.filter(e => e._2.usage == Business).map(e => e._1)
-    if (!personBusinessEmails.isEmpty) {
+    if (personBusinessEmails.nonEmpty) {
       return Success(personBusinessEmails(0))
     }
     Logger.error(s"Found no business email address for person '${p.fullname}'")
@@ -372,19 +364,21 @@ object UserCtrl extends Controller with ProvidesCtx with Security {
 
   def show(un: String) = isAuthenticated { username =>
     implicit request =>
-      val user = User.findByName(un)
-      if (user.isSuccess) {
-        val uhr = UserHasRoles.getByUser(user.toOption.get)
-        if (uhr.isSuccess) {
-          Ok(views.html.user(user.toOption.get, uhr.toOption.get))
-        } else {
-          Logger.logger.error("Failed to retrieve user roles for user '" + un + "'.", uhr.toEither.left.get)
-          Redirect(routes.UserCtrl.list).flashing("error" -> Messages("error.failedToFindUserRoles", un))
+      val userV = User.findByName(un)
+      userV match {
+        case Success(userOp) => userOp match {
+          case Some(user) => val uhrV = UserHasRoles.getByUser(user)
+            uhrV match {
+              case Success(uhr) => Ok(views.html.user(user, uhr))
+              case Failure(t) => Logger.error("Failed to retrieve user roles for user '" + un + "'.", uhrV.toEither.left.get)
+                Redirect(routes.UserCtrl.list()).flashing("error" -> Messages("error.failedToFindUserRoles", un))
+            }
+          case None => Logger.error(s"Failed to retrieve a user named '$un'. Does not exist.")
+            Redirect(routes.UserCtrl.list()).flashing("error" -> Messages("error.loading.user.by.name", un))
         }
-      } else {
-        Logger.logger.error("Failed to retrieve user named '" + un + "'.", user.toEither.left.get)
-        Redirect(routes.UserCtrl.list).flashing("error" -> Messages("error.failedToFindUserByName", un))
-      }
+        case Failure(t) => Logger.error(userV.toString, t)
+          Redirect(routes.UserCtrl.list).flashing("error" -> Messages("error.loading.user.by.name", un))
+       }
   }
 
   private def getUsernameSelection = {

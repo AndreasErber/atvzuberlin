@@ -15,7 +15,7 @@ import models.{ Email, Person }
  * Representation of a user of the website.
  * 
  * @author andreas
- * @version 0.0.7, 2015-04-18
+ * @version 0.0.8, 2015-04-26
  */
 case class User(
   username: String,
@@ -57,13 +57,9 @@ object User {
     }
   }
 
-  def findByName(u: String): Validation[Throwable, User] = db withSession {
+  def findByName(u: String): Validation[Throwable, Option[User]] = db withSession {
     try {
-      val result = Query(Users).where(_.username === u).firstOption
-      result match {
-        case None => Failure(new RuntimeException("Failed to find user with username " + u))
-        case _ => Success(result.get)
-      }
+      Success(Query(Users).where(_.username === u).firstOption)
     } catch {
       case e: Throwable => Failure(e)
     }

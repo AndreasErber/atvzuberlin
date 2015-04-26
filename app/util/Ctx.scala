@@ -8,8 +8,10 @@ import accesscontrol.{Role, RoleHasPrivileges, User, UserHasRoles}
 import play.api.mvc.Security
 import display.Header
 import display.Menu
-import play.Logger
+import play.api.Logger
 import accesscontrol.Privilege
+
+import scalaz.{Failure, Success}
 
 /**
  * Context for requests.
@@ -19,7 +21,7 @@ import accesscontrol.Privilege
  * @param sideMenu The side navigation of the pase.
  * @param request The current request that is handled.
  * @author andreas
- * @version 0.0.5, 2015-04-18
+ * @version 0.0.6, 2015-04-26
  */
 case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[List[Menu]])(implicit request: Request[_]) {
 
@@ -33,16 +35,15 @@ case class Ctx(header: Header, topMenu: Option[List[Menu]], sideMenu: Option[Lis
    * @return An optional [[User]] instance if a match is found.
    */
   def getUser[A](implicit request: Request[A]): Option[User] = {
-    val user = request.session.get(Security.username)
-    if (user.isDefined) {
-      val result = User.findByName(user.get)
-      if (result.isSuccess) {
-        result.toOption
-      } else {
-        None
-      }
-    } else {
-      None
+    val usernameOp = request.session.get(Security.username)
+    usernameOp match {
+      case Some(username) => val resultV = User.findByName(username)
+        resultV match {
+          case Success(resultOp) => resultOp
+          case Failure(t) => Logger.error(resultV.toString, t)
+            None
+        }
+      case None => None
     }
   }
 

@@ -1,0 +1,32 @@
+@(mailForm: Form[(String, Long, String, String)], charges: Seq[Charge])(implicit flash: Flash, lang: Lang, ctx:
+util.Ctx)
+@import helper._
+@import play.api.Logger
+
+@implicitField = @{ FieldConstructor(FieldCons.f) }
+
+@main(Messages("mail")) {
+    @Logger.debug("Rendering mail form")
+    <h1>@Messages("mail")</h1>
+    @form(routes.MailCtrl.submit) {
+        <div class="form-group">
+            @inputText(mailForm("from"), '_label -> Messages("mail.from"), 'class -> "form-control")
+        </div>
+        <div class="form-group">
+            @select(mailForm("to"), charges.map{c => c.id.get.toString -> c.nameMale}, '_label -> Messages("mail.to"),
+            'class -> "form-control", '_help -> "")
+        </div>
+        <div class="form-group">
+            @inputText(mailForm("subject"), '_label -> Messages("mail.subject"), 'class -> "form-control")
+        </div>
+        <div class="form-group">
+            @textarea(mailForm("content"),
+                      '_label -> Messages("mail.content"),
+                      'class -> "form-control",
+                      'style -> "height:70px")
+        </div>
+        @createModifyFormPart(mailForm)
+        @submitResetCancel()
+    }
+    @Logger.debug("Done rendering mail form")
+}

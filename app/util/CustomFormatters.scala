@@ -13,7 +13,7 @@ import scala.util.control.Exception
 /**
  * Customary formatters for different data types.
  * @author andreas
- * @version 0.1.7, 2015-04-19
+ * @version 0.1.9, 2015-04-26
  */
 object CustomFormatters {
 
@@ -135,7 +135,7 @@ object CustomFormatters {
       data.get(key).toRight {
         Seq(FormError(key, Messages("error.required"), Nil))
       }.right.flatMap { username =>
-        Exception.allCatch[User].either(User.findByName(username).toOption.get).left.map {
+        Exception.allCatch[User].either(User.findByName(username).toOption.get.get).left.map {
           e => Seq(FormError(key, Messages("error.failedToFindUserByName", username), Nil))
         }
       }

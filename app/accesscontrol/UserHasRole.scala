@@ -15,7 +15,7 @@ import play.Logger
  * Entity representing the relationship between a [[User]] and a [[Role]].
  *
  * @author andreas
- * @version 0.0.2, 2015-04-25
+ * @version 0.0.3, 2015-04-26
  */
 case class UserHasRole(override val id: Option[Long],
   user: User,
@@ -30,7 +30,7 @@ object UserHasRoles extends Table[UserHasRole]("UserHasRole") with GenericDao[Us
 
   import scala.slick.lifted.MappedTypeMapper.base
 
-  implicit val userMapper = base[User, String](_.username, username => User.findByName(username).toOption.get)
+  implicit val userMapper = base[User, String](_.username, username => User.findByName(username).toOption.get.get)
   implicit val roleMapper = base[Role, Long](_.id.get, id => Roles.get(id).toOption.get.get)
 
   override def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -62,11 +62,13 @@ object UserHasRoles extends Table[UserHasRole]("UserHasRole") with GenericDao[Us
   def getByUser(un: String): Validation[Throwable, List[UserHasRole]] = db withSession {
     Logger.debug("Getting userHasRoles by username string.")
     try {
-      val u = User.findByName(un)
-      if (u.isSuccess) {
-        getByUser(u.toOption.get)
-      } else {
-        Failure(u.toEither.left.get)
+      val userV = User.findByName(un)
+      userV match {
+        case Success(userOp) => userOp match  {
+          case Some(user) => getByUser(user)
+          case None => throw new RuntimeException(s"Failed to find a user with username '$un'")
+        }
+        case Failure(t) => throw t
       }
     } catch {
       case e: Throwable => Failure(e)

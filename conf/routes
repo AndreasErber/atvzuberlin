@@ -49,6 +49,10 @@ GET   /charge/edit/:id            controllers.ChargeCtrl.edit(id: Long)
 POST  /charge/edit                controllers.ChargeCtrl.submit
 GET   /charge/:id                 controllers.ChargeCtrl.show(id: Long)
 
+# mail form
+GET   /contact                    controllers.MailCtrl.create
+POST  /contact                    controllers.MailCtrl.submit
+
 # Documents
 GET   /docs                       controllers.DocumentCtrl.overview(limit: Int ?= 10)
 GET   /docs/:category             controllers.DocumentCtrl.listByCategory(category: String, limit: Int ?= 10)
